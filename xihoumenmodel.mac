@@ -1,0 +1,1880 @@
+!!西堠门大桥动力特性计算
+FINI
+/CLE
+/FILENAME,XHMBridge
+/TITLE,XHMDQ
+/UNITS,SI
+CSYS,0
+!!!设置读取文件的目录
+di='D:\Ansys\0code'
+/PREP7
+!!!定义参数
+/triad,off
+
+*DIM,EXT,ARRAY,30
+*DIM,DENS,ARRAY,2000
+*DIM,NU,ARRAY,400
+*DIM,MSX,ARRAY,400
+*DIM,ISTR,ARRAY,350
+*DIM,AREA,ARRAY,2000
+*DIM,Ix,ARRAY,2000
+*DIM,IY,ARRAY,2000
+*DIM,Iz,ARRAY,2000
+*DIM,Tx,ARRAY,2000
+*DIM,Ty,ARRAY,2000
+*DIM,Tz,ARRAY,2000
+*DIM,ADDMAS,ARRAY,2000
+*DIM,ZLx,ARRAY,2000
+*DIM,ZLy,ARRAY,2000
+*DIM,ZLz,ARRAY,2000
+
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+KUAN=35/2-1.8
+ZCH=2228
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+/PREP7
+!2.定义单元类型材料属性实常数
+!2.1定义单元类型ok
+ET,1,BEAM4   
+KEYOPT,1,2,0 
+KEYOPT,1,6,0 
+KEYOPT,1,7,0 
+KEYOPT,1,9,0 
+KEYOPT,1,2,0 
+KEYOPT,1,10,0
+             
+ET,2,LINK10  
+!KEYOPT,2,2,2 
+!KEYOPT,2,3,0
+             
+ET,3,MASS21  
+KEYOPT,3,1,0 
+KEYOPT,3,2,0 
+KEYOPT,3,3,0 
+
+!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////
+*DIM,XX1,ARRAY,500
+*DIM,YY1,ARRAY,500
+*DIM,ZZ1,ARRAY,500
+*DIM,ZZ20,ARRAY,500
+*DIM,ZZ30,ARRAY,500
+*DIM,ZZ40,ARRAY,500
+*DIM,ZZ50,ARRAY,500
+*DIM,ZZ60,ARRAY,500
+*DIM,ZZ70,ARRAY,500
+
+!桥面标高
+!!!P1=500
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+QID=20722                !起点
+BQK=31.4/2.0             !半桥宽  
+!@@@@@@@@@XX1
+XX1(1)=QID
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+*DO,I,2,11
+   XX1(I)=XX1(I-1)+5
+*ENDDO
+
+*DO,I,12,67
+   XX1(I)=XX1(I-1)+9
+*ENDDO
+
+*DO,I,68,83
+   XX1(I)=XX1(I-1)+3
+*ENDDO
+
+*DO,I,84,261
+   XX1(I)=XX1(I-1)+9
+*ENDDO
+
+*DO,I,262,269
+   XX1(I)=XX1(I-1)+3
+*ENDDO
+
+!@@@@@@@@@YY1
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX!!北边跨的直线段
+QX1=XX1(1)      
+QX2=XX1(75)
+QY1=43.2251
+QY2=57.675
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+*DO,I,1,75                 !桥面标高
+   YY1(I)=(QY2-QY1)/(QX2-QX1)*(XX1(I)-QX1)+QY1
+*ENDDO
+
+*DO,I,76,269                 !桥面标高
+   YY1(I)=SQRT(33010.311**2-(XX1(I)-22125)**2)-32942.3249
+*ENDDO
+
+*DO,I,1,269                 !扣除型心、桥面板
+   YY1(I)=YY1(I)-1.3527   !中间没有考虑铺装层
+*ENDDO
+
+!@@@@@@@@@ZZ1
+*DO,I,1,269
+   ZZ1(I)=0.0
+*ENDDO
+
+*DO,I,1,269
+   ZZ20(I)=-3.0
+*ENDDO
+
+*DO,I,1,269
+   ZZ30(I)=3.0
+*ENDDO
+
+*DO,I,1,269
+   ZZ40(I)=-9.4416
+*ENDDO
+
+*DO,I,1,269
+   ZZ50(I)=9.4416
+*ENDDO
+
+*DO,I,1,269
+   ZZ60(I)=-15.7
+*ENDDO
+
+*DO,I,1,269
+   ZZ70(I)=15.7
+*ENDDO
+
+!!NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNODE定义
+*DO,I,1,269
+   N,I,XX1(I),YY1(I),ZZ1(I)
+   N,I+2000,XX1(I),YY1(I),ZZ20(I)
+   N,I+3000,XX1(I),YY1(I),ZZ30(I)
+   N,I+4000,XX1(I),YY1(I),ZZ40(I)
+   N,I+5000,XX1(I),YY1(I),ZZ50(I)
+   N,I+6000,XX1(I),YY1(I),ZZ60(I)
+   N,I+7000,XX1(I),YY1(I),ZZ70(I)
+*ENDDO
+
+!!NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNELEMENT定义
+*DO,I,1,269-1
+   EN,I+2100,I+4000,I+1+4000
+   EN,I+3000,I+5000,I+1+5000
+*ENDDO
+
+!!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\主缆
+!!!!!!!!!!!!!!主缆生成边缆
+*DIM,XX2,ARRAY,500
+*DIM,YY2,ARRAY,500
+*DIM,ZZ2,ARRAY,500
+*DIM,JHX,ARRAY,500
+*DIM,JHY,ARRAY,500
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+IP1=236.486      !北塔顶标高
+IP2=41.5         !北锚点标高
+F1=20.462
+L1=578.0
+H1=IP1-IP2
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XX2(1)=0
+*DO,I,2,30
+   XX2(I)=24+(I-2)*18
+*ENDDO
+XX2(31)=XX2(30)+50.0
+
+*DO,I,1,31
+   YY2(I)=IP1-4*F1*XX2(I)*(L1-XX2(I))/L1**2-H1/L1*XX2(I)
+   JHY(I)=YY2(I)
+   JHX(I)=XX2(I)
+*ENDDO
+
+*DO,I,1,31
+   XX2(I)=21300-JHX(32-I)
+   YY2(I)=JHY(32-I)
+*ENDDO
+!!\\\\\\\\\\\\\\\\\\\\\\\\\中缆
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+F2=165
+L2=1650
+H2=165
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+*DO,I,32,122
+   XX2(32)=24
+   XX2(I+1)=XX2(32)+(I-31)*18
+   XX2(122)=XX2(121)+24
+   YY2(I)=IP1-4*F2*XX2(I)*(L2-XX2(I))/L2**2
+*ENDDO
+
+*DO,I,32,122
+   XX2(I)=21300+XX2(I)
+*ENDDO
+XX2(123)=23435
+YY2(123)=45.5
+
+*DO,I,1,123
+   ZZ2(I)=BQK
+*ENDDO
+
+!!NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNODE定义
+*DO,I,301,423
+   N,I,XX2(I-300),YY2(I-300),ZZ2(I-300)             !右主缆
+   N,I+122+1,XX2(I-300),YY2(I-300),-ZZ2(I-300)      !左主缆
+*ENDDO
+
+!!NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNELEMENT定义
+*DO,I,301,422!右
+   EN,I,I,I+1
+*ENDDO
+*DO,I,424,545!左
+   EN,I,I,I+1
+*ENDDO
+
+!!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\!横梁
+
+*DO,I,0,56,2                           !边跨
+   EN,12011+I,11+I,2011+I                  !左1边横梁
+   EN,13011+I,11+I,3011+I          !右1边横梁
+   EN,14011+I,2011+I,4011+I                  !左2边横梁
+   EN,15011+I,3011+I,5011+I          !右2边横梁
+   EN,16011+I,4011+I,6011+I                  !左3边横梁
+   EN,17011+I,5011+I,7011+I          !右3边横梁
+*ENDDO
+
+*DO,I,0,178,2                          !中跨
+   EN,12083+I,83+I,2083+I                  !左1边横梁
+   EN,13083+I,83+I,3083+I          !右1边横梁
+   EN,14083+I,2083+I,4083+I                  !左2边横梁
+   EN,15083+I,3083+I,5083+I          !右2边横梁
+   EN,16083+I,4083+I,6083+I                  !左3边横梁
+   EN,17083+I,5083+I,7083+I          !右3边横梁
+*ENDDO
+
+*DO,I,0,54,2                           !边跨
+   EN,4012+I,12+I,2012+I                  !左1边横梁
+   EN,5012+I,12+I,3012+I          !右1边横梁
+   EN,6012+I,2012+I,4012+I                  !左2边横梁
+   EN,7012+I,3012+I,5012+I          !右2边横梁
+*ENDDO
+
+*DO,I,0,176,2                          !中跨
+   EN,4084+I,84+I,2084+I                  !左1边横梁
+   EN,5084+I,84+I,3084+I          !右1边横梁
+   EN,6084+I,2084+I,4084+I                  !左2边横梁
+   EN,7084+I,3084+I,5084+I          !右2边横梁
+*ENDDO
+
+
+!!!!!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\吊杆
+
+*DO,I,1,29
+   EN,1200+I,301+I,7009+2*I                !边跨右边
+   EN,1200+I+29,424+I,6009+2*I             !边跨左边
+*ENDDO
+
+*DO,I,1,90
+   EN,1300+I,331+I,7081+2*I                !中跨右边
+   EN,1300+I+90,454+I,6081+2*I             !中跨左边
+*ENDDO
+
+!!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\桥塔
+!!!!!!!!!!!!!!桥塔
+*DIM,XX3,ARRAY,500
+*DIM,YY3,ARRAY,500
+*DIM,ZZ3,ARRAY,500
+!*DIM,JHX,ARRAY,500
+!*DIM,JHY,ARRAY,500
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 桥塔方程
+*DIM,YYY1,ARRAY,50
+*DIM,ZZZ1,ARRAY,50
+*DIM,ZZZ2,ARRAY,50
+YYY1(1)=27
+YYY1(2)=YYY1(1)+8
+YYY1(3)=YYY1(2)+8
+YYY1(4)=YYY1(3)+5.525
+YYY1(5)=YYY1(3)+5.525*2
+YYY1(6)=YYY1(5)+20
+YYY1(7)=YYY1(6)+20
+YYY1(8)=YYY1(7)+20
+YYY1(9)=YYY1(8)+20
+YYY1(10)=YYY1(9)+18
+YYY1(11)=YYY1(10)+5.625
+YYY1(12)=YYY1(10)+5.625*2
+YYY1(13)=YYY1(12)+20
+YYY1(14)=YYY1(13)+20
+YYY1(15)=YYY1(14)+20
+YYY1(16)=YYY1(15)+4.936
+YYY1(17)=233.286
+!AB
+ZZZ11=31.05/2
+ZZZ12=24.9/2
+YYY11=22
+YYY12=233.286
+!CD
+ZZZ21=31.05/2+11
+ZZZ22=23.4768
+YYY21=22
+YYY22=22+37.5296
+!DE
+ZZZ31=ZZZ22
+ZZZ32=22.6371
+YYY31=YYY22
+YYY32=22+52.4914
+!EF
+ZZZ41=ZZZ32
+ZZZ42=20.0504
+YYY41=YYY32
+YYY42=22+135.675
+!FG
+ZZZ51=ZZZ42
+ZZZ52=37.90/2
+YYY51=YYY42
+YYY52=233.286
+*DO,I,1,5
+  ZZZ1(I)=(ZZZ12-ZZZ11)/(YYY12-YYY11)*(YYY1(I)-YYY11)+ZZZ11   !AB
+  ZZZ2(I)=(ZZZ22-ZZZ21)/(YYY22-YYY21)*(YYY1(I)-YYY21)+ZZZ21   !CD
+*ENDDO
+*DO,I,6,6
+  ZZZ1(I)=(ZZZ12-ZZZ11)/(YYY12-YYY11)*(YYY1(I)-YYY11)+ZZZ11   !AB
+  ZZZ2(I)=(ZZZ32-ZZZ31)/(YYY32-YYY31)*(YYY1(I)-YYY31)+ZZZ31   !DE
+*ENDDO
+*DO,I,7,11
+  ZZZ1(I)=(ZZZ12-ZZZ11)/(YYY12-YYY11)*(YYY1(I)-YYY11)+ZZZ11   !AB
+  ZZZ2(I)=(ZZZ42-ZZZ41)/(YYY42-YYY41)*(YYY1(I)-YYY41)+ZZZ41   !EF
+*ENDDO
+*DO,I,12,17
+  ZZZ1(I)=(ZZZ12-ZZZ11)/(YYY12-YYY11)*(YYY1(I)-YYY11)+ZZZ11   !AB
+  ZZZ2(I)=(ZZZ52-ZZZ51)/(YYY52-YYY51)*(YYY1(I)-YYY51)+ZZZ51   !FG
+*ENDDO
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+TA1=21300      !塔x坐标
+TA2=22950
+!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+*DO,I,1,17
+  YY3(I)=YYY1(I)
+  XX3(I)=TA1
+  ZZ3(I)=(ZZZ2(I)-ZZZ1(I))/2+ZZZ1(I)
+*ENDDO
+!!NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNODE定义
+*DO,I,1,17
+   N,1200+I,XX3(I),YY3(I),ZZ3(I)
+   N,1200+I+44,XX3(I),YY3(I),-ZZ3(I)
+   N,1200+I+44+44,XX3(I)+TA2-TA1,YY3(I),ZZ3(I)
+   N,1200+I+44+44+44,XX3(I)+TA2-TA1,YY3(I),-ZZ3(I)
+*ENDDO
+!@@@@@@@@@@
+EN,1517,1217,331                                  !北右塔
+*DO,I,1,16
+   EN,1500+I,1200+I,1200+I+1                      !北右塔
+   EN,1500+I+44,1200+I+44,1200+I+44+1             !北左塔
+*ENDDO
+EN,1561,1261,454                                  !北左塔
+
+EN,1617,1305,422                                  !南右塔
+*DO,I,1,16
+   EN,1600+I,1200+I+44+44,1200+I+44+44+1                      !南右塔
+   EN,1600+I+44,1200+I+44+44+44,1200+I+44+44+44+1             !南左塔
+*ENDDO
+EN,1661,1349,545
+!@@@@@@@@@@           塔横梁 取3米刚性区
+*DIM,XX4,ARRAY,50
+*DIM,YY4,ARRAY,50
+*DIM,ZZ4,ARRAY,50
+
+ZZ4(1)=ZZ3(4)-(ZZZ2(4)-ZZZ1(4))/2-1.0
+*DO,I,1,5                                        !!!南塔下横梁
+   XX4(I)=XX3(I)+TA2-TA1                         !!!南塔下横梁
+   YY4(I)=YY3(4)                                 !!!南塔下横梁
+   ZZ4(I+1)=ZZ4(1)-ZZ4(1)/4*I                    !!!南塔下横梁
+*ENDDO                                           !!!南塔下横梁
+ZZ4(5)=0.0                                       !!!南塔下横梁
+*DO,I,1,5                                        !!!南塔下横梁
+   N,1500+I,XX4(I),YY4(I),ZZ4(I)                 !!!
+   N,1500+I+5,XX4(I),YY4(I),-ZZ4(I)              !!!
+*ENDDO                                           !!!
+NDELET,1510                                      !!!
+
+ZZ4(1)=ZZ3(11)-(ZZZ2(11)-ZZZ1(11))/2-1.0
+*DO,I,1,5                                        !南、北塔中横梁
+   XX4(I)=XX3(I)                                 !
+   YY4(I)=YY3(11)                                 !
+   ZZ4(I+1)=ZZ4(1)-ZZ4(1)/4*I          !
+*ENDDO                                           !
+ZZ4(5)=0.0                                       !
+*DO,I,1,5                                        !
+   N,1510+I,XX4(I),YY4(I),ZZ4(I)                 !北塔
+   N,1510+I+5,XX4(I),YY4(I),-ZZ4(I)              !北塔
+   N,1520+I,XX4(I)+TA2-TA1,YY4(I),ZZ4(I)         !南塔
+   N,1520+I+5,XX4(I)+TA2-TA1,YY4(I),-ZZ4(I)      !南塔
+*ENDDO    
+NDELET,1520
+NDELET,1530  
+
+ZZ4(1)=ZZ3(16)-(ZZZ2(16)-ZZZ1(16))/2-1.0
+*DO,I,1,5                                        !南、北塔顶横梁
+   XX4(I)=XX3(I)                                 !
+   YY4(I)=YY3(16)                                 !
+   ZZ4(I+1)=ZZ4(1)-ZZ4(1)/4*I          !
+*ENDDO                                           !
+ZZ4(5)=0.0                                       !
+*DO,I,1,5                                        !
+   N,1540+I,XX4(I),YY4(I),ZZ4(I)                 !北塔
+   N,1540+I+5,XX4(I),YY4(I),-ZZ4(I)              !北塔
+   N,1550+I,XX4(I)+TA2-TA1,YY4(I),ZZ4(I)         !南塔
+   N,1550+I+5,XX4(I)+TA2-TA1,YY4(I),-ZZ4(I)      !南塔
+*ENDDO    
+NDELET,1550
+NDELET,1560  
+!@@@@@@@@@@@@@@@@@@@@@@@形成单元
+*DO,I,1,4   !北塔中横梁
+   EN,1700+I,1515-I+1,1515-I
+   EN,1705,1511,1211
+   EN,1706,1515,1519
+   EN,1706+I,1515-I+5,1515-I+5-1
+   EN,1710,1516,1255
+*ENDDO
+*DO,I,1,4    !南塔中横梁
+   EN,1711+I,1525-I+1,1525-I
+   EN,1716,1521,1299
+   EN,1717,1525,1529
+   EN,1717+I,1525-I+5,1525-I+5-1
+   EN,1721,1526,1343
+*ENDDO
+
+*DO,I,1,4   !北塔底横梁
+   EN,1730+I,1545-I+1,1545-I
+   EN,1735,1541,1216
+   EN,1736,1545,1549
+   EN,1736+I,1545-I+5,1545-I+5-1
+   EN,1740,1546,1260
+*ENDDO
+*DO,I,1,4    !南塔底横梁
+   EN,1741+I,1555-I+1,1555-I
+   EN,1746,1551,1304
+   EN,1747,1555,1559
+   EN,1747+I,1555-I+5,1555-I+5-1
+   EN,1751,1556,1348
+*ENDDO
+
+*DO,I,1,4    !南塔下横梁
+   EN,1760+I,1505-I+1,1505-I
+   EN,1765,1501,1292
+   EN,1766,1505,1509
+   EN,1766+I,1505-I+5,1505-I+5-1
+   EN,1770,1506,1336
+*ENDDO
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!单元全部结束
+
+!!!!!!!!!!!!!!!!!!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\生成材料特性
+!!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC定义材料特性CCCCCCCCCCCCCCCCCCCCCCC
+NU(1)=1/3.0
+NU(2)=1/6.0
+!!!/////////////////////////////////////////////////////////////////////////////////////
+!BZHGJ=167.58           !标准通常构件重量(t/m)
+!!!!!!主梁//////////////////////////////////////////
+EXT(1)=2.1E11   
+DENS(1)=8.2429E3
+!DENS(1)=15.17e3
+MP,EX,1,EXT(1)
+MP,PRXY,1,NU(1)
+MP,DENS,1,DENS(1)
+!!!*************************主缆的材料特性\\\\\\\\\\\\\\\北边跨
+AREA(2)=0.9622/2.0             !主缆北边跨(301-330,424-453)
+AREA(3)=0.9292/2.0             !主缆中跨(331-421,454-544)
+AREA(4)=0.9402/2.0             !主缆南边跨(422,545)
+EXT(2)=2.0E11
+DENS(2)=7.931E3/area(2)/2
+!DENS(2)=0
+MP,EX,2,EXT(2)
+MP,PRXY,2,NU(1)
+MP,DENS,2,DENS(2)
+!!!*************************主缆的材料特性\\\\\\\\\\\\\\\中跨
+EXT(3)=2.0E11
+DENS(3)=7.659E3/area(3)/2
+!DENS(3)=0
+MP,EX,3,EXT(3)
+MP,PRXY,3,NU(1)
+MP,DENS,3,DENS(3)
+!!!*************************主缆的材料特性\\\\\\\\\\\\\\\南边跨
+EXT(4)=2.0E11
+DENS(4)=7.750E3/area(4)/2
+!DENS(4)=0
+MP,EX,4,EXT(4)
+MP,PRXY,4,NU(1)
+MP,DENS,4,DENS(4)
+!!!!!!!!*****************************吊杆的材料特性\\\\\\\\\\\\\\\
+EXT(5)=1.4E11
+!DENS(3)=0.00    !改动后的
+DENS(5)=0.136968E3/0.014967
+MP,EX,5,EXT(5)
+MP,PRXY,5,NU(1)
+MP,DENS,5,DENS(5)
+!!////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\塔与横梁
+EXT(6)=3.5E10    !
+!DENS(6)=0
+DENS(6)=2.6e3
+MP,EX,6,EXT(6)
+MP,PRXY,6,NU(2)
+MP,DENS,6,DENS(6)
+!!!*****************************************横梁刚臂\\\\\\\\\\\\\\\\
+
+EXT(7)=2.1E11   
+DENS(7)=10.06E3
+!DENS(1)=15.17e3
+MP,EX,7,EXT(7)
+MP,PRXY,7,NU(1)
+MP,DENS,7,DENS(7)
+
+EXT(8)=2.1E11   
+DENS(8)=8.898E3
+!DENS(1)=15.17e3
+MP,EX,8,EXT(8)
+MP,PRXY,8,NU(1)
+MP,DENS,8,DENS(8)
+
+
+EXT(9)=2.1E12   !横梁刚臂
+DENS(9)=0.0
+MP,EX,9,EXT(9)
+MP,PRXY,9,NU(1)
+MP,DENS,9,DENS(9)
+!!!\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////
+EXT(10)=3.5E10*5.0   !混凝土刚臂
+DENS(10)=0.000
+MP,EX,10,EXT(10)
+MP,PRXY,10,NU(2)
+MP,DENS,10,DENS(10)
+
+!******Zhaolin2007.5增加语句******
+!!!!!!主梁虚拟单元//////////////////////////////////////////
+EXT(11)=2.1E10   
+DENS(11)=0.0
+MP,EX,11,EXT(11)
+MP,PRXY,11,NU(1)
+MP,DENS,11,DENS(11)
+
+r,300,0.1,0.1,0.1,1.0,1.0, ,                                    
+rmore, ,0.1, , , , ,       
+
+!定义主梁虚拟单元      Beam4  ID001-ID087
+type,1
+esys,0
+mat,11
+real,300
+
+e,1,4,
+e,4,7,
+e,7,9,
+e,9,11,
+
+*do,i,1,56
+e,i+10,i+10+1,
+*enddo
+
+e,67,73,
+e,73,75,
+e,75,77,
+e,77,83,
+
+*do,i,1,178
+e,i+82,i+82+1,
+*enddo
+
+e,261,265,
+e,265,269,
+
+!******Zhaolin2007.5增加语句******
+
+!!////////////////////////////////////////////////////////////////////////////////
+!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+!!!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\材料定义全部结束开始定义实常数
+!!!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC定义主梁实常数CCCCCCCCCCCCCCCCCCCCCCCCC
+AREA(1)=0.54508            !主梁
+Iz(1)=1.024299
+Iy(1)=8.829012
+Ix(1)=2.25149
+Tz(1)=35
+Ty(1)=3.5
+ADDMAS(1)=0.0
+
+AREA(2)=0.2379            !箱横梁
+Iz(2)=0.48
+Iy(2)=0.5019
+Ix(2)=0.625
+Tz(2)=3.6
+Ty(2)=3.496
+ADDMAS(2)=0.0
+
+!!zhaolin修改
+!AREA(2)=0.2379            !箱横梁
+!Iz(2)=0.48*10
+!Iy(2)=0.5019*10
+!Ix(2)=0.625*10
+!Tz(2)=3.6
+!Ty(2)=3.496
+!ADDMAS(2)=0.0
+
+
+
+AREA(3)=0.0959            !工字横梁
+Iz(3)=0.1475
+Iy(3)=0.0027
+Ix(3)=6.6E-6
+Tz(3)=1.0
+Ty(3)=3.496
+ADDMAS(3)=0.0
+
+!!zhaolin修改
+!AREA(3)=0.2379            !工字横梁
+!Iz(3)=0.48*10
+!Iy(3)=0.5019*10
+!Ix(3)=0.625*10
+!Tz(3)=3.6
+!Ty(3)=3.496
+!ADDMAS(3)=0.0
+
+!!!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC定义实常数CCCCCCCCCCCCCCCCCCCCCCCCC
+*DO,I,1,3,1
+  R,I,AREA(I),Iz(I),Iy(I),Tz(I),Ty(I),,
+  RMORE,0,Ix(I),0,,,ADDMAS(I),       
+*ENDDO
+!!!!!!!!!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ !修改主梁的特性   塔与横梁单元修改
+*DO,I,2101,2368                  !
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,1
+  EMODIF,I,REAL,1
+*ENDDO
+
+*DO,I,3001,3268                  !
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,1
+  EMODIF,I,REAL,1
+*ENDDO
+
+!!!!!!!!!!                   !修改横梁的特性
+*DO,I,12011,12067,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,7
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,12083,12261,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,7
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,13011,13067,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,7
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,13083,13261,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,7
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,14011,14067,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,14083,14261,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,15011,15067,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,15083,15261,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,16011,16067,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,16083,16261,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,17011,17067,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,17083,17261,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,2
+*ENDDO
+*DO,I,4012,4066,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,8
+  EMODIF,I,REAL,3
+*ENDDO
+*DO,I,4084,4260,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,8
+  EMODIF,I,REAL,3
+*ENDDO
+*DO,I,5012,5066,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,8
+  EMODIF,I,REAL,3
+*ENDDO
+*DO,I,5084,5260,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,8
+  EMODIF,I,REAL,3
+*ENDDO
+*DO,I,6012,6066,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,3
+*ENDDO
+*DO,I,6084,6260,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,3
+*ENDDO
+*DO,I,7012,7066,2                  !边跨右边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,3
+*ENDDO
+*DO,I,7084,7260,2                 !边跨左边横梁
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,9
+  EMODIF,I,REAL,3
+*ENDDO
+
+!!!/////////////////////////////////////////////////////////定义主缆、吊杆实常数////////////////////
+
+!!!/////////////////////////////////////////////定义初应变
+*DIM,SS,ARRAY,400
+*DIM,CS,ARRAY,400
+*DIM,TS,ARRAY,400
+
+
+AREA(2)=0.9622/2.0             !主缆北边跨(301-330,424-453)
+AREA(3)=0.9292/2.0             !主缆中跨(331-421,454-544)
+AREA(4)=0.9402/2.0             !主缆南边跨(422,545)
+
+SHPL=55248*9.81*1000/2.0       !N
+*DO,I,1,30
+   SS(I)=SQRT((XX2(I+1)-XX2(I))**2+(YY2(I+1)-YY2(I))**2)
+   CS(I)=(XX2(I+1)-XX2(I))/SS(I)
+   TS(I)=(YY2(I+1)-YY2(I))/(XX2(I+1)-XX2(I))
+   ISTR(I)=SHPL/CS(I)/AREA(2)/EXT(2)
+*ENDDO
+*DO,I,31,121
+   SS(I)=SQRT((XX2(I+1)-XX2(I))**2+(YY2(I+1)-YY2(I))**2)
+   CS(I)=(XX2(I+1)-XX2(I))/SS(I)
+   TS(I)=(YY2(I+1)-YY2(I))/(XX2(I+1)-XX2(I))
+   ISTR(I)=SHPL/CS(I)/AREA(3)/EXT(3)
+*ENDDO
+*DO,I,122,122
+   SS(I)=SQRT((XX2(I+1)-XX2(I))**2+(YY2(I+1)-YY2(I))**2)
+   CS(I)=(XX2(I+1)-XX2(I))/SS(I)
+   TS(I)=(YY2(I+1)-YY2(I))/(XX2(I+1)-XX2(I))
+   ISTR(I)=SHPL/CS(I)/AREA(4)/EXT(4)
+*ENDDO
+
+!!!!!!!!!!!吊杆初应变
+AREA(5)=0.014967/2.0
+*DO,I,1,29
+    ISTR(I+200)=ABS(SHPL*(TS(I+1)-TS(I))/AREA(5)/EXT(5))
+!    ISTR(I+200)=0.0
+*ENDDO
+!ISTR(201)=ISTR(201)/2
+*DO,I,30,119
+    ISTR(I+200)=ABS(SHPL*(TS(I+1+1)-TS(I+1))/AREA(5)/EXT(5))
+!    ISTR(I+200)=0.0
+*ENDDO
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+AREA(12)=0.9622/2.0               !主缆北边跨(301-330,424-453)
+*DO,I,301,330,1 
+  R,I,AREA(12),ISTR(I-300)
+*ENDDO
+
+AREA(13)=0.9292/2.0               !主缆中跨(331-421,454-544)
+*DO,I,331,421,1 
+  R,I,AREA(13),ISTR(I-300)
+*ENDDO
+
+AREA(14)=0.9402/2.0               !主缆南边跨(422,545)
+*DO,I,422,422,1 
+  R,I,AREA(14),ISTR(I-300)
+*ENDDO
+!!!@@@@@@@@@@@@@@@吊杆
+*DO,I,1201,1229                   !边跨吊杆(1201-1229,1230-1258)
+  R,I,AREA(5),ISTR(I-1000)
+*ENDDO
+*DO,I,1301,1390                   !中跨吊杆(1301-1390,1391-1480)
+  R,I,AREA(5),ISTR(I-1000-100+29)
+*ENDDO
+!!!//////////////////////////////////////////////////////////////////////////////////////////// 主缆单元修改 
+*DO,I,301,330                  !修改边跨主缆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,2
+  EMODIF,I,REAL,I
+*ENDDO
+*DO,I,424,453                  !修改边跨主缆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,2
+  EMODIF,I,REAL,I-123
+*ENDDO
+
+*DO,I,331,421                  !修改中跨主缆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,3
+  EMODIF,I,REAL,I
+*ENDDO
+*DO,I,454,544                  !修改中跨主缆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,3
+  EMODIF,I,REAL,I-123
+*ENDDO
+
+*DO,I,422,422                  !修改南跨主缆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,4
+  EMODIF,I,REAL,I
+*ENDDO
+*DO,I,545,545                  !修改南跨主缆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,4
+  EMODIF,I,REAL,I-123
+*ENDDO
+!!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\吊杆单元修改
+*DO,I,1201,1229                  !修改北跨右吊杆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,5
+  EMODIF,I,REAL,I
+*ENDDO  
+*DO,I,1230,1258                  !修改北跨左吊杆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,5
+  EMODIF,I,REAL,I-29
+*ENDDO  
+
+*DO,I,1301,1390                  !修改中跨右吊杆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,5
+  EMODIF,I,REAL,I
+*ENDDO  
+*DO,I,1391,1480                  !修改中跨左吊杆的特性
+  EMODIF,I,TYPE,2
+  EMODIF,I,MAT,5
+  EMODIF,I,REAL,I-90
+*ENDDO      
+!!!//////////////////////////////////////////////////塔面积常数
+AREA(1501)=55.5600
+AREA(1502)=52.3560
+AREA(1503)=49.6560
+AREA(1504)=47.4480
+AREA(1505)=39.3736
+AREA(1506)=36.8060
+AREA(1507)=35.5960
+AREA(1508)=34.3804
+AREA(1509)=33.2256
+AREA(1510)=32.5104
+AREA(1511)=29.5600
+AREA(1512)=29.5600
+AREA(1513)=29.5600
+AREA(1514)=29.5600
+AREA(1515)=29.5600
+AREA(1516)=29.5600
+AREA(1517)=29.5600     !塔顶断面
+
+AREA(1701)=24.6000    !中横梁
+AREA(1702)=24.6000
+AREA(1703)=24.6000
+AREA(1704)=24.6000
+AREA(1705)=24.6000
+
+AREA(1731)=24.6000   !顶横梁
+AREA(1732)=24.6000
+AREA(1733)=24.6000
+AREA(1734)=24.6000
+AREA(1735)=24.6000
+
+AREA(1761)=31.20000   !底横梁
+AREA(1762)=31.20000
+AREA(1763)=31.20000
+AREA(1764)=31.20000
+AREA(1765)=31.20000
+
+!!!!Iy
+Iy(1501)=738.4953
+Iy(1502)=616.6622
+Iy(1503)=525.0738
+Iy(1504)=457.3138
+Iy(1505)=317.3172
+Iy(1506)=255.5488
+Iy(1507)=224.5816
+Iy(1508)=195.9768
+Iy(1509)=171.1323
+Iy(1510)=156.7382
+Iy(1511)=147.0438
+Iy(1512)=147.0438
+Iy(1513)=147.0438
+Iy(1514)=147.0438
+Iy(1515)=147.0438
+Iy(1516)=147.0438
+Iy(1517)=147.0438
+
+Iy(1701)=123.4317
+Iy(1702)=123.4317
+Iy(1703)=123.4317
+Iy(1704)=123.4317
+Iy(1705)=123.4317
+Iy(1731)=123.4317
+Iy(1732)=123.4317
+Iy(1733)=123.4317
+Iy(1734)=123.4317
+Iy(1735)=123.4317
+Iy(1761)=237.8270
+Iy(1762)=237.8270
+Iy(1763)=237.8270
+Iy(1764)=237.8270
+Iy(1765)=237.8270
+
+!!!Iz
+Iz(1501)=897.4793
+Iz(1502)=755.1258
+Iz(1503)=647.5640
+Iz(1504)=567.6109
+Iz(1505)=402.5874
+Iz(1506)=334.1440
+Iz(1507)=310.3733
+Iz(1508)=287.4945
+Iz(1509)=266.5662
+Iz(1510)=254.1153
+Iz(1511)=235.1692
+Iz(1512)=235.1692
+Iz(1513)=235.1692
+Iz(1514)=235.1692
+Iz(1515)=235.1692
+Iz(1516)=235.1692
+Iz(1517)=235.1692
+
+
+Iz(1701)=228.7463
+Iz(1702)=228.7463
+Iz(1703)=228.7463
+Iz(1704)=228.7463
+Iz(1705)=228.7463
+Iz(1731)=228.7463
+Iz(1732)=228.7463
+Iz(1733)=228.7463
+Iz(1734)=228.7463
+Iz(1735)=228.7463
+Iz(1761)=356.5750
+Iz(1762)=356.5750
+Iz(1763)=356.5750
+Iz(1764)=356.5750
+Iz(1765)=356.5750
+
+!!Ix
+Ix(1501)=1363.248
+Ix(1502)=1148.271
+Ix(1503)=985.5209
+Ix(1504)=864.3371
+Ix(1505)=609.2024
+Ix(1506)=500.2183
+Ix(1507)=451.7020
+Ix(1508)=405.4963
+Ix(1509)=363.9769
+Ix(1510)=339.3472
+Ix(1511)=315.0485
+Ix(1512)=315.0485
+Ix(1513)=315.0485
+Ix(1514)=315.0485
+Ix(1515)=315.0485
+Ix(1516)=315.0485
+Ix(1517)=315.0485
+
+
+Ix(1701)=259.0233
+Ix(1702)=259.0233
+Ix(1703)=259.0233
+Ix(1704)=259.0233
+Ix(1705)=259.0233
+Ix(1731)=259.0233
+Ix(1732)=259.0233
+Ix(1733)=259.0233
+Ix(1734)=259.0233
+Ix(1735)=259.0233
+Ix(1761)=458.0124
+Ix(1762)=458.0124
+Ix(1763)=458.0124
+Ix(1764)=458.0124
+Ix(1765)=458.0124
+
+!!!Ty
+Ty(1501)=10.400
+Ty(1502)=9.8667
+Ty(1503)=9.4158
+Ty(1504)=9.0475
+Ty(1505)=8.2310
+Ty(1506)=7.7179
+Ty(1507)=7.3871
+Ty(1508)=7.0562
+Ty(1509)=6.7419
+Ty(1510)=6.5465
+Ty(1511)=6.5000
+Ty(1512)=6.5000
+Ty(1513)=6.5000
+Ty(1514)=6.5000
+Ty(1515)=6.5000
+Ty(1516)=6.5000
+Ty(1517)=6.5000
+
+
+Ty(1701)=8.7000
+Ty(1702)=8.7000
+Ty(1703)=8.7000
+Ty(1704)=8.7000
+Ty(1705)=8.7000
+Ty(1731)=8.7000
+Ty(1732)=8.7000
+Ty(1733)=8.7000
+Ty(1734)=8.7000
+Ty(1735)=8.7000
+Ty(1761)=9.5000
+Ty(1762)=9.5000
+Ty(1763)=9.5000
+Ty(1764)=9.5000
+Ty(1765)=9.5000
+
+!!!Tz
+Tz(1501)=11.4000
+Tz(1502)=10.8667
+Tz(1503)=10.4158
+Tz(1504)=10.0475
+Tz(1505)=9.3398
+Tz(1506)=8.9059
+Tz(1507)=8.7957
+Tz(1508)=8.6854
+Tz(1509)=8.5806
+Tz(1510)=8.5155
+Tz(1511)=8.5000
+Tz(1512)=8.5000
+Tz(1513)=8.5000
+Tz(1514)=8.5000
+Tz(1515)=8.5000
+Tz(1516)=8.5000
+Tz(1517)=8.5000
+
+
+Tz(1701)=6.1000
+Tz(1702)=6.1000
+Tz(1703)=6.1000
+Tz(1704)=6.1000
+Tz(1705)=6.1000
+Tz(1731)=6.1000
+Tz(1732)=6.1000
+Tz(1733)=6.1000
+Tz(1734)=6.1000
+Tz(1735)=6.1000
+Tz(1761)=7.5000
+Tz(1762)=7.5000
+Tz(1763)=7.5000
+Tz(1764)=7.5000
+Tz(1765)=7.5000
+
+!!!///////////////////////////塔实常数的定义\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*DO,I,1501,1517,1            !立柱
+  R,I,AREA(I),Iz(I),Iy(I),Tz(I),Ty(I),,
+  RMORE,0,Ix(I),0,,,0,       
+*ENDDO
+*DO,I,1701,1705,1  !中横梁
+  R,I,AREA(I),Iz(I),Iy(I),Tz(I),Ty(I),,
+  RMORE,0,Ix(I),0,,,0,       
+*ENDDO
+*DO,I,1731,1735,1  !顶横梁
+  R,I,AREA(I),Iz(I),Iy(I),Tz(I),Ty(I),,
+  RMORE,0,Ix(I),0,,,0,       
+*ENDDO
+*DO,I,1761,1765,1  !底横梁
+  R,I,AREA(I),Iz(I),Iy(I),Tz(I),Ty(I),,
+  RMORE,0,Ix(I),0,,,0,       
+*ENDDO
+!!!!CCCCCCCCCCCCCCCCCCCCC//////////////////修改塔和横梁的单元特性\\\\\\\\\\\\\\\\
+*DO,I,1501,1517                  !修改北右塔柱的单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I
+*ENDDO 
+*DO,I,1545,1561                  !修改北左塔柱的单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-44
+*ENDDO 
+   
+*DO,I,1601,1617                  !修改南右塔柱的单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-100
+*ENDDO   
+*DO,I,1645,1661                  !修改南左塔柱的单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-144
+*ENDDO 
+!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\\\\\\\\\\\\\\\\\中横梁
+*DO,I,1701,1705                  !修改北中横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I
+*ENDDO 
+*DO,I,1706,1710                  !修改北中横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-5
+*ENDDO 
+*DO,I,1712,1716                  !修改南中横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-11
+*ENDDO 
+*DO,I,1717,1721                  !修改南中横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-16
+*ENDDO 
+
+!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\\\\\\\\\\\\\\\顶横梁
+*DO,I,1731,1735                  !修改北顶横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I
+*ENDDO 
+*DO,I,1736,1740                  !修改北顶横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-5
+*ENDDO 
+
+*DO,I,1742,1746                  !修改南顶横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-11
+*ENDDO 
+*DO,I,1747,1751                  !修改南顶横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-16
+*ENDDO 
+!!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\\\\\\\\\\\\\\\底横梁
+*DO,I,1761,1765                  !修改南底横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I
+*ENDDO 
+*DO,I,1766,1770                  !修改南底横梁单元特性
+  EMODIF,I,TYPE,1
+  EMODIF,I,MAT,6
+  EMODIF,I,REAL,I-5
+*ENDDO 
+!@@@@@@@@@@@@@@@@@@@@@@形成部分刚臂
+*DO,I,1510,1511                  
+   EMODIF,I,MAT,10
+   EMODIF,I+5,MAT,10
+   EMODIF,I+44,MAT,10
+   EMODIF,I+49,MAT,10
+   EMODIF,I+93,MAT,10
+   EMODIF,I+100,MAT,10
+   EMODIF,I+105,MAT,10
+   EMODIF,I+137,MAT,10
+   EMODIF,I+144,MAT,10
+   EMODIF,I+149,MAT,10
+*ENDDO 
+EMODIF,1705,MAT,10
+EMODIF,1735,MAT,10
+EMODIF,1740,MAT,10
+EMODIF,1710,MAT,10
+EMODIF,1765,MAT,10
+EMODIF,1716,MAT,10
+EMODIF,1746,MAT,10
+EMODIF,1770,MAT,10
+EMODIF,1721,MAT,10
+EMODIF,1751,MAT,10
+!!!!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+
+
+
+
+!!!阻尼器zuniqi
+!
+!ET,100001,MASS21
+!KEYOPT,100001,3,2
+!ET,100002,COMBIN14
+!KEYOPT,100002,2,2
+!!KEYOPT,6,3,0
+!
+!M=25000
+!F=0.0788
+!K=6128.5
+!!xi=0.0346
+!xi=0.0186
+!C=xi*2*M*2*3.1415926*F
+!R,100001,M,M,M
+!R,100002,K,C
+!
+!N,14217,22530,60,-9.4416
+!N,15217,22530,60,9.4416
+!N,14125,21702,60,-9.4416
+!N,15125,21702,60,9.4416
+!TYPE,100002
+!REAL,100002
+!E,4217,14217
+!E,5217,15217
+!E,4125,14125
+!E,5125,15125
+!TYPE,100001
+!REAL,100001
+!E,14217
+!E,15217
+!E,14125
+!E,15125
+!
+!
+
+
+!!!!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!!!!********************************生成质量单元
+ZK=29    !总宽
+CK=5.98   !槽宽
+JXDZJL=17.136   !边距16.5134                    !检修道质心距离
+JXDBJL=17.136
+GUANJ=3.262  !!水管/m
+HULBJ=14.379  !防撞护栏
+PUZHBK=28.0
+PUZHZK=7
+MAOJ=17-1.3
+JCHACJ=8.65
+!!!!!!!!!!!!!!!!!!!!!!!!!!补充灯柱、检修道栏杆、过桥管线
+MBCH=0.1+0.1+0.2
+IMBCH=0.1*14**2+0.1*17.5**2+0.2*8**2
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+SHG=0.745   !!水管/m
+ISHG=SHG*(GUANJ**2)
+!※※※※※※※
+!防撞护栏及其底座和路缘石
+!※※※※※※※
+HULZJ=3.642
+HUL=0.6
+IHUL=(HUL*2*(HULBJ**2)+HUL*2*(HULZJ**2))/4
+
+
+!※※※※※※※
+!车行道铺装
+!※※※※※※※
+Rp=8.8953     !铺装/m
+ChD=10.602
+PZH=2.96
+IPZH=1.0/12.0*PZH*(ChD**2)+PZH*Rp**2
+
+!※※※※※※※
+!横隔板
+!※※※※※※※
+GB=41.51/18.0
+GbA=72.3998
+GbIx=55.4193
+GbIy=6638.6963
+GbRo=GB/GbA
+IGB=GbRo*(GbIx+GbIy)
+
+!※※※※※※※
+!检修道（中边跨一致）
+!※※※※※※※
+JXDB=14.96/18.0+0.17  !边检修道+检修道铺装/m
+IJXDB=JXDB*(JXDBJL**2)
+
+JXDZ=10.02/18.0+0.1   !中检修道+检修道铺装/m
+IJXDZ=JXDZ*(JXDZJL**2)
+
+!※※※※※※※
+!检查车轨道
+!※※※※※※※
+JCHACJ=8.9                !检查车/m
+JCHAC=0.094
+IJCHAC=JCHAC*(JCHACJ**2)
+
+!※※※※※※※
+!锚箱
+!※※※※※※※
+MAOJ=15.74                !锚箱/m
+MAOX=6.42/18
+IMAOX=MAOX*(MAOJ**2)
+
+XL=0
+IXL=1.0/12.0*XL*(CK**2)
+
+GZL=0
+IGZL=1.0/12.0*GZL*(CK**2)
+!※※※※※※※
+!统计
+!※※※※※※※
+TONGY=SHG+HUL*4+PZH+GB+JCHAC+MBCH
+ITONGY=ISHG+IHUL+IPZH+GB+IJCHAC+IMBCH
+
+delta=9.4416
+
+MXB1=(TONGY+JXDB+XL/18.0+GZL/18.0)*5*1000
+IMB1=(ITONGY+IJXDB+IXL/18+IGZL/18)*5*1000
+MXB2=(TONGY+JXDB+XL/18+GZL/18)*3*1000
+IMB2=(ITONGY+IJXDB+IXL/18+IGZL/18)*3*1000
+MXB3=(TONGY+JXDB)*9*1000+(XL+MAOX)*1000
+IMB3=(ITONGY+IJXDB)*9*1000+(IXL+IMAOX)*1000
+MXB4=(TONGY+JXDB)*9*1000+GZL*1000
+IMB4=(ITONGY+IJXDB)*9*1000+IGZL*1000
+
+!!fang 修改质量 参考西堠门大桥施工阶段研究报告4
+!unitM = 8.83*1000
+!unitI = 9.66*100000
+!MXB1=unitM*5
+!IMB1=unitI*5
+!MXB2=unitM*3
+!IMB2=unitI*3
+!MXB3=unitM*9
+!IMB3=unitI*9
+!MXB4=unitM*9
+!IMB4=unitI*9
+!R,2001,MXB1,MXB1,MXB1,IMB1,,,   !5米段         !边跨
+!R,2002,MXB2,MXB2,MXB2,IMB2,,,   !3米段
+!R,2003,MXB3,MXB3,MXB3,IMB3,,,   !9米箱梁段
+!R,2004,MXB4,MXB4,MXB4,IMB4,,,   !9米工字梁段
+
+
+R,2001,MXB1/2.0,MXB1/2.0,MXB1/2.0,(IMB1-MXB1*delta*delta)/2.0,,,   !5米段         !边跨
+R,2002,MXB2/2.0,MXB2/2.0,MXB2/2.0,(IMB2-MXB2*delta*delta)/2.0,,,   !3米段
+R,2003,MXB3/2.0,MXB3/2.0,MXB3/2.0,(IMB3-MXB3*delta*delta)/2.0,,,   !9米箱梁段
+R,2004,MXB4/2.0,MXB4/2.0,MXB4/2.0,(IMB4-MXB4*delta*delta)/2.0,,,   !9米工字梁段
+
+
+MXZ2=(TONGY+JXDZ+XL/18+GZL/18)*3*1000
+IMZ2=(ITONGY+IJXDZ+IXL/18+IGZL/18)*3*1000
+MXZ3=(TONGY+JXDZ)*9*1000+(XL+MAOX)*1000
+IMZ3=(ITONGY+IJXDZ)*9*1000+(IXL+IMAOX)*1000
+MXZ4=(TONGY+JXDZ)*9*1000+GZL*1000
+IMZ4=(ITONGY+IJXDZ)*9*1000+IGZL*1000
+
+R,2005,MXZ2/2.0,MXZ2/2.0,MXZ2/2.0,(IMZ2-MXZ2*delta*delta)/2.0,,,   !3米段         !中跨
+R,2006,MXZ3/2.0,MXZ3/2.0,MXZ3/2.0,(IMZ3-MXZ3*delta*delta)/2.0,,,   !9米箱梁段
+R,2007,MXZ4/2.0,MXZ4/2.0,MXZ4/2.0,(IMZ4-MXZ4*delta*delta)/2.0,,,   !9米工字梁段
+
+!MXZ2=unitM*3
+!IMZ2=unitI*3
+!MXZ3=unitM*9
+!IMZ3=unitI*9
+!MXZ4=unitM*9
+!IMZ4=unitI*9
+!
+!R,2005,MXZ2,MXZ2,MXZ2,IMZ2,,,   !3米段         !中跨
+!R,2006,MXZ3,MXZ3,MXZ3,IMZ3,,,   !9米箱梁段
+!R,2007,MXZ4,MXZ4,MXZ4,IMZ4,,,   !9米工字梁段
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!将质量特性写入文件
+ZHLM=DENS(1)*AREA(1)+ADDMAS(1)
+TZHL=DENS(1)*(IY(1)+IZ(I))
+!!!!!!!!!!!!!!!!!!!!!!!!!!///////////////////////////////////////加质量单元
+TYPE,3                !边跨left
+Real,2001
+*DO,I,4001,4010,1
+   E,I
+*ENDDO
+TYPE,3
+Real,2002
+*DO,I,4068,4075,1
+   E,I
+*ENDDO
+TYPE,3
+Real,2003
+*DO,I,4011,4067,2
+   E,I
+*ENDDO
+TYPE,3
+Real,2004
+*DO,I,4012,4066,2
+   E,I
+*ENDDO
+
+TYPE,3                !边跨right
+Real,2001
+*DO,I,5001,5010,1
+   E,I
+*ENDDO
+TYPE,3
+Real,2002
+*DO,I,5068,5075,1
+   E,I
+*ENDDO
+TYPE,3
+Real,2003
+*DO,I,5011,5067,2
+   E,I
+*ENDDO
+TYPE,3
+Real,2004
+*DO,I,5012,5066,2
+   E,I
+*ENDDO
+
+TYPE,3                !中跨left
+Real,2005
+*DO,I,4076,4082,1
+   E,I
+*ENDDO
+*DO,I,4262,4269,1
+   E,I
+*ENDDO
+TYPE,3                !中跨
+Real,2006
+*DO,I,4083,4261,2
+   E,I
+*ENDDO
+TYPE,3                !中跨
+Real,2007
+*DO,I,4084,4260,2
+   E,I
+*ENDDO
+
+TYPE,3                !中跨right
+Real,2005
+*DO,I,5076,5082,1
+   E,I
+*ENDDO
+*DO,I,5262,5269,1
+   E,I
+*ENDDO
+TYPE,3                !中跨
+Real,2006
+*DO,I,5083,5261,2
+   E,I
+*ENDDO
+TYPE,3                !中跨
+Real,2007
+*DO,I,5084,5260,2
+   E,I
+*ENDDO
+
+!!!!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+TYPE,1
+Real,2
+MAT,7
+
+E,1,2001
+E,4,2004
+E,7,2007
+E,9,2009
+E,73,2073
+E,75,2075
+E,77,2077
+E,265,2265
+E,269,2269
+
+E,1,3001
+E,4,3004
+E,7,3007
+E,9,3009
+E,73,3073
+E,75,3075
+E,77,3077
+E,265,3265
+E,269,3269
+
+TYPE,1
+Real,2
+MAT,9
+
+E,2001,4001
+E,2004,4004
+E,2007,4007
+E,2009,4009
+E,2073,4073
+E,2075,4075
+E,2077,4077
+E,2265,4265
+E,2269,4269
+
+E,3001,5001
+E,3004,5004
+E,3007,5007
+E,3009,5009
+E,3073,5073
+E,3075,5075
+E,3077,5077
+E,3265,5265
+E,3269,5269
+           
+!!!///////////////////////////////////////////////////////////////////////////////
+D,4001,,,,,,,UY,UZ
+D,4075,,,,,,,,UZ
+!D,74,,,,,,,UY,UZ,ROTX    !!梁塔支座
+!D,268,,,,,,,UY,UZ,ROTX
+D,5001,,,,,,,UY,UZ
+D,5075,,,,,,,,UZ
+!D,8075,,,,,,,,UZ
+!D,9075,,,,,,,,UZ
+
+D,301,ALL  !主缆
+D,424,ALL
+D,423,ALL
+D,546,ALL
+
+D,1201,ALL !tower
+D,1245,ALL
+D,1289,ALL
+D,1333,ALL
+!※※※※※※※
+!在南塔梁位置处主梁的约束
+!※※※※※※※
+CP,1,UY,1507,4269
+CP,NEXT,UZ,1507,4269
+CP,NEXT,ROTX,1507,4269
+
+CP,NEXT,UY,1502,5269
+CP,NEXT,UZ,1502,5269
+CP,NEXT,ROTX,1502,5269
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!nsel,s,node,,1,269
+!nsel,a,node,,2001,2269
+!nsel,a,node,,3001,3269
+!nsel,s,node,,4001,4268
+!nsel,a,node,,5001,5268
+!nsel,a,node,,6001,6269
+!nsel,a,node,,7001,7269
+!CP,NEXT,ROTX,all
+!*DO,I,301,423
+!   D,I,ALL             !右主缆
+!   D,I+122+1,ALL      !左主缆
+!*ENDDO
+!NUMCMP,ALL
+nsel,s,node,,4002,4010,1
+nsel,a,node,,5002,5010,1
+nsel,a,node,,2001
+nsel,a,node,,2004
+nsel,a,node,,2007
+nsel,a,node,,2009
+nsel,a,node,,3001
+nsel,a,node,,3004
+nsel,a,node,,3007
+nsel,a,node,,3009
+nsel,a,node,,1
+nsel,a,node,,4
+nsel,a,node,,7
+nsel,a,node,,9
+cp,next,rotx,all
+
+
+nsel,s,node,,4068,4082,1
+nsel,a,node,,5068,5082,1
+nsel,a,node,,73
+nsel,a,node,,75
+nsel,a,node,,77
+nsel,a,node,,2073
+nsel,a,node,,2075
+nsel,a,node,,2077
+nsel,a,node,,3073
+nsel,a,node,,3075
+nsel,a,node,,3077
+cp,next,rotx,all
+
+
+nsel,s,node,,4262,4268,1
+nsel,a,node,,5262,5268,1
+nsel,a,node,,265
+nsel,a,node,,269
+nsel,a,node,,2265
+nsel,a,node,,2269
+nsel,a,node,,3265
+nsel,a,node,,3269
+cp,next,rotx,all
+
+
+!*DO,I,2,10
+!   D,I+4000,rotx
+!   D,I+5000,rotx
+!*ENDDO
+!D,1,rotx
+!D,4,rotx
+!D,7,rotx
+!D,9,rotx
+!
+!D,2000+1,rotx
+!D,2000+4,rotx
+!D,2000+7,rotx
+!D,2000+9,rotx
+!D,3000+1,rotx
+!D,3000+4,rotx
+!D,3000+7,rotx
+!D,3000+9,rotx
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+*DO,I,0,56,2                           !边跨
+   NSEL,S,NODE,,11+I
+   NSEL,A,NODE,,2011+I
+   NSEL,A,NODE,,3011+I
+   NSEL,A,NODE,,4011+I
+   NSEL,A,NODE,,5011+I
+   NSEL,A,NODE,,6011+I
+   NSEL,A,NODE,,7011+I
+   CP,NEXT,ROTX,ALL
+*ENDDO
+
+*DO,I,0,178,2                          !中跨
+   NSEL,S,NODE,,83+I
+   NSEL,A,NODE,,2083+I
+   NSEL,A,NODE,,3083+I
+   NSEL,A,NODE,,4083+I
+   NSEL,A,NODE,,5083+I
+   NSEL,A,NODE,,6083+I
+   NSEL,A,NODE,,7083+I
+   CP,NEXT,ROTX,ALL
+*ENDDO
+
+*DO,I,0,54,2                           !边跨
+   NSEL,S,NODE,,12+I
+   NSEL,A,NODE,,2012+I
+   NSEL,A,NODE,,3012+I
+   NSEL,A,NODE,,4012+I
+   NSEL,A,NODE,,5012+I
+   CP,NEXT,ROTX,ALL
+*ENDDO
+
+*DO,I,0,176,2                          !中跨
+   NSEL,S,NODE,,84+I
+   NSEL,A,NODE,,2084+I
+   NSEL,A,NODE,,3084+I
+   NSEL,A,NODE,,4084+I
+   NSEL,A,NODE,,5084+I
+   CP,NEXT,ROTX,ALL
+*ENDDO
+
+
+
+nummrg,node
+nummrg,elem
+
+
+NLGEOM,ON
+SSTIF,ON					!打开应力刚化效应
+
+!/INPUT,'StaticWindForce','mac','','', 0 !增加静风效应
+
+!消除警告信息
+!/UIS,MSGPOP,3
+!/NERR,5,10000,
+!/CONFIG,NRES,200000
+
+!----------------------------静力计算-------------------------------------------------------
+!resume
+/output,XHMBridge,dat,,  !!输出模型信息
+fini
+/SOLU
+allsel,all
+ACEL,,9.81
+
+time,1
+ANTYPE,0
+NLGEOM,ON
+NROPT,AUTO, ,OFF
+LUMPM,0 
+EQSLV, , ,0,
+PRECISION,0 
+MSAVE,0 
+PIVCHECK,1  
+SSTIF,ON
+EMATWRITE,YES
+TOFFST,0,   
+solve
+FINI
+/post1
+set,last 
+pldisp,1
+/view,1,1,1,1                                                                      
+/eshape,0                                                                        
+/pbc,u,,0                                                                        
+/pbc,rot,,0                                                                      
+/dscale,1,0                                                                      
+plnsol,u,sum,0,                                                                  
+/rep,fast  
+
+!----------------------模态分析----------------------------
+!/solu                                                                            
+!antype,modal                                                                     
+!pstres,1  !激活预应力对模态求解的效应,模态求解为线性求解 
+!!modopt,lanb,100                                                              
+!modopt,lanb,100,0,0, ,off                                                         
+!eqslv,spar                                                                       
+!mxpand,100, , ,0                                                                  
+!lumpm,0                                                                          
+!solve                                                                            
+!fini                                                                             
+!/post1                                                                           
+!set,first                                                                        
+!/view,1,1,1,1                                                                    
+!plnsol,u,sum,0,                                                                  
+!pldisp,0                                                                         
+!/pnum,real,0                                                                     
+!/num,0                                                                           
+!/rep,fast   
+
+!!!!!!!!!!!!!!!!!!!!!!!debug提取单元刚度质量矩阵（不太好用）
+!/output,cp,out,,!!将输出信息送到cp.out文件
+!/debug,-1,,,1 !指定输出单元矩阵
+!!!!!!!!!!!!!!!!!!!!!!!dubug命令结束
+
+
+
+
+
+
+/SOLU              
+ANTYPE,MODAL       ! Modal analysis
+UPCOORD,1.0,ON     ! Display mode shapes relative to deformed geometry  !   in the postprocessor.
+MSAVE,0                  
+PSTRES,ON          ! Prestress effects ON
+MODOPT,LANB,60,0,0, ,OFF         ! Select eigensolver 振型关于质量归一化
+MXPAND,60, , ,0          ! Specify the number of modes to expand, if desired.
+PSOLVE,EIGLANB    ! Calculate the eigenvalues and eigenvectors.
+                   !  Use EIGLANB or EIGFULL to match MODOPT command.
+FINISH
+/SOLU              !Additional solution step for expansion.
+EXPASS,ON
+PSOLVE,EIGEXP      ! Expand the eigenvector solution. (Required if you
+                   !   want to review mode shapes in the postprocessor.)
+FINISH
+
+
+!!
+!!!/OUTPUT, TERM ! 将输出信息送到output windows中
+!!!!--------------------输出单元信息结束--------------------
+!!!!
+!!!!ModelShape.mac
+!!!!Gmass_CQ.mac
+!!!
+!!!!Finsih   模态分析完毕!  
+!!!
+!!!
+!!!qiujie.mac
+!!!full.mac
+!!
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!提取振型位移结果!!!!!!!!!!!!!
+allsel,all
+/post1                                                                           
+set,first                                                                        
+/view,1,1,1,1                                                                    
+plnsol,u,sum,0,                                                                  
+pldisp,0                                                                         
+/pnum,real,0                                                                     
+/num,0                                                                           
+/rep,fast   
+
+!提取某一阶振型
+!选择主梁上的一排节点
+
+eplot
+set,first
+!输入振型阶数
+dat=23
+*DO,I,1,dat-1,1
+   set,next
+*ENDDO
+pldisp
+
+
+NN= 538	!主梁上节点数
+*DIM,NODEONDECK,ARRAY,NN,1,1            !!定义一数值（array）数组（这里是121*1*1），数组名：NODEONDECK
+!*DIM,FINNAME,CHAR,30
+!FINNAME='NODEONDECK.txt'
+FINNAME=strcat(di,'\NODEONDECK.txt')
+
+*CREATE,ansuitmp                        !!创建一宏文件，由 *end 结束
+*VREAD,NODEONDECK(1),%FINNAME%,,,1,     !!读入数据填充向量或矩阵  
+(f8.0)                                  !!数据格式 
+*END
+
+!!/Input,Fname,Ext,--,LIne,log
+!!读入数据文件
+!!Fname,文件名及目录路径,默认为先前设置的工作目录
+!!Ext, 文件扩展名
+!!后面的几个参数一般可以不考虑.
+!!(注): 用此命令时,文件名及目录路径都必须为英文,不能含有中文字符.
+/INPUT,ANSUITMP 
+
+
+*DIM,NODEDISTANCE,ARRAY,NN,1,1            !!定义一数值（array）数组（这里是121*1*1），数组名：NODEONDECK !*DIM,FINNAME,CHAR,30
+FINNAME=strcat(di,'\NODEDISTANCE.txt')
+!FINNAME='NODEDISTANCE.txt'
+
+*CREATE,ansuitmp                        !!创建一宏文件，由 *end 结束
+*VREAD,NODEDISTANCE(1),%FINNAME%,,,1,     !!读入数据填充向量或矩阵  
+(f8.0)                                  !!数据格式 
+*END
+
+
+*MWRITE,XX1,MYFILE1,TXT,,
+(1f10.4)
+
+!!/Input,Fname,Ext,--,LIne,log
+!!读入数据文件
+!!Fname,文件名及目录路径,默认为先前设置的工作目录
+!!Ext, 文件扩展名
+!!后面的几个参数一般可以不考虑.
+!!(注): 用此命令时,文件名及目录路径都必须为英文,不能含有中文字符.
+/INPUT,ANSUITMP 
+
+
+
+!!!!CREATE ARRAY OF NODE
+!!获取主梁节点坐标
+*DIM,DECKCOORD,ARRAY,NN,3,1
+*DO,I,1,NN,1
+  DECKCOORD(I,1)=NX(NODEONDECK(I))
+  DECKCOORD(I,2)=NY(NODEONDECK(I))
+  DECKCOORD(I,3)=NZ(NODEONDECK(I))
+*ENDDO
+
+!!!!获取振型向量
+*DIM,ZHENXING,ARRAY,NN,3,1
+*DO,I,1,NN,1
+  ZHENXING(I,1)=UX(NODEONDECK(I))
+  ZHENXING(I,2)=UY(NODEONDECK(I))
+  ZHENXING(I,3)=UZ(NODEONDECK(I))
+*ENDDO
+
+
+/AUX2
+FILE,XHMBridge,FULL
+HBMAT,KMatrix,,,ASCII,STIFF,YES,YES
+HBMAT,MMatrix,,,ASCII,MASS,YES,YES
+fini
+
+
+
+/OUTPUT, 'nodes', txt
+NLIST
+/OUTPUT
+
+/OUTPUT, 'elements', txt
+ELIST
+/OUTPUT
