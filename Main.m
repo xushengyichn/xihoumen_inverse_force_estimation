@@ -18,7 +18,7 @@ run('InitScript.m');
 %% 0 绘图参数
 fig_bool = ON;
 num_figs_in_row = 5; %每一行显示几个图
-figPos = figPosMedium; %图的大小，参数基于InitScript.m中的设置
+figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
 gap_between_images = [0, 0];
 figureIdx = 0;
@@ -40,6 +40,7 @@ MM_eq = Result.MM_eq;
 KK_eq = Result.KK_eq;
 mode_vec = Result.mode_vec;
 nodeondeck = Result.nodeondeck;
+Mapping_data = Result.Mapping;
 % CC_eq = 0.1 * MM_eq + 0.005 * KK_eq; %人为指定瑞利阻尼
 zeta = ones(size(modesel))*0.3/100;
 omega = diag(2*pi*Freq);
@@ -49,7 +50,7 @@ CC_eq = 2.*MM_eq.*omega.*zeta;
 T = 300; dt = 0.01; fs = 1 / dt; t = 0:dt:T;
 
 % Create force
-lambda = 0.001; sigma_p_2 = 1; sigma_p = sqrt(sigma_p_2); f1 = Freq(1); A1 = 10000;
+lambda = 0.001; sigma_p_2 = 1; sigma_p = sqrt(sigma_p_2); f1 = Freq(1); A1 = 1000000;
 [P] = quasiperiod_force(lambda, sigma_p, f1, dt, t);
 
 
@@ -65,6 +66,7 @@ loc_p = [1500];
 % 确定荷载位置和对应振型大小
 p_node = FindNodewithLocation(loc_p, node_loc,nodeondeck);
 p_node_list = p_node(:);
+p_matrix_seq = node2matrixseq(p_node_list,Mapping_data);
 % 计算荷载数量
 np  = size(p_node(:) , 1);
 
@@ -80,16 +82,17 @@ omega2 = K;
 
 S_p = zeros(size(phi, 1), np);
 
+
 for k1 = 1:np
     S_p(p_node_list(k1), k1) = 1;
 end
 
 % accelerometer location
 % loc_acc = [1000,1500,1700];
-loc_acc = [1500];
-loc_vel = [];
-loc_dis = [];
-[S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck);
+loc_acc = [1000,1500,1700];
+loc_vel = [1000,1500,1700];
+loc_dis = [1000,1500,1700];
+[S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data);
 % establish continuous time matrices
 [A_c, B_c, G_c, J_c] = ssmod_c(nmodes, np, omega2, Gamma, phi, S_p, S_a, S_v, S_d);
 
@@ -98,8 +101,8 @@ N = length(t);
 [A_d, B_d, G_d, J_d, ~] = ssmod_c2d(A_c, B_c, G_c, J_c, dt);
 
 % 生成带噪音的观测数据
-Q =0* 10 ^ (-6) * eye(ns);
-R =0* 10 ^ (-5) * eye(n_sensors);
+Q =10 ^ (-8) * eye(ns);
+R =10 ^ (-6) * eye(n_sensors);
 S = zeros(ns, n_sensors);
 x0 = zeros(ns, 1);
 [xn, yn, xn_true] = CalResponse(A_d, B_d, G_d, J_d, p, Q, R, N, x0, ns, n_sensors);
@@ -112,158 +115,20 @@ x_true = modal2physical(xn_true, phi);
 
 output = ImportMK(100, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt');
 node_modal_shape=[nodes.NODE, nodes.X, nodes.Y, nodes.Z];
-Mapping_data = output.Mapping;
+
 
 % x_dis = std(x(1:end/2,:),0,2);
 % x_dis_plot =x_dis/max(x_dis)*50;
 
-x_dis = x(1:end/2,15001);
+x_dis = x(1:end/2,7001);
 x_dis_plot=x_dis*5000;
 
 [node_modal_shape_plot,nodes_displacement,nodes_displacementMagnitude,X_modal_shape,Y_modal_shape,Z_modal_shape]= update_node(node_modal_shape,x_dis_plot,Mapping_data,elements);
 
-% plot modal shape
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% Define color, point size and marker for scatter plot
-color = 'b'; % Color blue
-marker = 'o'; % Circle marker
-size = 15; % Size of marker
-% scatter3(nodes_info.X, nodes_info.Y, nodes_info.Z, size, color, marker, 'filled'); % scatter plot for nodes
-hold on
-% scatter3(node_modal_shape(:,2),node_modal_shape(:,3),node_modal_shape(:,4), size, color, marker, 'filled'); % scatter plot for nodes
-% Create a scatter plot using displacementMagnitude as color data
-scatterHandle = scatter3(node_modal_shape_plot(:,2), node_modal_shape_plot(:,3), node_modal_shape_plot(:,4), size, nodes_displacementMagnitude, marker, 'filled');
-
-% Apply a colormap
-colormap(jet);  % or use another colormap if you prefer
-
-% Add a colorbar
-colorbar;
-
-% If needed, you can set the limits of the color scale
-% caxis([minDisplacement, maxDisplacement]);  % replace with actual min and max if needed
-
-% Define line color for beams
-beamColor = 'k'; % Black color
-hold on; % hold current plot
-% Plot each beam
-% Plot all lines at once
-line(X_modal_shape, Y_modal_shape, Z_modal_shape, 'Color', beamColor, 'LineWidth', lineWidthThin);
-% Add grids
-grid on;  
-% Add labels to each axis
-xlabel('X'); ylabel('Y'); zlabel('Z'); 
-% Add title
-title('My FEM Model'); 
-% View in 3D
-view(45, 35.264); 
-% view(0,0); 
-% Use equal scaling
-axis equal; 
-% Add light
-camlight('headlight');
-% Use gouraud lighting
-lighting gouraud;
-hold off;
 
 
 % 
-% % 创建一个VideoWriter对象
-% v = VideoWriter('myVideo.avi');
 % 
-% %你的k1循环开始
-% numFrames = length(k1_array);
-% frames(numFrames) = struct('cdata',[],'colormap',[]); % 初始化帧结构体数组
-% parfor k1 = 1:numFrames
-%     x_dis = x(1:end/2,k1_array(k1));
-%     x_dis_plot=x_dis/max(x_dis)*50;
-% 
-%     [node_modal_shape_plot,nodes_displacement,nodes_displacementMagnitude,X_modal_shape,Y_modal_shape,Z_modal_shape]= update_node(node_modal_shape,x_dis_plot,Mapping_data,elements);
-% 
-%     % 你的绘图代码...
-% 
-%     % 捕获当前帧
-%     frames(k1) = getframe(hFigure);
-% end
-% 
-% % 开启VideoWriter对象
-% open(v);
-% % 将帧写入视频
-% for k1 = 1:numFrames
-%     writeVideo(v,frames(k1));
-% end
-% % 关闭VideoWriter对象
-% close(v);
-
-
-
-% 创建一个VideoWriter对象
-v = VideoWriter('myVideo.avi');
-% 开启VideoWriter对象
-open(v);
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-%你的k1循环开始
-for k1 = 1:300:length(t)
-    x_dis = x(1:end/2,k1);
-    x_dis_plot=x_dis*5000;
-
-    [node_modal_shape_plot,nodes_displacement,nodes_displacementMagnitude,X_modal_shape,Y_modal_shape,Z_modal_shape]= update_node(node_modal_shape,x_dis_plot,Mapping_data,elements);
-
-    % 你的绘图代码...
-    % plot modal shape
-
-    % Define color, point size and marker for scatter plot
-    color = 'b'; % Color blue
-    marker = 'o'; % Circle marker
-    size = 15; % Size of marker
-    % scatter3(nodes_info.X, nodes_info.Y, nodes_info.Z, size, color, marker, 'filled'); % scatter plot for nodes
-    hold on
-    % scatter3(node_modal_shape(:,2),node_modal_shape(:,3),node_modal_shape(:,4), size, color, marker, 'filled'); % scatter plot for nodes
-    % Create a scatter plot using displacementMagnitude as color data
-    scatterHandle = scatter3(node_modal_shape_plot(:,2), node_modal_shape_plot(:,3), node_modal_shape_plot(:,4), size, nodes_displacementMagnitude, marker, 'filled');
-
-    % Apply a colormap
-    colormap(jet);  % or use another colormap if you prefer
-
-    % Add a colorbar
-    colorbar;
-
-    % If needed, you can set the limits of the color scale
-    % caxis([minDisplacement, maxDisplacement]);  % replace with actual min and max if needed
-    clim([0, max(max(x))*5000]);  % replace with actual min and max if needed
-
-    % Define line color for beams
-    beamColor = 'k'; % Black color
-    hold on; % hold current plot
-    % Plot each beam
-    % Plot all lines at once
-    line(X_modal_shape, Y_modal_shape, Z_modal_shape, 'Color', beamColor, 'LineWidth', lineWidthThin);
-    % Add grids
-    grid on;  
-    % Add labels to each axis
-    xlabel('X'); ylabel('Y'); zlabel('Z'); 
-    % Add title
-    title('My FEM Model'); 
-    % View in 3D
-    view(45, 35.264); 
-    % view(0,0); 
-    % Use equal scaling
-    axis equal; 
-    % Add light
-    camlight('headlight');
-    % Use gouraud lighting
-    lighting gouraud;
-    hold off;
-    % 捕获当前帧
-    frame = getframe(hFigure);
-    % 写入当前帧
-    writeVideo(v,frame);
-    disp(k1)
-end
-
-% 关闭VideoWriter对象
-close(v);
-
 
 %% 4 知道荷载位置反算荷载大小
 % Augmented Kalman Filter with latent force model
@@ -293,7 +158,7 @@ pa_history = P_k_k;
 
 x_filt_original = xa_history(1:ns, :);
 x_filt = modal2physical(xa_history(1:ns, :), phi);
-Px_filt = abs([phi, zeros(size(phi)); zeros(size(phi)), phi]) * pa_history(1:ns, :);
+% Px_filt = abs([phi, zeros(size(phi)); zeros(size(phi)), phi]) * pa_history(1:ns, :);
 H_d = H_c;
 p_filt = H_d * xa_history(ns + 1:end, :);
 Pp_filt = H_d * pa_history(ns + 1:end, :);
@@ -374,7 +239,7 @@ loc_acc_v = [25; 50; 75];
 loc_vel_v = [25; 50; 75];
 loc_dis_v = [25; 50; 75];
 
-[S_a_v, S_v_v, S_d_v, n_sensors_v] = sensor_selection(loc_acc_v, loc_vel_v, loc_dis_v, node_loc, phi);
+[S_a_v, S_v_v, S_d_v, n_sensors_v] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data);
 
 G_c_v = [S_d_v * phi - S_a_v * phi * omega2, S_v_v * phi - S_a_v * phi * Gamma];
 J_c_v = [S_a_v * phi * phi' * S_p];
@@ -386,12 +251,58 @@ h_hat_true = G_c_v * xn_true + J_c_v * p;
 
 if fig_bool == ON
 
-    for k1 = 1:nmodes
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        plot(node_loc,mode_deck_re(:,k1),'Color', 'r', 'LineWidth', lineWidthThin)
-        xlabel('location(m)')
-        ylabel('modal_shape')
-    end
+
+    % plot modal shape
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % Define color, point size and marker for scatter plot
+    color = 'b'; % Color blue
+    marker = 'o'; % Circle marker
+    size = 15; % Size of marker
+    % scatter3(nodes_info.X, nodes_info.Y, nodes_info.Z, size, color, marker, 'filled'); % scatter plot for nodes
+    hold on
+    % scatter3(node_modal_shape(:,2),node_modal_shape(:,3),node_modal_shape(:,4), size, color, marker, 'filled'); % scatter plot for nodes
+    % Create a scatter plot using displacementMagnitude as color data
+    scatterHandle = scatter3(node_modal_shape_plot(:,2), node_modal_shape_plot(:,3), node_modal_shape_plot(:,4), size, nodes_displacementMagnitude, marker, 'filled');
+    
+    % Apply a colormap
+    colormap(jet);  % or use another colormap if you prefer
+    
+    % Add a colorbar
+    colorbar;
+    
+    % If needed, you can set the limits of the color scale
+    % caxis([minDisplacement, maxDisplacement]);  % replace with actual min and max if needed
+    
+    % Define line color for beams
+    beamColor = 'k'; % Black color
+    hold on; % hold current plot
+    % Plot each beam
+    % Plot all lines at once
+    line(X_modal_shape, Y_modal_shape, Z_modal_shape, 'Color', beamColor, 'LineWidth', lineWidthThin);
+    % Add grids
+    grid on;  
+    % Add labels to each axis
+    xlabel('X'); ylabel('Y'); zlabel('Z'); 
+    % Add title
+    title('My FEM Model'); 
+    % View in 3D
+    view(45, 35.264); 
+    % view(0,0); 
+    % Use equal scaling
+    axis equal; 
+    % Add light
+    camlight('headlight');
+    % Use gouraud lighting
+    lighting gouraud;
+    hold off;
+
+
+%     for k1 = 1:nmodes
+%         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%         plot(node_loc,mode_deck_re(:,k1),'Color', 'r', 'LineWidth', lineWidthThin)
+%         xlabel('location(m)')
+%         ylabel('modal_shape')
+%     end
     
 
 
@@ -507,7 +418,7 @@ if fig_bool == ON
         ylabel('force (N)')
         legend('filtered', 'true', 'Location', 'northwest')
         title(['p', num2str(k1)]);
-        ylim([-200, 200])
+        ylim([-100000, 100000])
     end
 
     set(hFigure, 'name', 'estimate force', 'Numbertitle', 'off');
@@ -578,7 +489,7 @@ function node = FindNodewithLocation(loc, node_loc,nodeondeck)
     node = nodeondeck(node_seq,:);
 end
 
-function [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck)
+function [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data)
 
     if ~isempty(loc_acc)
         acc_node = FindNodewithLocation(loc_acc, node_loc,nodeondeck);
@@ -604,6 +515,9 @@ function [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis
     n_acc = length(acc_node_list);
     n_vel = length(vel_node_list);
     n_dis = length(dis_node_list);
+    acc_matrix_seq = node2matrixseq(acc_node_list,Mapping_data);
+    vel_matrix_seq = node2matrixseq(vel_node_list,Mapping_data);
+    dis_matrix_seq = node2matrixseq(dis_node_list,Mapping_data);
 
     n_sensors = n_acc + n_vel + n_dis;
 
@@ -615,11 +529,11 @@ function [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis
     for k1 = 1:n_sensors
 
         if k1 <= n_acc
-            S_a(k1, acc_node_list(k1)) = 1;
+            S_a(k1, acc_matrix_seq(k1)) = 1;
         elseif k1 <= n_acc + n_vel
-            S_v(k1, vel_node_list(k1 - n_acc)) = 1;
+            S_v(k1, vel_matrix_seq(k1 - n_acc)) = 1;
         else
-            S_d(k1, dis_node_list(k1 - n_acc - n_vel)) = 1;
+            S_d(k1, dis_matrix_seq(k1 - n_acc - n_vel)) = 1;
         end
 
     end
@@ -702,4 +616,13 @@ function [P]=quasiperiod_force(lambda,sigma_p,f,dt,t)
         P(:,k1) = H_d * s(:,k1);
     end
     P=rescale(P)-0.5;
+end
+
+function matrix_seq=node2matrixseq(node_list,KMmapping)
+    UYNode=KMmapping.Node(KMmapping.DOF == 'UY');
+    UYMatrix=KMmapping.MatrixEqn(KMmapping.DOF == 'UY');
+    for k1 = 1:length(node_list)
+        indices(k1) = find(UYNode==node_list(k1));
+    end
+    matrix_seq = UYMatrix(indices);
 end
