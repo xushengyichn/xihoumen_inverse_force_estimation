@@ -152,7 +152,7 @@ yn_a = yn;
 x_ak = zeros(ns + np * (2), 1);
 P_ak = 10 ^ (1) * eye(ns + np * (2));
 [x_k_k, x_k_kmin, P_k_k, P_k_kmin] = KalmanFilterNoInput(A_a, G_a, Q_a, R_a, yn_a, x_ak, P_ak);
-[x_k_k, P_k_k] = RTSFixedInterval(A_a, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
+% [x_k_k, P_k_k] = RTSFixedInterval(A_a, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
 xa_history = x_k_k;
 pa_history = P_k_k;
 
@@ -208,7 +208,7 @@ P_ak = 10 ^ (1) * eye(ns + np_m * (2));
 
 % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
 [x_k_k, x_k_kmin, P_k_k, P_k_kmin] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak);
-[x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
+% [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
 xa_history = x_k_k;
 pa_history = P_k_k;
 
@@ -556,7 +556,14 @@ function [xn, yn, xn_true] = CalResponse(A_d, B_d, G_d, J_d, p, Q, R, N, x0, ns,
 end
 
 function x = modal2physical(xn, phi)
-    x = [phi, zeros(size(phi)); zeros(size(phi)), phi] * xn;
+%     x = [phi, zeros(size(phi)); zeros(size(phi)), phi] * xn;
+    xn_top = xn(1:end/2, :);
+    xn_bottom = xn(end/2+1:end, :);
+    
+    x_part_top = phi * xn_top;
+    x_part_bottom = phi * xn_bottom;
+    
+    x = [x_part_top; x_part_bottom];
 end
 
 function [F_c, L_c, H_c, sigma_w12] = ssmod_quasiperiod_coninue(lambdas, sigma_ps, omega_0, np)
