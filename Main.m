@@ -47,7 +47,7 @@ omega = diag(2*pi*Freq);
 CC_eq = 2.*MM_eq.*omega.*zeta;
 
 %% 2 生成计算荷载
-T = 300; dt = 0.01; fs = 1 / dt; t = 0:dt:T;
+T = 500; dt = 0.01; fs = 1 / dt; t = 0:dt:T;
 
 % Create force
 lambda = 0.001; sigma_p_2 = 1; sigma_p = sqrt(sigma_p_2); f1 = Freq(1); A1 = 1000000;
@@ -106,27 +106,25 @@ R =10 ^ (-6) * eye(n_sensors);
 S = zeros(ns, n_sensors);
 x0 = zeros(ns, 1);
 [xn, yn, xn_true] = CalResponse(A_d, B_d, G_d, J_d, p, Q, R, N, x0, ns, n_sensors);
-x = modal2physical(xn, phi);
-x_true = modal2physical(xn_true, phi);
+% x = modal2physical(xn, phi);
+% x_true = modal2physical(xn_true, phi);
+% 
+% 
+% % 绘制位移图
+% [X,Y,Z,nodes,elements]=plot_FEM('nodes.txt','elements.txt');
+% 
+% output = ImportMK(100, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt');
+% node_modal_shape=[nodes.NODE, nodes.X, nodes.Y, nodes.Z];
+% 
+% 
+% 
+% x_dis = x(1:end/2,7001);
+% x_dis_plot=x_dis*5000;
+% 
+% [node_modal_shape_plot,nodes_displacement,nodes_displacementMagnitude,X_modal_shape,Y_modal_shape,Z_modal_shape]= update_node(node_modal_shape,x_dis_plot,Mapping_data,elements);
+% 
 
-
-% 绘制位移图
-[X,Y,Z,nodes,elements]=plot_FEM('nodes.txt','elements.txt');
-
-output = ImportMK(100, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt');
-node_modal_shape=[nodes.NODE, nodes.X, nodes.Y, nodes.Z];
-
-
-% x_dis = std(x(1:end/2,:),0,2);
-% x_dis_plot =x_dis/max(x_dis)*50;
-
-x_dis = x(1:end/2,7001);
-x_dis_plot=x_dis*5000;
-
-[node_modal_shape_plot,nodes_displacement,nodes_displacementMagnitude,X_modal_shape,Y_modal_shape,Z_modal_shape]= update_node(node_modal_shape,x_dis_plot,Mapping_data,elements);
-
-
-
+x_dis = modal2physical_node(xn,phi,[4128 5128],Mapping_data);
 % 
 % 
 
@@ -152,12 +150,12 @@ yn_a = yn;
 x_ak = zeros(ns + np * (2), 1);
 P_ak = 10 ^ (1) * eye(ns + np * (2));
 [x_k_k, x_k_kmin, P_k_k, P_k_kmin] = KalmanFilterNoInput(A_a, G_a, Q_a, R_a, yn_a, x_ak, P_ak);
-[x_k_k, P_k_k] = RTSFixedInterval(A_a, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
+% [x_k_k, P_k_k] = RTSFixedInterval(A_a, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
 xa_history = x_k_k;
 pa_history = P_k_k;
 
 x_filt_original = xa_history(1:ns, :);
-x_filt = modal2physical(xa_history(1:ns, :), phi);
+% x_filt = modal2physical(xa_history(1:ns, :), phi);
 % Px_filt = abs([phi, zeros(size(phi)); zeros(size(phi)), phi]) * pa_history(1:ns, :);
 H_d = H_c;
 p_filt = H_d * xa_history(ns + 1:end, :);
@@ -208,7 +206,7 @@ P_ak = 10 ^ (1) * eye(ns + np_m * (2));
 
 % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
 [x_k_k, x_k_kmin, P_k_k, P_k_kmin] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak);
-[x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
+% [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
 xa_history = x_k_k;
 pa_history = P_k_k;
 
@@ -252,58 +250,58 @@ h_hat_true = G_c_v * xn_true + J_c_v * p;
 if fig_bool == ON
 
 
-    % plot modal shape
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    % Define color, point size and marker for scatter plot
-    color = 'b'; % Color blue
-    marker = 'o'; % Circle marker
-    size = 15; % Size of marker
-    % scatter3(nodes_info.X, nodes_info.Y, nodes_info.Z, size, color, marker, 'filled'); % scatter plot for nodes
-    hold on
-    % scatter3(node_modal_shape(:,2),node_modal_shape(:,3),node_modal_shape(:,4), size, color, marker, 'filled'); % scatter plot for nodes
-    % Create a scatter plot using displacementMagnitude as color data
-    scatterHandle = scatter3(node_modal_shape_plot(:,2), node_modal_shape_plot(:,3), node_modal_shape_plot(:,4), size, nodes_displacementMagnitude, marker, 'filled');
-    
-    % Apply a colormap
-    colormap(jet);  % or use another colormap if you prefer
-    
-    % Add a colorbar
-    colorbar;
-    
-    % If needed, you can set the limits of the color scale
-    % caxis([minDisplacement, maxDisplacement]);  % replace with actual min and max if needed
-    
-    % Define line color for beams
-    beamColor = 'k'; % Black color
-    hold on; % hold current plot
-    % Plot each beam
-    % Plot all lines at once
-    line(X_modal_shape, Y_modal_shape, Z_modal_shape, 'Color', beamColor, 'LineWidth', lineWidthThin);
-    % Add grids
-    grid on;  
-    % Add labels to each axis
-    xlabel('X'); ylabel('Y'); zlabel('Z'); 
-    % Add title
-    title('My FEM Model'); 
-    % View in 3D
-    view(45, 35.264); 
-    % view(0,0); 
-    % Use equal scaling
-    axis equal; 
-    % Add light
-    camlight('headlight');
-    % Use gouraud lighting
-    lighting gouraud;
-    hold off;
-
-
-%     for k1 = 1:nmodes
-%         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-%         plot(node_loc,mode_deck_re(:,k1),'Color', 'r', 'LineWidth', lineWidthThin)
-%         xlabel('location(m)')
-%         ylabel('modal_shape')
-%     end
-    
+%     % plot modal shape
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%     % Define color, point size and marker for scatter plot
+%     color = 'b'; % Color blue
+%     marker = 'o'; % Circle marker
+%     size = 15; % Size of marker
+%     % scatter3(nodes_info.X, nodes_info.Y, nodes_info.Z, size, color, marker, 'filled'); % scatter plot for nodes
+%     hold on
+%     % scatter3(node_modal_shape(:,2),node_modal_shape(:,3),node_modal_shape(:,4), size, color, marker, 'filled'); % scatter plot for nodes
+%     % Create a scatter plot using displacementMagnitude as color data
+%     scatterHandle = scatter3(node_modal_shape_plot(:,2), node_modal_shape_plot(:,3), node_modal_shape_plot(:,4), size, nodes_displacementMagnitude, marker, 'filled');
+% 
+%     % Apply a colormap
+%     colormap(jet);  % or use another colormap if you prefer
+% 
+%     % Add a colorbar
+%     colorbar;
+% 
+%     % If needed, you can set the limits of the color scale
+%     % caxis([minDisplacement, maxDisplacement]);  % replace with actual min and max if needed
+% 
+%     % Define line color for beams
+%     beamColor = 'k'; % Black color
+%     hold on; % hold current plot
+%     % Plot each beam
+%     % Plot all lines at once
+%     line(X_modal_shape, Y_modal_shape, Z_modal_shape, 'Color', beamColor, 'LineWidth', lineWidthThin);
+%     % Add grids
+%     grid on;  
+%     % Add labels to each axis
+%     xlabel('X'); ylabel('Y'); zlabel('Z'); 
+%     % Add title
+%     title('My FEM Model'); 
+%     % View in 3D
+%     view(45, 35.264); 
+%     % view(0,0); 
+%     % Use equal scaling
+%     axis equal; 
+%     % Add light
+%     camlight('headlight');
+%     % Use gouraud lighting
+%     lighting gouraud;
+%     hold off;
+% 
+% 
+% %     for k1 = 1:nmodes
+% %         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% %         plot(node_loc,mode_deck_re(:,k1),'Color', 'r', 'LineWidth', lineWidthThin)
+% %         xlabel('location(m)')
+% %         ylabel('modal_shape')
+% %     end
+% 
 
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -557,6 +555,13 @@ end
 
 function x = modal2physical(xn, phi)
     x = [phi, zeros(size(phi)); zeros(size(phi)), phi] * xn;
+end
+
+function x = modal2physical_node(xn, phi, node_list,KMmapping)
+    % 节点在matrix中的编号
+    matrixseq=node2matrixseq(node_list,KMmapping);
+    phi_trim = phi(matrixseq,:);
+    x = [phi_trim, zeros(size(phi_trim)); zeros(size(phi_trim)), phi_trim] * xn;
 end
 
 function [F_c, L_c, H_c, sigma_w12] = ssmod_quasiperiod_coninue(lambdas, sigma_ps, omega_0, np)
