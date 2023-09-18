@@ -554,7 +554,14 @@ function [xn, yn, xn_true] = CalResponse(A_d, B_d, G_d, J_d, p, Q, R, N, x0, ns,
 end
 
 function x = modal2physical(xn, phi)
-    x = [phi, zeros(size(phi)); zeros(size(phi)), phi] * xn;
+%     x = [phi, zeros(size(phi)); zeros(size(phi)), phi] * xn;
+    xn_top = xn(1:end/2, :);
+    xn_bottom = xn(end/2+1:end, :);
+    
+    x_part_top = phi * xn_top;
+    x_part_bottom = phi * xn_bottom;
+    
+    x = [x_part_top; x_part_bottom];
 end
 
 function x = modal2physical_node(xn, phi, node_list,KMmapping)
