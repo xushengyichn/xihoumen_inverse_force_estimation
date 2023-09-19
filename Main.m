@@ -421,12 +421,12 @@ if fig_bool == ON
         f_upper_bound = p_filt(k1, :) + sqrt(Pp_filt(k1, k1, :));
         f_lower_bound = p_filt(k1, :) - sqrt(Pp_filt(k1, k1, :));
         f_fill = [f_upper_bound(1:NN), fliplr(f_lower_bound(1:NN))];
-        fill(t_fill, f_fill, 'r', 'FaceAlpha', 0.3, 'EdgeColor', 'none')
+        % fill(t_fill, f_fill, 'r', 'FaceAlpha', 0.3, 'EdgeColor', 'none')
         xlabel('time (s)')
         ylabel('force (N)')
         legend('filtered', 'true', 'Location', 'northwest')
         title(['p', num2str(k1)]);
-        ylim([-100000, 100000])
+        % ylim([-100000, 100000])
     end
 
     set(hFigure, 'name', 'estimate force', 'Numbertitle', 'off');
