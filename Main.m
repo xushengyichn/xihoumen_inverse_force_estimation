@@ -29,6 +29,7 @@ figureIdx = 0;
 % 0 number of modes to consider
 
 modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+% modesel= [2];
 nmodes = length(modesel);
 ns = nmodes * 2;
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt','modesel',modesel);
@@ -47,11 +48,12 @@ omega = diag(2*pi*Freq);
 CC_eq = 2.*MM_eq.*omega.*zeta;
 
 %% 2 生成计算荷载
-T = 500; dt = 0.01; fs = 1 / dt; t = 0:dt:T;
+T = 1000; dt = 0.01; fs = 1 / dt; t = 0:dt:T;
 
 % Create force
 lambda = 0.001; sigma_p_2 = 1; sigma_p = sqrt(sigma_p_2); f1 = Freq(1); A1 = 1000000;
 [P] = quasiperiod_force(lambda, sigma_p, f1, dt, t);
+
 
 
 % 更简化的荷载测试用代码
@@ -65,6 +67,7 @@ loc_p = [1500];
 
 % 确定荷载位置和对应振型大小
 p_node = FindNodewithLocation(loc_p, node_loc,nodeondeck);
+% p_node = p_node(1)
 p_node_list = p_node(:);
 p_matrix_seq = node2matrixseq(p_node_list,Mapping_data);
 % 计算荷载数量
@@ -72,6 +75,12 @@ np  = size(p_node(:) , 1);
 
 p = A1 * P;
 p = repmat(p,np,1);
+
+% [P2] = quasiperiod_force(lambda, sigma_p, f1*2, dt, t);
+% p2 = A1 * P2;
+% p = repmat(p,np/2,1);
+% p2 = repmat(p2,np/2,1);
+% p = [p;p2];
 %% 3 响应计算
 % establish continuous time matrices
 phi = mode_vec; %模态向量 每一列是一个模态
@@ -83,15 +92,16 @@ omega2 = K;
 S_p = zeros(size(phi, 1), np);
 
 
+p_matrix_seq_list=node2matrixseq(p_node_list,Mapping_data);
 for k1 = 1:np
-    S_p(p_node_list(k1), k1) = 1;
+    S_p(p_matrix_seq_list(k1), k1) = 1;
 end
 
 % accelerometer location
 % loc_acc = [1000,1500,1700];
 loc_acc = [1000,1500,1700];
-loc_vel = [1000,1500,1700];
-loc_dis = [1000,1500,1700];
+loc_vel = [];
+loc_dis = [];
 [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data);
 % establish continuous time matrices
 [A_c, B_c, G_c, J_c] = ssmod_c(nmodes, np, omega2, Gamma, phi, S_p, S_a, S_v, S_d);
@@ -124,7 +134,7 @@ x0 = zeros(ns, 1);
 % [node_modal_shape_plot,nodes_displacement,nodes_displacementMagnitude,X_modal_shape,Y_modal_shape,Z_modal_shape]= update_node(node_modal_shape,x_dis_plot,Mapping_data,elements);
 % 
 
-x_dis = modal2physical_node(xn,phi,[4128 5128],Mapping_data);
+% x_dis = modal2physical_node(xn,phi,[4128 5128],Mapping_data);
 % 
 % 
 
@@ -161,10 +171,10 @@ H_d = H_c;
 p_filt = H_d * xa_history(ns + 1:end, :);
 Pp_filt = H_d * pa_history(ns + 1:end, :);
 
-% 滤波
-f_low = 0.95 * f1;
-f_high = 1.05 * f1;
-p_filt = bandpass(p_filt, [f_low f_high], fs);
+% % 滤波
+% f_low = 0.95 * f1;
+% f_high = 1.05 * f1;
+% p_filt = bandpass(p_filt, [f_low f_high], fs);
 
 % 分析预测荷载频率
 fs = 1 / dt;
@@ -214,12 +224,12 @@ H_d_m = H_c_m;
 p_filt_m = H_d_m * xa_history(ns + 1:end, :);
 Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
 
-% 滤波
-f_low = 0.95 * f1;
-f_high = 1.05 * f1;
-p_filt_m(1, :) = bandpass(p_filt_m(1, :), [f_low f_high], fs);
-p_filt_m(2, :) = bandpass(p_filt_m(2, :), [f_low f_high], fs);
-p_filt_m(3, :) = bandpass(p_filt_m(3, :), [f_low f_high], fs);
+% % 滤波
+% f_low = 0.95 * f1;
+% f_high = 1.05 * f1;
+% p_filt_m(1, :) = bandpass(p_filt_m(1, :), [f_low f_high], fs);
+% p_filt_m(2, :) = bandpass(p_filt_m(2, :), [f_low f_high], fs);
+% p_filt_m(3, :) = bandpass(p_filt_m(3, :), [f_low f_high], fs);
 
 % 分析预测模态力频率
 for k1 = 1:nmodes
@@ -337,36 +347,36 @@ if fig_bool == ON
     title("acc at "+num2str(loc_acc_v(3)));
     set(hFigure, 'name', 'estimate acceleration', 'Numbertitle', 'off');
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    subplot(1, 3, 1)
-    hLineObj = plot(t, h_hat(7, :), 'Color', 'r');
-    set(hLineObj, 'LineWidth', lineWidthThin);
-    hold on
-    hLineObj = plot(t, h_hat_true(7, :), 'Color', 'b', 'LineStyle', '--');
-    set(hLineObj, 'LineWidth', lineWidthThin);
-    xlabel('time (s)')
-    ylabel('displacement (m)')
-    legend('filtered', 'true', 'Location', 'northwest')
-    title("dis at "+num2str(loc_dis_v(1)));
-    subplot(1, 3, 2)
-    hLineObj = plot(t, h_hat(8, :), 'Color', 'r');
-    hold on
-    hLineObj = plot(t, h_hat_true(8, :), 'Color', 'b', 'LineStyle', '--');
-    set(gca, 'FontSize', 12)
-    xlabel('time (s)')
-    ylabel('displacement (m)')
-    legend('filtered', 'true', 'Location', 'northwest')
-    title("dis at "+num2str(loc_dis_v(2)));
-    subplot(1, 3, 3)
-    hLineObj = plot(t, h_hat(9, :), 'Color', 'r');
-    hold on
-    hLineObj = plot(t, h_hat_true(9, :), 'Color', 'b', 'LineStyle', '--');
-    set(gca, 'FontSize', 12)
-    xlabel('time (s)')
-    ylabel('displacement (m)')
-    legend('filtered', 'true', 'Location', 'northwest')
-    title("dis at "+num2str(loc_dis_v(3)));
-    set(hFigure, 'name', 'estimate displacement', 'Numbertitle', 'off');
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%     subplot(1, 3, 1)
+%     hLineObj = plot(t, h_hat(7, :), 'Color', 'r');
+%     set(hLineObj, 'LineWidth', lineWidthThin);
+%     hold on
+%     hLineObj = plot(t, h_hat_true(7, :), 'Color', 'b', 'LineStyle', '--');
+%     set(hLineObj, 'LineWidth', lineWidthThin);
+%     xlabel('time (s)')
+%     ylabel('displacement (m)')
+%     legend('filtered', 'true', 'Location', 'northwest')
+%     title("dis at "+num2str(loc_dis_v(1)));
+%     subplot(1, 3, 2)
+%     hLineObj = plot(t, h_hat(8, :), 'Color', 'r');
+%     hold on
+%     hLineObj = plot(t, h_hat_true(8, :), 'Color', 'b', 'LineStyle', '--');
+%     set(gca, 'FontSize', 12)
+%     xlabel('time (s)')
+%     ylabel('displacement (m)')
+%     legend('filtered', 'true', 'Location', 'northwest')
+%     title("dis at "+num2str(loc_dis_v(2)));
+%     subplot(1, 3, 3)
+%     hLineObj = plot(t, h_hat(9, :), 'Color', 'r');
+%     hold on
+%     hLineObj = plot(t, h_hat_true(9, :), 'Color', 'b', 'LineStyle', '--');
+%     set(gca, 'FontSize', 12)
+%     xlabel('time (s)')
+%     ylabel('displacement (m)')
+%     legend('filtered', 'true', 'Location', 'northwest')
+%     title("dis at "+num2str(loc_dis_v(3)));
+%     set(hFigure, 'name', 'estimate displacement', 'Numbertitle', 'off');
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
@@ -633,8 +643,13 @@ end
 function matrix_seq=node2matrixseq(node_list,KMmapping)
     UYNode=KMmapping.Node(KMmapping.DOF == 'UY');
     UYMatrix=KMmapping.MatrixEqn(KMmapping.DOF == 'UY');
+    indices=[];
     for k1 = 1:length(node_list)
         indices(k1) = find(UYNode==node_list(k1));
     end
-    matrix_seq = UYMatrix(indices);
+    if isempty(indices)
+        matrix_seq=[];
+    else
+        matrix_seq = UYMatrix(indices);
+    end
 end
