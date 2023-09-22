@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com Date:
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-07-29 22:42:26
+%LastEditTime: 2023-09-22 21:44:02
 %Description: 计算简支梁施加荷载后的动力响应，并反算出荷载（分别按照集中力和模态力反算）
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -36,10 +36,19 @@ sigma_ps_m_list = linspace(1,100,50);
 [X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 
-numIterations = 2500;
-ppm = ParforProgressbar(numIterations);
+numIterations = size(combinations,1);
 
-parfor k1 = 1:size(combinations,1)
+if isempty(gcp('nocreate'))
+    parpool();
+end
+
+b = ProgressBar(numIterations, ...
+    'IsParallel', true, ...
+    'WorkerDirectory', pwd(), ...
+    'Title', 'Parallel 2' ...
+    );
+b.setup([], [], []);
+parfor k1 = 1:numIterations
     lambdas_m = [combinations(k1,1)] * ones(1, np_m);
     sigma_ps_m = [combinations(k1,2)] * ones(1, np_m);
 
@@ -48,11 +57,11 @@ parfor k1 = 1:size(combinations,1)
     logSk(k1) = result.logSk;
     logek(k1)=result.logek;
 
-
-    ppm.increment();
+    % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
+    updateParallel([], pwd);
 end
 
-delete(ppm);
+b.release();
 
 Z_1 = reshape(logL, 50, 50);
 Z_2 = reshape(logSk, 50, 50);
