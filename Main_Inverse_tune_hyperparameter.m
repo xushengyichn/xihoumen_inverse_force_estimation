@@ -58,7 +58,7 @@ Z_1 = reshape(logL, 50, 50);
 Z_2 = reshape(logSk, 50, 50);
 Z_3 = reshape(logek, 50, 50);
 
-
+save tune_hyperparameter_result
 
 %% plot
 
