@@ -67,9 +67,9 @@ acc_names=["主跨1/4","主跨1/2","主跨3/4"];
 % vibac3_data=read_vib_data(vibac3_name);
 % vibac4_data=read_vib_data(vibac4_name);
 vibration_data = importdata("vibration_data.mat");
-vibac2_data = vibration_data.vibac2_data;
-vibac3_data = vibration_data.vibac3_data;
-vibac4_data = vibration_data.vibac4_data;
+vibac2_data = vibration_data.vibac2_data/1000*9.8;
+vibac3_data = vibration_data.vibac3_data/1000*9.8;
+vibac4_data = vibration_data.vibac4_data/1000*9.8;
 
 
 dt = vibac2_data(2,1)-vibac2_data(1,1);

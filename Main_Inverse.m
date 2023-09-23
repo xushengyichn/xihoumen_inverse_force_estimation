@@ -13,6 +13,7 @@ addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
 addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
 addpath(genpath("F:\git\Function_shengyi_package"))
 addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
+addpath(genpath("D:\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
 
 subStreamNumberDefault = 2132;
 run('InitScript.m');
@@ -80,9 +81,9 @@ vibac2_name=["2013-02-06 00-vibac2.txt";"2013-02-06 01-vibac2.txt";"2013-02-06 0
 vibac3_name=["2013-02-06 00-VIBac3.txt";"2013-02-06 01-VIBac3.txt";"2013-02-06 02-VIBac3.txt"];
 vibac4_name=["2013-02-06 00-VIBac4.txt";"2013-02-06 01-VIBac4.txt";"2013-02-06 02-VIBac4.txt"];
 acc_names=["主跨1/4","主跨1/2","主跨3/4"];
-vibac2_data=read_vib_data(vibac2_name);
-vibac3_data=read_vib_data(vibac3_name);
-vibac4_data=read_vib_data(vibac4_name);
+vibac2_data=read_vib_data(vibac2_name)/1000*9.8;
+vibac3_data=read_vib_data(vibac3_name)/1000*9.8;
+vibac4_data=read_vib_data(vibac4_name)/1000*9.8;
 
 
 dt = vibac2_data(2,1)-vibac2_data(1,1);
@@ -136,9 +137,9 @@ J_c_m = [S_a * phi];
 B_d_m = A_c \ (A_d - eye(size(A_d))) * B_c_m;
 J_d_m = J_c_m;
 
-lambdas_m = [0.01] * ones(1, np_m);
+lambdas_m = [1e2] * ones(1, np_m);
 
-sigma_ps_m = [100] * ones(1, np_m);
+sigma_ps_m = [20] * ones(1, np_m);
 
 [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
@@ -221,7 +222,23 @@ if fig_bool == ON
     set(gca, 'FontSize', 12)
     legend('filtered modal force', 'Location', 'northwest')
     title([acc_names(k1)]);
-    ylim([-75, 75])
+    ylim([-75, 75]/1000*9.8)
+    end
+
+    for k1 = 1:length(acc_names)
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+
+    % subplot(1, nmodes, k1)
+    plot(t, h_hat(2*k1-1, :), 'Color', 'r')
+    hold on
+    plot(t, h_hat(2*k1, :), 'Color', 'b')
+
+    xlabel('time (s)')
+    ylabel('acc (1e-3*g)')
+    set(gca, 'FontSize', 12)
+    legend('filtered modal force', 'Location', 'northwest')
+    title([acc_names(k1)]);
+    ylim([-75, 75]/1000*9.8)
     end
 
     for k1 = 1:length(acc_names)
@@ -237,42 +254,42 @@ if fig_bool == ON
         set(gca, 'FontSize', 12)
         legend('filtered modal force', 'Location', 'northwest')
         title([acc_names(k1)]+"重构");
-        ylim([-75, 75])
+        ylim([-75, 75]/1000*9.8)
     end
-
-    for k1 = 1:nmodes
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-        % subplot(1, nmodes, k1)
-        plot(t, p_filt_m(k1, :), 'Color', 'r')
-        hold on
-        %         plot(t, p_m_real(k1, :), 'Color', 'b', 'LineStyle', '--')
-        xlabel('time (s)')
-        ylabel('Modal force (N)')
-        set(gca, 'FontSize', 12)
-        legend('filtered modal force', 'Location', 'northwest')
-        title(['mode ', num2str(modesel(k1))]);
-        ylim([-1e5, 1e5])
-    end
-
-    set(hFigure, 'name', 'modal force estimation', 'Numbertitle', 'off');
-
-    for k1 = 1:nmodes
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        % subplot(1, nmodes, k1)
-        plot(f_p_filt_m(k1, :), magnitude_filt_m(k1, :), 'Color', 'r')
-        hold on
-        %         plot(f_p_real_m(k1, :), magnitude_real_m(k1, :), 'Color', 'b', 'LineStyle', '--')
-        xlabel('frequency (Hz)')
-        ylabel('magnitude (N)')
-        set(gca, 'FontSize', 12)
-        legend('filtered modal force frequency', 'Location', 'northwest')
-        title(['mode ', num2str(modesel(k1))]);
-        xlim([0, 3])
-        % ylim([0, 50])
-    end
-
-    set(hFigure, 'name', 'filtered modal force frequency', 'Numbertitle', 'off');
+% 
+%     for k1 = 1:nmodes
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% 
+%         % subplot(1, nmodes, k1)
+%         plot(t, p_filt_m(k1, :), 'Color', 'r')
+%         hold on
+%         %         plot(t, p_m_real(k1, :), 'Color', 'b', 'LineStyle', '--')
+%         xlabel('time (s)')
+%         ylabel('Modal force (N)')
+%         set(gca, 'FontSize', 12)
+%         legend('filtered modal force', 'Location', 'northwest')
+%         title(['mode ', num2str(modesel(k1))]);
+%         ylim([-1e5, 1e5]/1000*9.8)
+%     end
+% 
+%     set(hFigure, 'name', 'modal force estimation', 'Numbertitle', 'off');
+% 
+%     for k1 = 1:nmodes
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%         % subplot(1, nmodes, k1)
+%         plot(f_p_filt_m(k1, :), magnitude_filt_m(k1, :), 'Color', 'r')
+%         hold on
+%         %         plot(f_p_real_m(k1, :), magnitude_real_m(k1, :), 'Color', 'b', 'LineStyle', '--')
+%         xlabel('frequency (Hz)')
+%         ylabel('magnitude (N)')
+%         set(gca, 'FontSize', 12)
+%         legend('filtered modal force frequency', 'Location', 'northwest')
+%         title(['mode ', num2str(modesel(k1))]);
+%         xlim([0, 3])
+%         % ylim([0, 50])
+%     end
+% 
+%     set(hFigure, 'name', 'filtered modal force frequency', 'Numbertitle', 'off');
 end
 
 

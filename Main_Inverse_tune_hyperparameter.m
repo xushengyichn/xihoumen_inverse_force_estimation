@@ -30,9 +30,11 @@ figureIdx = 0;
 modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
 nmodes = length(modesel);
 np_m = nmodes;
+n1 = 100;
+n2 = 100;
 
-lambdas_m_list = logspace(-4, 4, 50);
-sigma_ps_m_list = linspace(1,100,50);
+lambdas_m_list = logspace(-2, 2, n1);
+sigma_ps_m_list = linspace(10,1000,n2);
 [X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 
@@ -63,9 +65,9 @@ end
 
 b.release();
 
-Z_1 = reshape(logL, 50, 50);
-Z_2 = reshape(logSk, 50, 50);
-Z_3 = reshape(logek, 50, 50);
+Z_1 = reshape(logL, n2, n1);
+% Z_2 = reshape(logSk, 50, 50);
+% Z_3 = reshape(logek, 50, 50);
 
 save tune_hyperparameter_result
 
@@ -76,7 +78,8 @@ if fig_bool == ON
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
     
-    contour(X, Y, Z);  % 绘制等高线图
+    contourf(X, Y, Z_1);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
     xlabel('lambdas');
     ylabel('sigma_ps');
     colorbar;  % 添加颜色栏
