@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com Date:
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-07-29 22:42:26
+%LastEditTime: 2023-09-25 22:33:43
 %Description: 计算简支梁施加荷载后的动力响应，并反算出荷载（分别按照集中力和模态力反算）
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.

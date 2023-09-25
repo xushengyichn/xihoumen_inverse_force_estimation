@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com Date:
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-09-25 17:03:09
+%LastEditTime: 2023-09-25 22:33:08
 %Description: 计算简支梁施加荷载后的动力响应，并反算出荷载（分别按照集中力和模态力反算）
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -72,11 +72,10 @@ end
 
 b.release();
 
-Z_1 = reshape(logL, n2, n1);
-Z_2 = reshape(logSk, n2, n1);
-Z_3 = reshape(logek, n2, n1);
-Z_4 = reshape(real_vs_reconstruct_mse, n2, n1);
-Z_5 = reshape(real_vs_reconstruct_middle_mse, n2, n1);
+Z_1 = reshape(logL, 50, 50);
+Z_2 = reshape(logSk, 50, 50);
+Z_3 = reshape(logek, 50, 50);
+
 save tune_hyperparameter_result
 
 
@@ -87,33 +86,7 @@ if fig_bool == ON
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
     
-    contourf(X, Y, Z_1);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logL');
-
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_2);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logSk');
-
-
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_3);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logek');
-
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_4);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
+    contour(X, Y, Z);  % 绘制等高线图
     xlabel('lambdas');
     ylabel('sigma_ps');
     colorbar;  % 添加颜色栏

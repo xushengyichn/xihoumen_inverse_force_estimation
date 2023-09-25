@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com Date:
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-07-29 22:42:26
+%LastEditTime: 2023-09-25 22:34:03
 %Description: 计算简支梁施加荷载后的动力响应，并反算出荷载（分别按照集中力和模态力反算）
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -13,6 +13,7 @@ addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
 addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
 addpath(genpath("F:\git\Function_shengyi_package"))
 addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
+addpath(genpath("D:\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
 
 subStreamNumberDefault = 2132;
 run('InitScript.m');
