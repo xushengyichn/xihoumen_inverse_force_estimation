@@ -61,6 +61,7 @@ Gamma = C; % 对应文献中表述的符号
 omega2 = K;
 
 % accelerometer location
+% loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
 loc_acc = [578+1650/4;578+1650/2;578+1650/4*3];
 loc_vel = [];
 loc_dis = [];
@@ -79,7 +80,7 @@ x0 = zeros(ns, 1);
 vibac2_name=["2013-02-06 00-vibac2.txt";"2013-02-06 01-vibac2.txt";"2013-02-06 02-vibac2.txt"];
 vibac3_name=["2013-02-06 00-VIBac3.txt";"2013-02-06 01-VIBac3.txt";"2013-02-06 02-VIBac3.txt"];
 vibac4_name=["2013-02-06 00-VIBac4.txt";"2013-02-06 01-VIBac4.txt";"2013-02-06 02-VIBac4.txt"];
-acc_names=["主跨1/4","主跨1/2","主跨3/4"];
+acc_names=["Main span 1/4","Main span 1/2","Main span 3/4"];
 vibac2_data=read_vib_data(vibac2_name);
 vibac3_data=read_vib_data(vibac3_name);
 vibac4_data=read_vib_data(vibac4_name);
@@ -100,7 +101,7 @@ yn(3,:)=vibac3_data(:,2);
 yn(4,:)=vibac3_data(:,4);
 yn(5,:)=vibac4_data(:,2);
 yn(6,:)=vibac4_data(:,4);
-
+maxvalue = max(max(abs(yn)));
 fs = 1/dt;
 % establish discrete time matrices
 
@@ -136,9 +137,9 @@ J_c_m = [S_a * phi];
 B_d_m = A_c \ (A_d - eye(size(A_d))) * B_c_m;
 J_d_m = J_c_m;
 
-lambdas_m = [0.01] * ones(1, np_m);
+lambdas_m = [1e-2] * ones(1, np_m);
 
-sigma_ps_m = [100] * ones(1, np_m);
+sigma_ps_m = [60] * ones(1, np_m);
 
 [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
@@ -173,13 +174,22 @@ Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
 % p_filt_m(3, :) = bandpass(p_filt_m(3, :), [f_low f_high], fs);
 % p_filt_m(9, :) = bandpass(p_filt_m(9, :), [f_low f_high], fs);
 % 分析预测模态力频率
+
+%% fft and bandpass filter
+
+
 for k1 = 1:nmodes
+    if 0
+        % p_filt_m(k1, :) = fft_filter(fs, p_filt_m(k1, :), [0.15 0.55]);
+        p_filt_m(k1, :) = bandpass(p_filt_m(k1, :), [0.3 0.55], fs);
+    end
     [f_p_filt_m(k1, :), magnitude_filt_m(k1, :)] = fft_transform(fs, p_filt_m(k1, :));
 end
 
 
 %% 6 virtual sensoring
 loc_acc_v = [578+1650/4;578+1650/2;578+1650/4*3];
+% loc_acc_v = [578+1650/4*3;578+1650/2;578+1650/4];
 loc_vel_v = [];
 loc_dis_v = [];
 
@@ -194,6 +204,12 @@ h_hat = G_c_v * x_filt_original + J_c_v * p_filt_m;
 p_reconstruct = p_filt_m;
 % p_reconstruct([1 2 3 4 5 6 7 8 10 11 12 13 14],:)=0;
 [~, yn_reconstruct, ~] = CalResponse(A_d, B_d, G_d, J_d, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
+
+
+seq1 = yn(:);
+seq2 = yn_reconstruct(:);
+mse = immse(seq1, seq2);
+
 
 %% 8 marginal likelihood
 
@@ -217,12 +233,29 @@ if fig_bool == ON
     plot(t, yn(2*k1, :), 'Color', 'b')
 
     xlabel('time (s)')
-    ylabel('acc (1e-3*g)')
+    ylabel('acc (m/s^2)')
     set(gca, 'FontSize', 12)
     legend('filtered modal force', 'Location', 'northwest')
     title([acc_names(k1)]);
-    ylim([-75, 75])
+    ylim([-maxvalue , maxvalue ])
     end
+
+    for k1 = 1:length(acc_names)
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+
+    % subplot(1, nmodes, k1)
+    plot(t, h_hat(2*k1-1, :), 'Color', 'r')
+    hold on
+    plot(t, h_hat(2*k1, :), 'Color', 'b')
+
+    xlabel('time (s)')
+    ylabel('acc (m/s^2)')
+    set(gca, 'FontSize', 12)
+    legend('filtered modal force', 'Location', 'northwest')
+    title([acc_names(k1)]+"filter");
+    ylim([-maxvalue , maxvalue ])
+    end
+
 
     for k1 = 1:length(acc_names)
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -233,12 +266,13 @@ if fig_bool == ON
         plot(t, yn_reconstruct(2*k1, :), 'Color', 'b')
     
         xlabel('time (s)')
-        ylabel('acc (1e-3*g)')
+        ylabel('acc (m/s^2)')
         set(gca, 'FontSize', 12)
         legend('filtered modal force', 'Location', 'northwest')
-        title([acc_names(k1)]+"重构");
-        ylim([-75, 75])
+        title([acc_names(k1)]+"recalculate");
+        ylim([-maxvalue , maxvalue ])
     end
+
 
     for k1 = 1:nmodes
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -248,11 +282,11 @@ if fig_bool == ON
         hold on
         %         plot(t, p_m_real(k1, :), 'Color', 'b', 'LineStyle', '--')
         xlabel('time (s)')
-        ylabel('Modal force (N)')
+        ylabel('Modal force ')
         set(gca, 'FontSize', 12)
         legend('filtered modal force', 'Location', 'northwest')
         title(['mode ', num2str(modesel(k1))]);
-        ylim([-1e5, 1e5])
+        % ylim([-1e3, 1e3])
     end
 
     set(hFigure, 'name', 'modal force estimation', 'Numbertitle', 'off');
@@ -268,7 +302,7 @@ if fig_bool == ON
         set(gca, 'FontSize', 12)
         legend('filtered modal force frequency', 'Location', 'northwest')
         title(['mode ', num2str(modesel(k1))]);
-        xlim([0, 3])
+        xlim([0, 0.5])
         % ylim([0, 50])
     end
 
@@ -506,6 +540,7 @@ function [vibac_data]=read_vib_data(vibac_name)
 vibac_data=[];
 for i=1:length(vibac_name)
     vibac_data_temp=importdata(vibac_name(i));
+    vibac_data_temp(:,2:4)=vibac_data_temp(:,2:4)/1000*9.8;%第一列是是时间，不要修改
     vibac_data=[vibac_data;vibac_data_temp];
 end
 end

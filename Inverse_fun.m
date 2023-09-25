@@ -17,7 +17,7 @@ modesel= modesel;
 % modesel= [23];
 nmodes = length(modesel);
 ns = nmodes * 2;
-Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt','modesel',modesel);
+Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt','modesel',modesel,'showtext',false);
 mode_deck = Result.mode_deck;
 mode_deck_re = Result.mode_deck_re;
 node_loc = Result.node_loc;
@@ -66,18 +66,39 @@ acc_names=["主跨1/4","主跨1/2","主跨3/4"];
 % vibac2_data=read_vib_data(vibac2_name);
 % vibac3_data=read_vib_data(vibac3_name);
 % vibac4_data=read_vib_data(vibac4_name);
-vibration_data = importdata("vibration_data.mat");
-vibac2_data = vibration_data.vibac2_data;
-vibac3_data = vibration_data.vibac3_data;
-vibac4_data = vibration_data.vibac4_data;
+% vibration_data = importdata("vibration_data.mat");
+% vibac2_data = vibration_data.vibac2_data;
+% vibac3_data = vibration_data.vibac3_data;
+% vibac4_data = vibration_data.vibac4_data;
+% 
+% vibac2_data(:,2:4)=vibac2_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+% vibac3_data(:,2:4)=vibac3_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+% vibac4_data(:,2:4)=vibac4_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
 
+
+result = viv2013(4,false);
+
+vibac2_name=result.vibac2_name;
+vibac3_name=result.vibac3_name;
+vibac4_name=result.vibac4_name;
+startDate = result.startDate;
+endDate = result.endDate;
+
+
+vibac2_data=read_vib_data(vibac2_name);
+vibac3_data=read_vib_data(vibac3_name);
+vibac4_data=read_vib_data(vibac4_name);
+
+vibac2_data(:,2:4)=vibac2_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+vibac3_data(:,2:4)=vibac3_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+vibac4_data(:,2:4)=vibac4_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
 
 dt = vibac2_data(2,1)-vibac2_data(1,1);
 
 [f, magnitude] = fft_transform(1/0.02,vibac2_data(:,2));
 [~,seq_temp]= max(magnitude);
 f_max=f(seq_temp);
-disp("Frequency regarding the maximum amplitude:"+num2str(f_max))
+% disp("Frequency regarding the maximum amplitude:"+num2str(f_max))
 % figure
 % plot(f, magnitude)
 omega_0 = 2 * pi * Freq;
@@ -143,7 +164,24 @@ x_ak = zeros(ns + np_m * (2), 1);
 P_ak = 10 ^ (1) * eye(ns + np_m * (2));
 
 % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
-[x_k_k, x_k_kmin, P_k_k, P_k_kmin,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true);
+[x_k_k, ~, ~, ~,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext', false);
+xa_history = x_k_k;
+x_filt_original = xa_history(1:ns, :);
+H_d_m = H_c_m;
+p_filt_m = H_d_m * xa_history(ns + 1:end, :);
+p_reconstruct=p_filt_m;
+[~, yn_reconstruct, ~] = CalResponse(A_d, B_d, G_d, J_d, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
+seq1=yn(:);
+seq2=yn_reconstruct(:);
+
+real_vs_reconstruct_mse = immse(seq1, seq2);
+result.real_vs_reconstruct_mse=real_vs_reconstruct_mse;
+
+seq1_middle=yn(3,:);
+seq2_middle=yn_reconstruct(3,:);
+real_vs_reconstruct_middle_mse = immse(seq1_middle, seq2_middle);
+result.real_vs_reconstruct_middle_mse=real_vs_reconstruct_middle_mse;
+
 % % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
 % xa_history = x_k_k;
 % pa_history = P_k_k;

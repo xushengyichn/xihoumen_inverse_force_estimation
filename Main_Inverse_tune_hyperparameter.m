@@ -1,13 +1,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com Date:
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-09-22 21:44:02
+%LastEditTime: 2023-09-25 17:03:09
 %Description: 计算简支梁施加荷载后的动力响应，并反算出荷载（分别按照集中力和模态力反算）
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clc; clear; close all;
+addpath(genpath("D:\XSY\230923"))
+addpath(genpath("D:\XSY\20230923\230923"))
 addpath(genpath("F:\git\ssm_tools"))
 addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
 addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
@@ -25,14 +27,19 @@ figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 gap_between_images = [0, 0];
 figureIdx = 0;
 
+
+
 %% 1 set hyperparameters
 
-modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+% modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+modesel= [23];
 nmodes = length(modesel);
 np_m = nmodes;
+n1 = 10;
+n2 = 5;
 
-lambdas_m_list = logspace(-4, 4, 50);
-sigma_ps_m_list = linspace(1,100,50);
+lambdas_m_list = logspace(-2,2, n1);
+sigma_ps_m_list = linspace(10,100,n2);
 [X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 
@@ -49,6 +56,7 @@ b = ProgressBar(numIterations, ...
     );
 b.setup([], [], []);
 parfor k1 = 1:numIterations
+% for k1 = 1:numIterations
     lambdas_m = [combinations(k1,1)] * ones(1, np_m);
     sigma_ps_m = [combinations(k1,2)] * ones(1, np_m);
 
@@ -56,18 +64,21 @@ parfor k1 = 1:numIterations
     logL(k1)=result.logL;
     logSk(k1) = result.logSk;
     logek(k1)=result.logek;
-
+    real_vs_reconstruct_mse(k1)=result.real_vs_reconstruct_mse;
+    real_vs_reconstruct_middle_mse(k1)=result.real_vs_reconstruct_middle_mse;
     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
     updateParallel([], pwd);
 end
 
 b.release();
 
-Z_1 = reshape(logL, 50, 50);
-Z_2 = reshape(logSk, 50, 50);
-Z_3 = reshape(logek, 50, 50);
-
+Z_1 = reshape(logL, n2, n1);
+Z_2 = reshape(logSk, n2, n1);
+Z_3 = reshape(logek, n2, n1);
+Z_4 = reshape(real_vs_reconstruct_mse, n2, n1);
+Z_5 = reshape(real_vs_reconstruct_middle_mse, n2, n1);
 save tune_hyperparameter_result
+
 
 %% plot
 
@@ -76,12 +87,45 @@ if fig_bool == ON
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
     
-    contour(X, Y, Z);  % 绘制等高线图
+    contourf(X, Y, Z_1);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
     xlabel('lambdas');
     ylabel('sigma_ps');
     colorbar;  % 添加颜色栏
-    title('Contour Plot');
+    title('logL');
 
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_2);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('lambdas');
+    ylabel('sigma_ps');
+    colorbar;  % 添加颜色栏
+    title('logSk');
+
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_3);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('lambdas');
+    ylabel('sigma_ps');
+    colorbar;  % 添加颜色栏
+    title('logek');
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_4);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('lambdas');
+    ylabel('sigma_ps');
+    colorbar;  % 添加颜色栏
+    title('real_vs_reconstruct_mse');
+
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_5);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('lambdas');
+    ylabel('sigma_ps');
+    colorbar;  % 添加颜色栏
+    title('real_vs_reconstruct_middle_mse');
 end
 
 
