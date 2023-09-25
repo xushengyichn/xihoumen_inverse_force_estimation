@@ -35,15 +35,19 @@ figureIdx = 0;
 modesel= [23];
 nmodes = length(modesel);
 np_m = nmodes;
-n1 = 10;
-n2 = 5;
+n1 = 18;
 
-lambdas_m_list = logspace(-2,2, n1);
-sigma_ps_m_list = linspace(10,100,n2);
-[X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
-combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 
-numIterations = size(combinations,1);
+lambdas_m = [1e-1] * ones(1, np_m);
+
+sigma_ps_m = [80] * ones(1, np_m);
+
+
+omega_percent_list = linspace(-20,20, n1)/100;
+
+
+
+numIterations = length(omega_percent_list);
 
 if isempty(gcp('nocreate'))
     parpool();
@@ -57,79 +61,70 @@ b = ProgressBar(numIterations, ...
 b.setup([], [], []);
 parfor k1 = 1:numIterations
 % for k1 = 1:numIterations
-    lambdas_m = [combinations(k1,1)] * ones(1, np_m);
-    sigma_ps_m = [combinations(k1,2)] * ones(1, np_m);
+    omega_percent = omega_percent_list(k1)
+    
 
-    result= Inverse_fun(lambdas_m,sigma_ps_m,modesel);
+    result=  Inverse_fun_tune_structural_omega(omega_percent,lambdas_m,sigma_ps_m,modesel);
     logL(k1)=result.logL;
     logSk(k1) = result.logSk;
     logek(k1)=result.logek;
     real_vs_reconstruct_mse(k1)=result.real_vs_reconstruct_mse;
     real_vs_reconstruct_middle_mse(k1)=result.real_vs_reconstruct_middle_mse;
+    p_reconstruct_norm(k1)=result.p_reconstruct_norm;
     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
     updateParallel([], pwd);
 end
 
 b.release();
 
-Z_1 = reshape(logL, n2, n1);
-Z_2 = reshape(logSk, n2, n1);
-Z_3 = reshape(logek, n2, n1);
-Z_4 = reshape(real_vs_reconstruct_mse, n2, n1);
-Z_5 = reshape(real_vs_reconstruct_middle_mse, n2, n1);
+% Z_1 = logL;
+% Z_2 = logSk;
+% Z_3 = logek;
 
 save tune_hyperparameter_result
 
 
 %% plot
+
 if fig_bool == ON
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-    
-    contourf(X, Y, Z_1);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
+    plot(omega_percent_list,logL)
+    xlabel('omega_percent');
+    ylabel('logL');
     title('logL');
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_2);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(omega_percent_list,logSk)
+    xlabel('omega_percent');
+    ylabel('logSk');
     title('logSk');
 
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_3);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(omega_percent_list,logek)
+    xlabel('omega_percent');
+    ylabel('logek');
     title('logek');
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_4);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(omega_percent_list,real_vs_reconstruct_mse)
+    xlabel('omega_percent');
+    ylabel('real_vs_reconstruct_mse');
     title('real_vs_reconstruct_mse');
 
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_5);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
+            [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(omega_percent_list,real_vs_reconstruct_middle_mse)
+    xlabel('omega_percent');
+    ylabel('real_vs_reconstruct_middle_mse');
     title('real_vs_reconstruct_middle_mse');
+
+                [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(omega_percent_list,p_reconstruct_norm)
+    xlabel('omega_percent');
+    ylabel('p_reconstruct_norm');
+    title('p_reconstruct_norm');
 end
-
-
-
 
 
 

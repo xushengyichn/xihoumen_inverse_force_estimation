@@ -35,15 +35,23 @@ figureIdx = 0;
 modesel= [23];
 nmodes = length(modesel);
 np_m = nmodes;
-n1 = 10;
-n2 = 5;
 
-lambdas_m_list = logspace(-2,2, n1);
-sigma_ps_m_list = linspace(10,100,n2);
-[X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
+omega_percent=0;
+lambdas_m = [1e-1] * ones(1, np_m);
+sigma_ps_m = [80] * ones(1, np_m);
+
+
+n1 = 10;
+n2 = 10;
+
+Q_list = logspace(-10,-4, n1);
+R_list = logspace(-10,-4, n1);
+
+[X, Y] = meshgrid(Q_list, R_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 
 numIterations = size(combinations,1);
+
 
 if isempty(gcp('nocreate'))
     parpool();
@@ -57,15 +65,18 @@ b = ProgressBar(numIterations, ...
 b.setup([], [], []);
 parfor k1 = 1:numIterations
 % for k1 = 1:numIterations
-    lambdas_m = [combinations(k1,1)] * ones(1, np_m);
-    sigma_ps_m = [combinations(k1,2)] * ones(1, np_m);
+    Q = [combinations(k1,1)] ;
+    R = [combinations(k1,2)] ;
 
-    result= Inverse_fun(lambdas_m,sigma_ps_m,modesel);
+
+    result=Inverse_fun_tune_Q_R(Q,R,omega_percent,lambdas_m,sigma_ps_m,modesel);
+    % result=  Inverse_fun_tune_structural_omega(omega_percent,lambdas_m,sigma_ps_m,modesel);
     logL(k1)=result.logL;
     logSk(k1) = result.logSk;
     logek(k1)=result.logek;
     real_vs_reconstruct_mse(k1)=result.real_vs_reconstruct_mse;
     real_vs_reconstruct_middle_mse(k1)=result.real_vs_reconstruct_middle_mse;
+    % p_reconstruct_norm(k1)=result.p_reconstruct_norm;
     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
     updateParallel([], pwd);
 end
@@ -82,6 +93,7 @@ save tune_hyperparameter_result
 
 
 %% plot
+
 if fig_bool == ON
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -89,16 +101,16 @@ if fig_bool == ON
     
     contourf(X, Y, Z_1);  % 绘制等高线图
     set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
+    xlabel('Q');
+    ylabel('R');
     colorbar;  % 添加颜色栏
     title('logL');
 
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     contourf(X, Y, Z_2);  % 绘制等高线图
     set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
+    xlabel('Q');
+    ylabel('R');
     colorbar;  % 添加颜色栏
     title('logSk');
 
@@ -106,30 +118,28 @@ if fig_bool == ON
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     contourf(X, Y, Z_3);  % 绘制等高线图
     set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
+    xlabel('Q');
+    ylabel('R');
     colorbar;  % 添加颜色栏
     title('logek');
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     contourf(X, Y, Z_4);  % 绘制等高线图
     set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
+    xlabel('Q');
+    ylabel('R');
     colorbar;  % 添加颜色栏
     title('real_vs_reconstruct_mse');
 
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     contourf(X, Y, Z_5);  % 绘制等高线图
     set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
+    xlabel('Q');
+    ylabel('R');
     colorbar;  % 添加颜色栏
     title('real_vs_reconstruct_middle_mse');
+
 end
-
-
-
 
 
 

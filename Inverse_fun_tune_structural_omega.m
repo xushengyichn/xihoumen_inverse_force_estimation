@@ -1,51 +1,34 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com Date:
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-09-25 22:34:03
+%LastEditTime: 2023-09-25 22:33:43
 %Description: 计算简支梁施加荷载后的动力响应，并反算出荷载（分别按照集中力和模态力反算）
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clc; clear; close all;
-addpath(genpath("F:\git\ssm_tools"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-addpath(genpath("F:\git\Function_shengyi_package"))
-addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
-addpath(genpath("D:\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
-
-subStreamNumberDefault = 2132;
-run('InitScript.m');
-
-%% 0 绘图参数
-fig_bool = ON;
-num_figs_in_row = 10; %每一行显示几个图
-figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
-%设置图片间隔
-gap_between_images = [0, 0];
-figureIdx = 0;
-
+function result = Inverse_fun_tune_structural_omega(omega_percent,lambdas_m,sigma_ps_m,modesel)
 %% 1 有限元模型
 % 读入ANSYS梁桥模型质量刚度矩阵  MCK矩阵 Import MCK matrix from ANSYS
 % 将ANSYS中的稀疏矩阵处理为完全矩阵 Handling sparse matrices in ANSYS as full matrices
 % 0 number of modes to consider
 
-% modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-modesel= [23];
+modesel= modesel;
+% modesel= [23];
 nmodes = length(modesel);
 ns = nmodes * 2;
-Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt','modesel',modesel);
+Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt','modesel',modesel,'showtext',false);
 mode_deck = Result.mode_deck;
 mode_deck_re = Result.mode_deck_re;
 node_loc = Result.node_loc;
 Freq = Result.Freq;
+
+Freq  = Freq*(1+omega_percent);
+
 MM_eq = Result.MM_eq;
 KK_eq = Result.KK_eq;
 
-% omega_percent=0;
-% Freq  = Freq*(1+omega_percent);
-% KK_eq = Result.KK_eq*(1+omega_percent)^2;
+KK_eq = Result.KK_eq*(1+omega_percent)^2;
 
 mode_vec = Result.mode_vec;
 nodeondeck = Result.nodeondeck;
@@ -67,7 +50,6 @@ Gamma = C; % 对应文献中表述的符号
 omega2 = K;
 
 % accelerometer location
-% loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
 loc_acc = [578+1650/4;578+1650/2;578+1650/4*3];
 loc_vel = [];
 loc_dis = [];
@@ -86,14 +68,21 @@ x0 = zeros(ns, 1);
 % vibac2_name=["2013-02-06 00-vibac2.txt";"2013-02-06 01-vibac2.txt";"2013-02-06 02-vibac2.txt"];
 % vibac3_name=["2013-02-06 00-VIBac3.txt";"2013-02-06 01-VIBac3.txt";"2013-02-06 02-VIBac3.txt"];
 % vibac4_name=["2013-02-06 00-VIBac4.txt";"2013-02-06 01-VIBac4.txt";"2013-02-06 02-VIBac4.txt"];
-
+acc_names=["主跨1/4","主跨1/2","主跨3/4"];
 % vibac2_data=read_vib_data(vibac2_name);
 % vibac3_data=read_vib_data(vibac3_name);
 % vibac4_data=read_vib_data(vibac4_name);
-acc_names=["Main span 1/4","Main span 1/2","Main span 3/4"];
+% vibration_data = importdata("vibration_data.mat");
+% vibac2_data = vibration_data.vibac2_data;
+% vibac3_data = vibration_data.vibac3_data;
+% vibac4_data = vibration_data.vibac4_data;
+% 
+% vibac2_data(:,2:4)=vibac2_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+% vibac3_data(:,2:4)=vibac3_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+% vibac4_data(:,2:4)=vibac4_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
 
-result = viv2013(4);
 
+result = viv2013(4,false);
 
 vibac2_name=result.vibac2_name;
 vibac3_name=result.vibac3_name;
@@ -106,14 +95,16 @@ vibac2_data=read_vib_data(vibac2_name);
 vibac3_data=read_vib_data(vibac3_name);
 vibac4_data=read_vib_data(vibac4_name);
 
-
+vibac2_data(:,2:4)=vibac2_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+vibac3_data(:,2:4)=vibac3_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
+vibac4_data(:,2:4)=vibac4_data(:,2:4)/1000*9.8;%第一列是是时间，不要修改
 
 dt = vibac2_data(2,1)-vibac2_data(1,1);
 
 [f, magnitude] = fft_transform(1/0.02,vibac2_data(:,2));
 [~,seq_temp]= max(magnitude);
 f_max=f(seq_temp);
-disp("Frequency regarding the maximum amplitude:"+num2str(f_max))
+% disp("Frequency regarding the maximum amplitude:"+num2str(f_max))
 % figure
 % plot(f, magnitude)
 omega_0 = 2 * pi * Freq;
@@ -123,7 +114,7 @@ yn(3,:)=vibac3_data(:,2);
 yn(4,:)=vibac3_data(:,4);
 yn(5,:)=vibac4_data(:,2);
 yn(6,:)=vibac4_data(:,4);
-maxvalue = max(max(abs(yn)));
+
 fs = 1/dt;
 % establish discrete time matrices
 
@@ -159,9 +150,9 @@ J_c_m = [S_a * phi];
 B_d_m = A_c \ (A_d - eye(size(A_d))) * B_c_m;
 J_d_m = J_c_m;
 
-lambdas_m = [1e-1] * ones(1, np_m);
+lambdas_m = lambdas_m;
 
-sigma_ps_m = [80] * ones(1, np_m);
+sigma_ps_m = sigma_ps_m;
 
 [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
@@ -179,71 +170,69 @@ x_ak = zeros(ns + np_m * (2), 1);
 P_ak = 10 ^ (1) * eye(ns + np_m * (2));
 
 % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
-[x_k_k, x_k_kmin, P_k_k, P_k_kmin,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true);
-% [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
+[x_k_k, ~, ~, ~,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext', false);
 xa_history = x_k_k;
-pa_history = P_k_k;
 x_filt_original = xa_history(1:ns, :);
 H_d_m = H_c_m;
 p_filt_m = H_d_m * xa_history(ns + 1:end, :);
-Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
-
-% % 滤波
-% f_low = 0.95 * 0.328241;
-% f_high = 1.05 * 0.328241;
-% p_filt_m(1, :) = bandpass(p_filt_m(1, :), [f_low f_high], fs);
-% p_filt_m(2, :) = bandpass(p_filt_m(2, :), [f_low f_high], fs);
-% p_filt_m(3, :) = bandpass(p_filt_m(3, :), [f_low f_high], fs);
-% p_filt_m(9, :) = bandpass(p_filt_m(9, :), [f_low f_high], fs);
-% 分析预测模态力频率
-
-%% fft and bandpass filter
-
-
-for k1 = 1:nmodes
-    if 0
-        % p_filt_m(k1, :) = fft_filter(fs, p_filt_m(k1, :), [0.15 0.55]);
-        % p_filt_m(k1, :) = bandpass(p_filt_m(k1, :), [0.3 0.55], fs);
-    end
-    [f_p_filt_m(k1, :), magnitude_filt_m(k1, :)] = fft_transform(fs, p_filt_m(k1, :));
-end
-
-
-%% 6 virtual sensoring
-loc_acc_v = [578+1650/4;578+1650/2;578+1650/4*3];
-% loc_acc_v = [578+1650/4*3;578+1650/2;578+1650/4];
-loc_vel_v = [];
-loc_dis_v = [];
-
-[S_a_v, S_v_v, S_d_v, n_sensors_v] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data);
-
-G_c_v = [S_d_v * phi - S_a_v * phi * omega2, S_v_v * phi - S_a_v * phi * Gamma];
-J_c_v = [S_a_v * phi ];
-
-h_hat = G_c_v * x_filt_original + J_c_v * p_filt_m;
-
-%% 7 重构涡振响应
-p_reconstruct = p_filt_m;
-% p_reconstruct([1 2 3 4 5 6 7 8 10 11 12 13 14],:)=0;
-% p_reconstruct([1],:)=0;
+p_reconstruct=p_filt_m;
 [~, yn_reconstruct, ~] = CalResponse(A_d, B_d, G_d, J_d, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
+seq1=yn(:);
+seq2=yn_reconstruct(:);
 
+real_vs_reconstruct_mse = immse(seq1, seq2);
+result.real_vs_reconstruct_mse=real_vs_reconstruct_mse;
 
+seq1_middle=yn(3,:);
+seq2_middle=yn_reconstruct(3,:);
+real_vs_reconstruct_middle_mse = immse(seq1_middle, seq2_middle);
+result.real_vs_reconstruct_middle_mse=real_vs_reconstruct_middle_mse;
 
-seq1 = yn(:);
-seq2 = yn_reconstruct(:);
-mse = immse(seq1, seq2);
-
-%% fft
-[f_origin, magnitude_origin] = fft_transform(1/dt,yn(3,:));
-[f_re, magnitude_re] = fft_transform(1/dt,yn_reconstruct(3,:));
-
-
-%% 8 marginal likelihood
-
-logL=result.logL;
-logSk=result.logSk;
-logek=result.logek;
+p_reconstruct_norm = norm(p_reconstruct);
+result.p_reconstruct_norm=p_reconstruct_norm;
+% % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
+% xa_history = x_k_k;
+% pa_history = P_k_k;
+% x_filt_original = xa_history(1:ns, :);
+% H_d_m = H_c_m;
+% p_filt_m = H_d_m * xa_history(ns + 1:end, :);
+% Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
+% 
+% % % 滤波
+% % f_low = 0.95 * 0.328241;
+% % f_high = 1.05 * 0.328241;
+% % p_filt_m(1, :) = bandpass(p_filt_m(1, :), [f_low f_high], fs);
+% % p_filt_m(2, :) = bandpass(p_filt_m(2, :), [f_low f_high], fs);
+% % p_filt_m(3, :) = bandpass(p_filt_m(3, :), [f_low f_high], fs);
+% % p_filt_m(9, :) = bandpass(p_filt_m(9, :), [f_low f_high], fs);
+% % 分析预测模态力频率
+% for k1 = 1:nmodes
+%     [f_p_filt_m(k1, :), magnitude_filt_m(k1, :)] = fft_transform(fs, p_filt_m(k1, :));
+% end
+% 
+% 
+% %% 6 virtual sensoring
+% loc_acc_v = [578+1650/4;578+1650/2;578+1650/4*3];
+% loc_vel_v = [];
+% loc_dis_v = [];
+% 
+% [S_a_v, S_v_v, S_d_v, n_sensors_v] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data);
+% 
+% G_c_v = [S_d_v * phi - S_a_v * phi * omega2, S_v_v * phi - S_a_v * phi * Gamma];
+% J_c_v = [S_a_v * phi ];
+% 
+% h_hat = G_c_v * x_filt_original + J_c_v * p_filt_m;
+% 
+% %% 7 重构涡振响应
+% p_reconstruct = p_filt_m;
+% % p_reconstruct([1 2 3 4 5 6 7 8 10 11 12 13 14],:)=0;
+% [~, yn_reconstruct, ~] = CalResponse(A_d, B_d, G_d, J_d, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
+% 
+% %% 8 marginal likelihood
+% 
+% logL=result.logL;
+% logSk=result.logSk;
+% logek=result.logek;
 
 
 
@@ -251,7 +240,7 @@ logek=result.logek;
 
 %% plot
 
-if fig_bool == ON
+if 0
     for k1 = 1:length(acc_names)
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
@@ -261,29 +250,12 @@ if fig_bool == ON
     plot(t, yn(2*k1, :), 'Color', 'b')
 
     xlabel('time (s)')
-    ylabel('acc (m/s^2)')
+    ylabel('acc (1e-3*g)')
     set(gca, 'FontSize', 12)
     legend('filtered modal force', 'Location', 'northwest')
     title([acc_names(k1)]);
-    ylim([-maxvalue , maxvalue ])
+    ylim([-75, 75])
     end
-
-    for k1 = 1:length(acc_names)
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-    % subplot(1, nmodes, k1)
-    plot(t, h_hat(2*k1-1, :), 'Color', 'r')
-    hold on
-    plot(t, h_hat(2*k1, :), 'Color', 'b')
-
-    xlabel('time (s)')
-    ylabel('acc (m/s^2)')
-    set(gca, 'FontSize', 12)
-    legend('filtered modal force', 'Location', 'northwest')
-    title([acc_names(k1)]+"filter");
-    ylim([-maxvalue , maxvalue ])
-    end
-
 
     for k1 = 1:length(acc_names)
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -294,13 +266,12 @@ if fig_bool == ON
         plot(t, yn_reconstruct(2*k1, :), 'Color', 'b')
     
         xlabel('time (s)')
-        ylabel('acc (m/s^2)')
+        ylabel('acc (1e-3*g)')
         set(gca, 'FontSize', 12)
         legend('filtered modal force', 'Location', 'northwest')
-        title([acc_names(k1)]+"recalculate");
-        ylim([-maxvalue , maxvalue ])
+        title([acc_names(k1)]+"重构");
+        ylim([-75, 75])
     end
-
 
     for k1 = 1:nmodes
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -310,11 +281,11 @@ if fig_bool == ON
         hold on
         %         plot(t, p_m_real(k1, :), 'Color', 'b', 'LineStyle', '--')
         xlabel('time (s)')
-        ylabel('Modal force ')
+        ylabel('Modal force (N)')
         set(gca, 'FontSize', 12)
         legend('filtered modal force', 'Location', 'northwest')
         title(['mode ', num2str(modesel(k1))]);
-        % ylim([-1e3, 1e3])
+        ylim([-1e5, 1e5])
     end
 
     set(hFigure, 'name', 'modal force estimation', 'Numbertitle', 'off');
@@ -330,19 +301,15 @@ if fig_bool == ON
         set(gca, 'FontSize', 12)
         legend('filtered modal force frequency', 'Location', 'northwest')
         title(['mode ', num2str(modesel(k1))]);
-        xlim([0, 0.5])
+        xlim([0, 3])
         % ylim([0, 50])
     end
 
     set(hFigure, 'name', 'filtered modal force frequency', 'Numbertitle', 'off');
 end
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(f_re, magnitude_re)
-hold on
-plot(f_origin, magnitude_origin)
-legend("cal","measure")
-xlim([0, 0.5])
+
+
 % 
 % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 % 
@@ -384,7 +351,7 @@ xlim([0, 0.5])
 
 
 
-
+end
 
 
 function node = FindNodewithLocation(loc, node_loc,nodeondeck)
@@ -572,7 +539,6 @@ function [vibac_data]=read_vib_data(vibac_name)
 vibac_data=[];
 for i=1:length(vibac_name)
     vibac_data_temp=importdata(vibac_name(i));
-    vibac_data_temp(:,2:4)=vibac_data_temp(:,2:4)/1000*9.8;%第一列是是时间，不要修改
     vibac_data=[vibac_data;vibac_data_temp];
 end
 end

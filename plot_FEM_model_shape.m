@@ -51,7 +51,7 @@ node_modal_shape=[nodes.NODE, nodes.X, nodes.Y, nodes.Z];
 % node_modal_shape_original = node_modal_shape;
 Mapping_data = output.Mapping;
 modal_shape_all = output.eig_vec;
-mode_num  =1;
+mode_num  =23;
 modal_shape_plot = modal_shape_all(:,mode_num);
 modal_shape_plot = modal_shape_plot/max(abs(modal_shape_plot))*50;
 
@@ -130,6 +130,50 @@ title('My FEM Model');
 % View in 3D
 view(45, 35.264); 
 % view(0,0); 
+% Use equal scaling
+axis equal; 
+% Add light
+camlight('headlight');
+% Use gouraud lighting
+lighting gouraud;
+hold off;
+
+% plot modal shape
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% Define color, point size and marker for scatter plot
+color = 'b'; % Color blue
+marker = 'o'; % Circle marker
+size = 15; % Size of marker
+% scatter3(nodes_info.X, nodes_info.Y, nodes_info.Z, size, color, marker, 'filled'); % scatter plot for nodes
+hold on
+% scatter3(node_modal_shape(:,2),node_modal_shape(:,3),node_modal_shape(:,4), size, color, marker, 'filled'); % scatter plot for nodes
+% Create a scatter plot using displacementMagnitude as color data
+scatterHandle = scatter3(node_modal_shape(:,2), node_modal_shape(:,3), node_modal_shape(:,4), size, nodes_displacementMagnitude, marker, 'filled');
+
+% Apply a colormap
+colormap(jet);  % or use another colormap if you prefer
+
+% Add a colorbar
+colorbar;
+
+% If needed, you can set the limits of the color scale
+% caxis([minDisplacement, maxDisplacement]);  % replace with actual min and max if needed
+
+% Define line color for beams
+beamColor = 'k'; % Black color
+hold on; % hold current plot
+% Plot each beam
+% Plot all lines at once
+line(X_modal_shape, Y_modal_shape, Z_modal_shape, 'Color', beamColor, 'LineWidth', lineWidthThin);
+% Add grids
+grid on;  
+% Add labels to each axis
+xlabel('X'); ylabel('Y'); zlabel('Z'); 
+% Add title
+title('My FEM Model'); 
+% View in 3D
+% view(45, 35.264); 
+view(0,0); 
 % Use equal scaling
 axis equal; 
 % Add light

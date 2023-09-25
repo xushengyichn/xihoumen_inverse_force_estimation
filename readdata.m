@@ -109,7 +109,7 @@ winds4_trim = winds4_data(winds4_data.DateTime >= startDate & winds4_data.DateTi
 
 %% fftanalysis
 
-[f, magnitude] = fft_transform(1/dt,vibac3_data(:,3));
+[f, magnitude] = fft_transform(1/dt,vibac3_data(:,2));
 [a,b]= max(magnitude);
 f_dom(k1)=f(b);
 
