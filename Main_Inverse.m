@@ -343,6 +343,15 @@ hold on
 plot(f_origin, magnitude_origin)
 legend("cal","measure")
 xlim([0, 0.5])
+
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(f_re, log(magnitude_re))
+hold on
+plot(f_origin, log(magnitude_origin))
+legend("cal","measure")
+xlim([0, 0.5])
 % 
 % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 % 
