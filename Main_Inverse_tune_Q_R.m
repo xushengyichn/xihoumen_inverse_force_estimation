@@ -44,8 +44,8 @@ sigma_ps_m = [80] * ones(1, np_m);
 n1 = 10;
 n2 = 10;
 
-Q_list = logspace(-10,-4, n1);
-R_list = logspace(-10,-4, n1);
+Q_list = logspace(-6,-1, n1);
+R_list = logspace(-6,-1, n1);
 
 [X, Y] = meshgrid(Q_list, R_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];

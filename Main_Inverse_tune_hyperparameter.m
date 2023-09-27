@@ -36,10 +36,11 @@ modesel= [23];
 nmodes = length(modesel);
 np_m = nmodes;
 n1 = 10;
-n2 = 5;
+n2 = 10;
 
-lambdas_m_list = logspace(-2,2, n1);
-sigma_ps_m_list = linspace(10,100,n2);
+lambdas_m_list = logspace(-15,-1, n1);
+sigma_ps_m_list = linspace(1e2,1e5,n2);
+% sigma_ps_m_list = logspace(2,8,n2);
 [X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 

@@ -161,7 +161,7 @@ J_d_m = J_c_m;
 
 lambdas_m = [1e-1] * ones(1, np_m);
 
-sigma_ps_m = [80] * ones(1, np_m);
+sigma_ps_m = [100000] * ones(1, np_m);
 
 [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
