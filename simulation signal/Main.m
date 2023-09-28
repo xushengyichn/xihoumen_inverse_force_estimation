@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-09-27 12:52:24
-%LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-09-27 13:01:11
-%FilePath: \xihoumen_inverse_force_estimation\simulation signal\Main.m
+%LastEditors: xushengyichn xushengyichn@outlook.com
+%LastEditTime: 2023-09-28 22:39:41
+%FilePath: /xihoumen_inverse_force_estimation/simulation signal/Main.m
 %Description: 使用模拟荷载信号，测试反算气动力的准确性，以及参数选择的合理性
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -17,6 +17,10 @@ addpath(genpath("F:\git\Function_shengyi_package"))
 addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
 addpath(genpath("D:\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
 addpath(genpath("F:\git\xihoumen_inverse_force_estimation"))
+addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
+addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package/"))
+addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/"))
+
 
 subStreamNumberDefault = 2132;
 run('InitScript.m');
@@ -31,21 +35,26 @@ figureIdx = 0;
 
 
 %% Generate force
+modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+% modesel= [23];
+mode_resonant=23;
 f1=0.321813289457002;
+mode_resonant_seq = find(modesel==mode_resonant);
 T = 10000; dt = 0.01; fs = 1 / dt; t = 0:dt:T;N = length(t);
 lambda = 0.00002; sigma_p_2 = 400; sigma_p = sqrt(sigma_p_2);
 
+
+Modal_Force_all = zeros(length(modesel),N);
 [Modal_Force] = quasiperiod_force(lambda, sigma_p, f1, dt, t);
+Modal_Force_all(mode_resonant_seq ,:)=Modal_Force;
 
 
-
-rms(Modal_Force);
+% rms(Modal_Force);
 
 
 %% Finite element model
 
-% modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-modesel= [23];
+
 nmodes = length(modesel);
 ns = nmodes * 2;
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt','modesel',modesel);
@@ -95,32 +104,32 @@ x0 = zeros(ns, 1);
 %% read real vibration data(just for compare)
 acc_names=["Main span 1/4","Main span 1/2","Main span 3/4"];
 
-result = viv2013(4);
+% result = viv2013(4);
 
 
-% vibac2_name=result.vibac2_name;
-vibac3_name=result.vibac3_name;
-% vibac4_name=result.vibac4_name;
-startDate = result.startDate;
-endDate = result.endDate;
+% % vibac2_name=result.vibac2_name;
+% vibac3_name=result.vibac3_name;
+% % vibac4_name=result.vibac4_name;
+% startDate = result.startDate;
+% endDate = result.endDate;
 
 
-% vibac2_data=read_vib_data(vibac2_name);
-vibac3_data=read_vib_data(vibac3_name);
-% vibac4_data=read_vib_data(vibac4_name);
+% % vibac2_data=read_vib_data(vibac2_name);
+% vibac3_data=read_vib_data(vibac3_name);
+% % vibac4_data=read_vib_data(vibac4_name);
 
 
 
 %% calculate response
 
-[xn_true, yn_true,~] = CalResponse(A_d, B_d, G_d, J_d, Modal_Force, 0, 0, N, x0, ns, n_sensors);
-[xn, yn,~] = CalResponse(A_d, B_d, G_d, J_d, Modal_Force, Q, R, N, x0, ns, n_sensors);
+[xn_true, yn_true,~] = CalResponse(A_d, B_d, G_d, J_d, Modal_Force_all, 0, 0, N, x0, ns, n_sensors);
+[xn, yn,~] = CalResponse(A_d, B_d, G_d, J_d, Modal_Force_all, Q, R, N, x0, ns, n_sensors);
 
 
-disp("RMS of accelration in the middle span is: "+num2str(rms(vibac3_data(:,2))))
-disp("MAX of accelration in the middle span is: "+num2str(max(abs(vibac3_data(:,2)))))
-disp("Reconstruct RMS of accelration in the middle span is: "+num2str(rms(yn_true(3,:))))
-disp("Reconstruct MAX of accelration in the middle span is: "+num2str(max(abs(yn_true(3,:)))))
+% disp("RMS of accelration in the middle span is: "+num2str(rms(vibac3_data(:,2))))
+% disp("MAX of accelration in the middle span is: "+num2str(max(abs(vibac3_data(:,2)))))
+% disp("Reconstruct RMS of accelration in the middle span is: "+num2str(rms(yn_true(3,:))))
+% disp("Reconstruct MAX of accelration in the middle span is: "+num2str(max(abs(yn_true(3,:)))))
 
 
 %% perform kalman filter
@@ -136,7 +145,11 @@ J_d_m = J_c_m;
 lambdas_m = [lambda] * ones(1, np_m);
 
 sigma_ps_m = [sigma_p] * ones(1, np_m);
-omega_0= f1*2*pi;
+% omega_0= f1*2*pi;
+
+for k1 = 1:nmodes
+    omega_0(k1)=Freq(k1)*2*pi;
+end
 [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
 [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
@@ -161,81 +174,89 @@ H_d_m = H_c_m;
 p_filt_m = H_d_m * xa_history(ns + 1:end, :);
 Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
 
+%% recalculate the response with estimated force
+[xn_re, yn_re,~] = CalResponse(A_d, B_d, G_d, J_d, p_filt_m, Q, R, N, x0, ns, n_sensors);
+
+
+
 %% parfor loop
-n1 = 100;
-n2 = 100;
-lambdas_m_list = logspace(-8,-1, n1);
-sigma_ps_m_list = linspace(100,500,n2);
-[X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
-combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
-numIterations = size(combinations,1);
+% n1 = 100;
+% n2 = 100;
+% lambdas_m_list = logspace(-8,-1, n1);
+% sigma_ps_m_list = linspace(100,500,n2);
+% [X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
+% combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
+% numIterations = size(combinations,1);
 
-if isempty(gcp('nocreate'))
-    parpool();
-end
+% if isempty(gcp('nocreate'))
+%     parpool();
+% end
 
-b = ProgressBar(numIterations, ...
-    'IsParallel', true, ...
-    'WorkerDirectory', pwd(), ...
-    'Title', 'Parallel 2' ...
-    );
-b.setup([], [], []);
+% b = ProgressBar(numIterations, ...
+%     'IsParallel', true, ...
+%     'WorkerDirectory', pwd(), ...
+%     'Title', 'Parallel 2' ...
+%     );
+% b.setup([], [], []);
 
-parfor k1 = 1:numIterations
-% for k1 = 1:numIterations
-    parameters = combinations(k1,:);
-    lambdas_m = parameters(1) * ones(1, np_m);
-    sigma_ps_m = parameters(2)  * ones(1, np_m);
-    % omega_0= f1*2*pi;
-    [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
+
+
+% parfor k1 = 1:numIterations
+% % for k1 = 1:numIterations
+%     parameters = combinations(k1,:);
+%     lambdas_m = parameters(1) * ones(1, np_m);
+%     sigma_ps_m = parameters(2)  * ones(1, np_m);
+%     % omega_0= f1*2*pi;
+%     [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
     
-    [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
-    A_a_m = Fad_m;
-    G_a_m = Had_m;
-    Q_a_m = Qad_m;
-    R_a_m = R;
-    yn_a = yn;
-    NN = N;
-    xa_history = zeros(ns + np_m * (2), NN);
-    pa_history = zeros(ns + np_m * (2), NN);
+%     [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
+%     A_a_m = Fad_m;
+%     G_a_m = Had_m;
+%     Q_a_m = Qad_m;
+%     R_a_m = R;
+%     yn_a = yn;
+%     NN = N;
+%     xa_history = zeros(ns + np_m * (2), NN);
+%     pa_history = zeros(ns + np_m * (2), NN);
     
-    x_ak = zeros(ns + np_m * (2), 1);
-    P_ak = 10 ^ (1) * eye(ns + np_m * (2));
+%     x_ak = zeros(ns + np_m * (2), 1);
+%     P_ak = 10 ^ (1) * eye(ns + np_m * (2));
     
-    % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
-    [x_k_k, x_k_kmin, P_k_k, P_k_kmin,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',false);
-    logL(k1)=result.logL;
-    logSk(k1) = result.logSk;
-    logek(k1)=result.logek;
+%     % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
+%     [x_k_k, x_k_kmin, P_k_k, P_k_kmin,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',false);
+%     logL(k1)=result.logL;
+%     logSk(k1) = result.logSk;
+%     logek(k1)=result.logek;
 
-    % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
-    updateParallel([], pwd);
-end
+%     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
+%     updateParallel([], pwd);
+% end
 
 
-b.release();
+% b.release();
 
-Z_1 = reshape(logL, n2, n1);
-Z_2 = reshape(logSk, n2, n1);
-Z_3 = reshape(logek, n2, n1);
+% Z_1 = reshape(logL, n2, n1);
+% Z_2 = reshape(logSk, n2, n1);
+% Z_3 = reshape(logek, n2, n1);
 
 
 %% plot the figures
 if fig_bool == ON
+    for k1 = 1:nmodes
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     hold on
-    plot(t,p_filt_m)
-    plot(t,Modal_Force)
+    plot(t,p_filt_m(k1,:))
+    plot(t,Modal_Force_all(k1,:))
     legend("filter","true")
     xlabel('t (s)')
     ylabel('Modal force')
+    end
 
-
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    plot(vibac3_data(:,2))
-    xlabel('t (s)')
-    ylabel('Acceleration')
-    ylim([-0.5,0.5])
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % plot(vibac3_data(:,2))
+    % xlabel('t (s)')
+    % ylabel('Acceleration')
+    % ylim([-0.5,0.5])
 
 
 
@@ -243,38 +264,39 @@ if fig_bool == ON
     plot(t,yn(3,:))
     hold on
     plot(t,yn_true(3,:))
+    plot(t,yn_re(3,:))
     xlabel('t (s)')
     ylabel('Acceleration')
-    legend("measurement","true")
+    legend("measurement","true","reconstruct")
     ylim([-0.5,0.5])
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_1,50);   % 绘制等高线图
-    hold on
-    plot(lambda,sigma_p_2,'ro')
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logL');
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % contourf(X, Y, Z_1,50);   % 绘制等高线图
+    % hold on
+    % plot(lambda,sigma_p_2,'ro')
+    % set(gca, 'XScale', 'log');
+    % xlabel('lambdas');
+    % ylabel('sigma_ps');
+    % colorbar;  % 添加颜色栏
+    % title('logL');
     
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_2);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logSk');
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % contourf(X, Y, Z_2);  % 绘制等高线图
+    % set(gca, 'XScale', 'log');
+    % xlabel('lambdas');
+    % ylabel('sigma_ps');
+    % colorbar;  % 添加颜色栏
+    % title('logSk');
 
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_3);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logek');
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % contourf(X, Y, Z_3);  % 绘制等高线图
+    % set(gca, 'XScale', 'log');
+    % xlabel('lambdas');
+    % ylabel('sigma_ps');
+    % colorbar;  % 添加颜色栏
+    % title('logek');
 
 end
 
