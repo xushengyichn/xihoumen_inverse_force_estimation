@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-09-27 12:52:24
-%LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2023-09-28 22:39:41
-%FilePath: /xihoumen_inverse_force_estimation/simulation signal/Main.m
+%LastEditors: ShengyiXu xushengyichn@outlook.com
+%LastEditTime: 2023-09-29 21:15:30
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\simulation signal\Main.m
 %Description: 使用模拟荷载信号，测试反算气动力的准确性，以及参数选择的合理性
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -49,8 +49,8 @@ Modal_Force_all = zeros(length(modesel),N);
 [Modal_Force] = quasiperiod_force(lambda, sigma_p, f1, dt, t);
 Modal_Force_all(mode_resonant_seq ,:)=Modal_Force;
 
-% white_noise = randn(nmodes,N)*1;
-% Modal_Force_all = Modal_Force_all+white_noise;
+white_noise = randn(nmodes,N)*1;
+Modal_Force_all = Modal_Force_all+white_noise;
 % rms(Modal_Force);
 
 
@@ -188,10 +188,10 @@ Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
 
 
 %% parfor loop
-if 0
-n1 = 10;
-n2 = 10;
-lambdas_m_list = logspace(-8,-1, n1);
+if 1
+n1 = 100;
+n2 = 100;
+lambdas_m_list = linspace(1e-8,1e-1, n1);
 sigma_ps_m_list = linspace(100,500,n2);
 [X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
@@ -241,6 +241,9 @@ parfor k1 = 1:numIterations
     updateParallel([], pwd);
 end
 
+[~,MaxIdx]= max(logL);
+lambda_Max = combinations(MaxIdx,1);
+sigma_p_2_Max = combinations(MaxIdx,2);
 
 b.release();
 
@@ -284,6 +287,7 @@ if fig_bool == ON
     contourf(X, Y, Z_1);   % 绘制等高线图
     hold on
     plot(lambda,sigma_p_2,'ro')
+    plot(lambda_Max, sigma_p_2_Max, 'bo')  % 绘制最大值的位置
     set(gca, 'XScale', 'log');
     xlabel('lambdas');
     ylabel('sigma_ps');
