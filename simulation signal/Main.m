@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-09-27 12:52:24
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-09-29 21:15:30
+%LastEditTime: 2023-09-30 18:20:00
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\simulation signal\Main.m
 %Description: 使用模拟荷载信号，测试反算气动力的准确性，以及参数选择的合理性
 %
@@ -252,6 +252,75 @@ Z_2 = reshape(logSk, n2, n1);
 Z_3 = reshape(logek, n2, n1);
 end
 
+
+
+%% parfor loop
+if 1
+    n1 = 50;
+    n2 = 50;
+    n3 = 10;
+    lambdas_m_list = linspace(1e-8,1e-1, n1);
+    sigma_ps_m_list = linspace(100,500,n2);
+    omega_0_list = linspace(0.9,1.1,n3);
+    [X, Y,Z] = meshgrid(lambdas_m_list, sigma_ps_m_list,omega_0_list);
+    combinations = [reshape(X, [], 1), reshape(Y, [], 1),reshape(Z, [], 1)];
+    numIterations = size(combinations,1);
+    
+    if isempty(gcp('nocreate'))
+        parpool();
+    end
+    
+    b = ProgressBar(numIterations, ...
+        'IsParallel', true, ...
+        'WorkerDirectory', pwd(), ...
+        'Title', 'Parallel 1' ...
+        );
+    b.setup([], [], []);
+    
+    
+    
+    parfor k1 = 1:numIterations
+    % for k1 = 1:numIterations
+        parameters = combinations(k1,:);
+        lambdas_m = parameters(1) * ones(1, np_m);
+        sigma_ps_m = parameters(2)  * ones(1, np_m);
+        omega_0_m= parameters(3)  * omega_0;
+        [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0_m, np_m);
+        
+        [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
+        A_a_m = Fad_m;
+        G_a_m = Had_m;
+        Q_a_m = Qad_m;
+        R_a_m = R;
+        yn_a = yn;
+        NN = N;
+        xa_history = zeros(ns + np_m * (2), NN);
+        pa_history = zeros(ns + np_m * (2), NN);
+        
+        x_ak = zeros(ns + np_m * (2), 1);
+        P_ak = 10 ^ (1) * eye(ns + np_m * (2));
+        
+        % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
+        [x_k_k, x_k_kmin, P_k_k, P_k_kmin,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',false);
+        logL(k1)=result.logL;
+        logSk(k1) = result.logSk;
+        logek(k1)=result.logek;
+    
+        % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
+        updateParallel([], pwd);
+    end
+    
+    [~,MaxIdx]= max(logL);
+    lambda_Max = combinations(MaxIdx,1);
+    sigma_p_2_Max = combinations(MaxIdx,2);
+    
+    b.release();
+    
+    % Z_1 = reshape(logL, n2, n1);
+    % Z_2 = reshape(logSk, n2, n1);
+    % Z_3 = reshape(logek, n2, n1);
+    end
+
 %% plot the figures
 if fig_bool == ON
     for k1 = 1:nmodes
@@ -283,35 +352,40 @@ if fig_bool == ON
     legend("measurement","true","reconstruct")
     ylim([-0.5,0.5])
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_1);   % 绘制等高线图
-    hold on
-    plot(lambda,sigma_p_2,'ro')
-    plot(lambda_Max, sigma_p_2_Max, 'bo')  % 绘制最大值的位置
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logL');
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % contourf(X, Y, Z_1);   % 绘制等高线图
+    % hold on
+    % plot(lambda,sigma_p_2,'ro')
+    % plot(lambda_Max, sigma_p_2_Max, 'bo')  % 绘制最大值的位置
+    % set(gca, 'XScale', 'log');
+    % xlabel('lambdas');
+    % ylabel('sigma_ps');
+    % colorbar;  % 添加颜色栏
+    % title('logL');
     
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_2);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
-    colorbar;  % 添加颜色栏
-    title('logSk');
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % contourf(X, Y, Z_2);  % 绘制等高线图
+    % set(gca, 'XScale', 'log');
+    % xlabel('lambdas');
+    % ylabel('sigma_ps');
+    % colorbar;  % 添加颜色栏
+    % title('logSk');
+
+
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % contourf(X, Y, Z_3);  % 绘制等高线图
+    % set(gca, 'XScale', 'log');
+    % xlabel('lambdas');
+    % ylabel('sigma_ps');
+    % colorbar;  % 添加颜色栏
+    % title('logek');
 
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    contourf(X, Y, Z_3);  % 绘制等高线图
-    set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
+    scatter3(X(:),Y(:),Z(:),10,logL(:),'filled')
     colorbar;  % 添加颜色栏
-    title('logek');
-
+    title('logL');
 end
 
 
