@@ -1,0 +1,93 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com
+%Date: 2023-01-25 15:24:39
+%LastEditors: xushengyichn 54436848+xushengyichn@users.noreply.github.com
+%LastEditTime: 2023-01-25 15:29:21
+%FilePath: \20230124优化问题\Main.m
+%Description: 本脚本功能为输入一组TMD参数以及气动力控制参数，获得多阶模态涡振的响应
+%
+%Copyright (c) 2023 by xushengyichn 54436848+xushengyichn@users.noreply.github.com, All Rights Reserved.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc
+clear
+close all
+addpath("F:\git\Function_shengyi_package")
+
+subStreamNumberDefault = 2132;
+run('InitScript.m');
+%% 0 绘图参数
+fig_bool = ON;
+num_figs_in_row = 10; %每一行显示几个图
+figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
+%设置图片间隔
+gap_between_images = [0, 0];
+figureIdx = 0;
+
+%% 输入预先设定的参数
+% Preset parameters
+
+number_of_modes_to_control = [1]; % 需要控制的模态数 The number of modes to be controlled
+number_of_modes_to_consider = 1; % 考虑的总模态数 The total number of modes considered
+number_of_tmds = 0; % 考虑的总TMD数 The total number of TMDs
+total_tmd_mass_ratio = 0.02; % 总质量比 The total mass ratio
+mass_six_span = 10007779.7; % 深中通道非通航桥六跨连续梁质量 The mass of 6-span continuous beam of the non-navigational bridge of the Zhenzhong-Link
+total_tmd_mass = total_tmd_mass_ratio * mass_six_span; % 总质量 The total mass
+modal_damping_ratios = ones(1, number_of_modes_to_consider) * 0.003; % 模态阻尼 The damping of modes
+t_length = 100; % 设定计算时间长度
+
+% 输入初始参数
+% Input initial parameters
+TMDs_mass = 0; % TMD质量 The mass of TMDs
+TMDs_frequency = 0; % TMD频率 The frequency of TMDs
+TMDs_damping_ratio = 0; % TMD阻尼 The damping of TMDs
+TMDs_location = 0; % TMD位置 The location of TMDs
+
+[result] = a_0_main(number_of_modes_to_control, number_of_modes_to_consider, number_of_tmds, modal_damping_ratios, t_length, TMDs_mass, TMDs_frequency, TMDs_damping_ratio, TMDs_location);
+t=result.t;
+u=result.u;
+udot=result.udot;
+u2dot=result.u2dot;
+F_viv=result.F_viv;
+
+u_re=result.u_re;
+udot_re=result.udot_re;
+u2dot_re=result.u2dot_re;
+
+[f, magnitude] = fft_transform(100,u);
+[f_re, magnitude_re] = fft_transform(100,u_re);
+
+
+%% Kalman filter
+modesel= [1];
+nmodes = length(modesel);
+ns = nmodes * 2;
+Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt','modesel',modesel);
+mode_deck = Result.mode_deck;
+mode_deck_re = Result.mode_deck_re;
+node_loc = Result.node_loc;
+Freq = Result.Freq;
+MM_eq = Result.MM_eq;
+KK_eq = Result.KK_eq;
+nodegap = Result.nodegap;
+
+
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t, u, 'LineWidth', 2);
+hold on
+plot(t, u_re, 'LineWidth', 2);
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t, F_viv, 'LineWidth', 2);
+% hold on
+% plot(t, udot, 'LineWidth', 2);
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(f, log(magnitude), 'LineWidth', 2);
+hold on 
+plot(f_re, log(magnitude_re), 'LineWidth', 2);
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(nodegap,mode_deck, 'LineWidth', 2);
+
