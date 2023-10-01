@@ -149,14 +149,16 @@ J_d_m = J_c_m;
 % sigma_ps_m = [sigma_p] * ones(1, np_m);
 
 
-lambdas_m = [6.13591e-09] * ones(1, np_m);
+lambdas_m = [1.6298e-08] * ones(1, np_m);
 
-sigma_ps_m = [378.788] * ones(1, np_m);
+sigma_ps_m = [866.8687] * ones(1, np_m);
 
 % omega_0= f1*2*pi;
 
+omega_variation = 0.9889;
+
 for k1 = 1:nmodes
-    omega_0(k1)=Freq(k1)*2*pi;
+    omega_0(k1)=Freq(k1)*2*pi*omega_variation;
 end
 [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
@@ -255,7 +257,7 @@ end
 
 
 %% parfor loop
-if 1
+if 0
     n1 = 100;
     n2 = 100;
     n3 = 10;
@@ -381,14 +383,33 @@ if fig_bool == ON
     % colorbar;  % 添加颜色栏
     % title('logek');
 
-
+    
+    load result.mat
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     scatter3(X(:),Y(:),Z(:),10,logL(:),'filled')
+    set(gca, 'XScale', 'log');
     colorbar;  % 添加颜色栏
     title('logL');
+    hold on 
+    lambda = 0.00002;
+    sigma_p = sqrt(400);
+    f1 = 1;
+    scatter3(lambda,sigma_p,1,30,"red")
+    [~,maxLogL_idx] = max(logL(:));
+    x_list = X(:);
+    y_list = Y(:);
+    z_list = Z(:);
+    x_max = x_list(maxLogL_idx);
+    y_max = y_list(maxLogL_idx);
+    z_max = z_list(maxLogL_idx);
+    scatter3(x_max,y_max,z_max,30,"cyan")
+
 end
 
-save('result.mat','X','Y','Z','logL','logSk','logek')
+
+
+
+% save('result.mat','X','Y','Z','logL','logSk','logek')
 %% necessary functions
 function [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data)
 
