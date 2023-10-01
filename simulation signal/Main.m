@@ -17,6 +17,7 @@ addpath(genpath("F:\git\Function_shengyi_package"))
 addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
 addpath(genpath("D:\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
 addpath(genpath("F:\git\xihoumen_inverse_force_estimation"))
+addpath(genpath("D:\git\xihoumen_inverse_force_estimation"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package/"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/"))
@@ -42,15 +43,15 @@ mode_resonant=23;
 f1=0.321813289457002;
 mode_resonant_seq = find(modesel==mode_resonant);
 T = 10000; dt = 0.01; fs = 1 / dt; t = 0:dt:T;N = length(t);
-lambda = 0.00002; sigma_p_2 = 400; sigma_p = sqrt(sigma_p_2);
+lambda = 0.00002;  sigma_p =20;
 
 
 Modal_Force_all = zeros(length(modesel),N);
 [Modal_Force] = quasiperiod_force(lambda, sigma_p, f1, dt, t);
 Modal_Force_all(mode_resonant_seq ,:)=Modal_Force;
 
-white_noise = randn(nmodes,N)*1;
-Modal_Force_all = Modal_Force_all+white_noise;
+% white_noise = randn(nmodes,N)*1;
+% Modal_Force_all = Modal_Force_all+white_noise;
 % rms(Modal_Force);
 
 
@@ -145,17 +146,18 @@ J_d_m = J_c_m;
 
 
 % lambdas_m = [lambda] * ones(1, np_m);
-% 
+% % 
 % sigma_ps_m = [sigma_p] * ones(1, np_m);
 
 
-lambdas_m = [1.6298e-08] * ones(1, np_m);
+lambdas_m = [3.59381e-07] * ones(1, np_m);
 
-sigma_ps_m = [866.8687] * ones(1, np_m);
+sigma_ps_m = [44.5556] * ones(1, np_m);
 
 % omega_0= f1*2*pi;
 
-omega_variation = 0.9889;
+% omega_variation = 0.9889;
+omega_variation = 1;
 
 for k1 = 1:nmodes
     omega_0(k1)=Freq(k1)*2*pi*omega_variation;
@@ -190,11 +192,11 @@ Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
 
 
 %% parfor loop
-if 0
-n1 = 100;
-n2 = 100;
-lambdas_m_list = linspace(1e-8,1e-1, n1);
-sigma_ps_m_list = linspace(100,500,n2);
+if 1
+n1 = 10;
+n2 = 10;
+lambdas_m_list = logspace(-8,-1, n1);
+sigma_ps_m_list = linspace(1,50,n2);
 [X, Y] = meshgrid(lambdas_m_list, sigma_ps_m_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 numIterations = size(combinations,1);
@@ -245,7 +247,7 @@ end
 
 [~,MaxIdx]= max(logL);
 lambda_Max = combinations(MaxIdx,1);
-sigma_p_2_Max = combinations(MaxIdx,2);
+sigma_p_Max = combinations(MaxIdx,2);
 
 b.release();
 
@@ -314,7 +316,7 @@ if 0
     
     [~,MaxIdx]= max(logL);
     lambda_Max = combinations(MaxIdx,1);
-    sigma_p_2_Max = combinations(MaxIdx,2);
+    sigma_p_Max = combinations(MaxIdx,2);
     
     b.release();
     
@@ -325,16 +327,16 @@ if 0
 
 %% plot the figures
 if fig_bool == ON
-    for k1 = 1:nmodes
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    hold on
-    plot(t,p_filt_m(k1,:))
-    plot(t,Modal_Force_all(k1,:))
-    legend("filter","true")
-    xlabel('t (s)')
-    ylabel('Modal force')
-    xlim([4000,4100])
-    end
+%     for k1 = 1:nmodes
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%     hold on
+%     plot(t,p_filt_m(k1,:))
+%     plot(t,Modal_Force_all(k1,:))
+%     legend("filter","true")
+%     xlabel('t (s)')
+%     ylabel('Modal force')
+%     xlim([4000,4100])
+%     end
 
     % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     % plot(vibac3_data(:,2))
@@ -354,55 +356,62 @@ if fig_bool == ON
     legend("measurement","true","reconstruct")
     ylim([-0.5,0.5])
 
-    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    % contourf(X, Y, Z_1);   % 绘制等高线图
-    % hold on
-    % plot(lambda,sigma_p_2,'ro')
-    % plot(lambda_Max, sigma_p_2_Max, 'bo')  % 绘制最大值的位置
-    % set(gca, 'XScale', 'log');
-    % xlabel('lambdas');
-    % ylabel('sigma_ps');
-    % colorbar;  % 添加颜色栏
-    % title('logL');
-    
-
-    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    % contourf(X, Y, Z_2);  % 绘制等高线图
-    % set(gca, 'XScale', 'log');
-    % xlabel('lambdas');
-    % ylabel('sigma_ps');
-    % colorbar;  % 添加颜色栏
-    % title('logSk');
-
-
-    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    % contourf(X, Y, Z_3);  % 绘制等高线图
-    % set(gca, 'XScale', 'log');
-    % xlabel('lambdas');
-    % ylabel('sigma_ps');
-    % colorbar;  % 添加颜色栏
-    % title('logek');
-
-    
-    load result.mat
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    scatter3(X(:),Y(:),Z(:),10,logL(:),'filled')
+    n = 256;
+%     x = linspace(0, 1, n)';
+%     customMap = [x.^2, x.^2, x.^2];  % 四次多项式映射
+%     colormap(customMap);
+    
+    contourf(X, Y, Z_1);   % 绘制等高线图
+    clim([3.0e+07 3.1512e+07]);
+    hold on
+    plot(lambda,sigma_p,'ro')
+    plot(lambda_Max, sigma_p_Max, 'bo')  % 绘制最大值的位置
     set(gca, 'XScale', 'log');
+    xlabel('lambdas');
+    ylabel('sigma_ps');
     colorbar;  % 添加颜色栏
+
     title('logL');
-    hold on 
-    lambda = 0.00002;
-    sigma_p = sqrt(400);
-    f1 = 1;
-    scatter3(lambda,sigma_p,1,30,"red")
-    [~,maxLogL_idx] = max(logL(:));
-    x_list = X(:);
-    y_list = Y(:);
-    z_list = Z(:);
-    x_max = x_list(maxLogL_idx);
-    y_max = y_list(maxLogL_idx);
-    z_max = z_list(maxLogL_idx);
-    scatter3(x_max,y_max,z_max,30,"cyan")
+    
+
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%     contourf(X, Y, Z_2);  % 绘制等高线图
+%     set(gca, 'XScale', 'log');
+%     xlabel('lambdas');
+%     ylabel('sigma_ps');
+%     colorbar;  % 添加颜色栏
+%     title('logSk');
+% 
+% 
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%     contourf(X, Y, Z_3);  % 绘制等高线图
+%     set(gca, 'XScale', 'log');
+%     xlabel('lambdas');
+%     ylabel('sigma_ps');
+%     colorbar;  % 添加颜色栏
+%     title('logek');
+
+    
+%     load result.mat
+%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+%     scatter3(X(:),Y(:),Z(:),10,logL(:),'filled')
+%     set(gca, 'XScale', 'log');
+%     colorbar;  % 添加颜色栏
+%     title('logL');
+%     hold on 
+%     lambda = 0.00002;
+%     sigma_p = sqrt(400);
+%     f1 = 1;
+%     scatter3(lambda,sigma_p,1,30,"red")
+%     [~,maxLogL_idx] = max(logL(:));
+%     x_list = X(:);
+%     y_list = Y(:);
+%     z_list = Z(:);
+%     x_max = x_list(maxLogL_idx);
+%     y_max = y_list(maxLogL_idx);
+%     z_max = z_list(maxLogL_idx);
+%     scatter3(x_max,y_max,z_max,30,"cyan")
 
 end
 
