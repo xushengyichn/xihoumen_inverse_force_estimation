@@ -358,12 +358,13 @@ if fig_bool == ON
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     n = 256;
-%     x = linspace(0, 1, n)';
-%     customMap = [x.^2, x.^2, x.^2];  % 四次多项式映射
-%     colormap(customMap);
-    
-    contourf(X, Y, Z_1);   % 绘制等高线图
-    clim([3.0e+07 3.1512e+07]);
+    x = linspace(0, 1, n)';
+    baseColormap = parula(n);
+    customMap = [baseColormap(:,1), baseColormap(:,2), baseColormap(:,3)].*x.^2;  % 四次多项式映射
+    colormap(customMap);
+    contourf(X, Y, Z_1,1000,'LineColor','none');   % 绘制等高线图
+
+    % clim([3.0e+07 3.1512e+07]);
     hold on
     plot(lambda,sigma_p,'ro')
     plot(lambda_Max, sigma_p_Max, 'bo')  % 绘制最大值的位置
@@ -375,6 +376,17 @@ if fig_bool == ON
     title('logL');
     
 
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    test = sort(Z_1(:));
+    test_min = min(test);
+    test_max = max(test);
+    test = test(2:5:end,:);
+    clev = [test_min;test;test_max];
+    hc = contourfcmap(log(X), Y, Z_1,clev,jet(length(clev)-1), 'lo', [.8 .8 .8], 'hi', [.2 .2 .2], 'cbarloc', 'eastoutside', 'method', 'calccontour',   'evencb', true);
+    hold on
+    plot(log(lambda),sigma_p,'ro')
+    plot(log(lambda_Max), sigma_p_Max, 'bo')  % 绘制最大值的位置
+   
 %     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 %     contourf(X, Y, Z_2);  % 绘制等高线图
 %     set(gca, 'XScale', 'log');
