@@ -20,7 +20,7 @@ addpath(genpath("F:\git\xihoumen_inverse_force_estimation"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package/"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/"))
-
+addpath(genpath("D:\XSY\20230930"))
 
 subStreamNumberDefault = 2132;
 run('InitScript.m');
@@ -256,11 +256,11 @@ end
 
 %% parfor loop
 if 1
-    n1 = 50;
-    n2 = 50;
+    n1 = 100;
+    n2 = 100;
     n3 = 10;
-    lambdas_m_list = linspace(1e-8,1e-1, n1);
-    sigma_ps_m_list = linspace(100,500,n2);
+    lambdas_m_list = logspace(-15,-1, n1);
+    sigma_ps_m_list = linspace(10,5000,n2);
     omega_0_list = linspace(0.9,1.1,n3);
     [X, Y,Z] = meshgrid(lambdas_m_list, sigma_ps_m_list,omega_0_list);
     combinations = [reshape(X, [], 1), reshape(Y, [], 1),reshape(Z, [], 1)];
@@ -388,7 +388,7 @@ if fig_bool == ON
     title('logL');
 end
 
-
+save('result.mat','X','Y','Z','logL','logSk','logek')
 %% necessary functions
 function [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi,nodeondeck,Mapping_data)
 
