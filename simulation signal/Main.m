@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-09-27 12:52:24
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2023-10-02 02:13:10
+%LastEditTime: 2023-10-02 02:18:20
 %FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/simulation signal/Main.m
 %Description: 使用模拟荷载信号，测试反算气动力的准确性，以及参数选择的合理性
 %
@@ -27,7 +27,7 @@ subStreamNumberDefault = 2132;
 run('InitScript.m');
 
 %% 0 绘图参数
-fig_bool = ON;
+fig_bool = OFF;
 num_figs_in_row = 10; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
@@ -265,8 +265,8 @@ if parfor_loop_three_variables == ON
     n1 = 100;
     n2 = 100;
     n3 = 10;
-    lambdas_m_list = logspace(-15,-1, n1);
-    sigma_ps_m_list = linspace(1,100,n2);
+    lambdas_m_list = logspace(-10,-1, n1);
+    sigma_ps_m_list = linspace(5,100,n2);
     omega_0_list = linspace(0.9,1.1,n3);
     [X, Y,Z] = meshgrid(lambdas_m_list, sigma_ps_m_list,omega_0_list);
     combinations = [reshape(X, [], 1), reshape(Y, [], 1),reshape(Z, [], 1)];
