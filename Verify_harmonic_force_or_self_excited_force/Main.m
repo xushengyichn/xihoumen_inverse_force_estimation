@@ -2,7 +2,7 @@
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com
 %Date: 2023-01-25 15:24:39
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-09-30 22:20:07
+%LastEditTime: 2023-10-02 22:37:24
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\Verify_harmonic_force_or_self_excited_force\Main.m
 %Description: 本脚本功能为输入一组TMD参数以及气动力控制参数，获得多阶模态涡振的响应
 %
@@ -13,7 +13,7 @@ clear
 close all
 addpath(genpath("F:\git\Function_shengyi_package"))
 addpath(genpath("F:\git\ssm_tools"))
-
+addpath(genpath("F:\git\HHT-Tutorial\HuangEMD"))
 subStreamNumberDefault = 2132;
 run('InitScript.m');
 %% 0 绘图参数
@@ -33,7 +33,7 @@ number_of_tmds = 0; % 考虑的总TMD数 The total number of TMDs
 total_tmd_mass_ratio = 0.02; % 总质量比 The total mass ratio
 mass_six_span = 10007779.7; % 深中通道非通航桥六跨连续梁质量 The mass of 6-span continuous beam of the non-navigational bridge of the Zhenzhong-Link
 total_tmd_mass = total_tmd_mass_ratio * mass_six_span; % 总质量 The total mass
-modal_damping_ratios = ones(1, number_of_modes_to_consider) * 0.003; % 模态阻尼 The damping of modes
+modal_damping_ratios = ones(1, number_of_modes_to_consider) * 0.000; % 模态阻尼 The damping of modes
 t_length = 100; % 设定计算时间长度
 
 % 输入初始参数
@@ -155,12 +155,168 @@ Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
 
 [f_re_kalman, magnitude_re_kalman] = fft_transform(100,xn_re_kalman(1,:));
 
+%% Calculate aerodynamic force work
+fs = 1/0.01;
+t = 0:1/fs:100;
 
+% 
+[p,fd,td] = pspectrum(x_k_k(1,:),t,'spectrogram','FrequencyResolution',0.05);
+
+[ifq1,t1] = instfreq(p,fd,td);
+% [ifq2,t2] = instfreq(u_re,fs);
+
+
+
+% 首先，我们对于t1范围内的t值执行插值
+inside_indices = t >= min(t1) & t <= max(t1);
+t_inside = t(inside_indices);
+ifq1_interpolated_inside = interp1(t1, ifq1, t_inside, 'linear');
+
+% 然后，我们对于t1范围外的t值保留最近的ifq1值
+t_outside_left = t(t < min(t1));
+t_outside_right = t(t > max(t1));
+ifq1_extrapolated_left = repmat(ifq1(1), size(t_outside_left));
+ifq1_extrapolated_right = repmat(ifq1(end), size(t_outside_right));
+
+% 最后，我们将这些值合并到一个数组中
+ifq1_interpolated = [ifq1_extrapolated_left  ifq1_interpolated_inside  ifq1_extrapolated_right];
+
+% 现在，ifq1_interpolated 是一个与t具有相同长度的数组，其中包含通过插值和外插获得的ifq1值。
+
+
+
+% x_analytic = hilbert(u_re);
+% 
+% inst_amplitude = abs(x_analytic);
+% figure;
+% plot(t, inst_amplitude);
+% hold on
+% plot(t,u_re)
+% xlabel('Time (s)');
+% ylabel('Instantaneous Amplitude');
+% title('Instantaneous Amplitude vs Time');
+% 
+
+
+Fa = p_filt_m;
+vel = x_k_k(2,:);
+dis = x_k_k(1,:);
+t = t;
+
+
+% 找到峰值
+d = 100;
+p = 0;
+[peaks, locs] = findpeaks(Fa,'MinPeakDistance', d,'MinPeakProminence', p);
+
+% 画图来验证峰值检测的准确性
+figure;
+plot(t, Fa);
+hold on;
+plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
+hold off;
+title('Peak detection');
+xlabel('Time');
+ylabel('Force');
+
+
+for k1 = 1:length(locs)-1
+    dt = t(locs(k1+1))-t(locs(k1));
+    work(k1) = trapz(t(locs(k1):locs(k1+1)),Fa(locs(k1):locs(k1+1)).*vel(locs(k1):locs(k1+1)));
+    dis_k1 = dis(locs(k1):locs(k1+1));
+    amp(k1) = (max(dis_k1)-min(dis_k1))/2;
+    f(k1) = (ifq1_interpolated(locs(k1))+ifq1_interpolated(locs(k1+1)))/2;
+    omega(k1) = 2*pi*f(k1);
+    c(k1) = work(k1)/pi/amp(k1)^2/omega(k1);
+    zeta(k1)=c(k1)/2/omega(k1);
+end
+amp_filt_kalman=amp;
+zeta_filt_kalman=zeta;
+figure
+plot(amp_filt_kalman,zeta_filt_kalman)
+
+
+Fa = F_viv;
+vel = udot;
+dis = u;
+t = t;
+
+
+% 找到峰值
+d = 100;
+p = 0;
+[peaks, locs] = findpeaks(Fa,'MinPeakDistance', d,'MinPeakProminence', p);
+
+% 画图来验证峰值检测的准确性
+figure;
+plot(t, Fa);
+hold on;
+plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
+hold off;
+title('Peak detection');
+xlabel('Time');
+ylabel('Force');
+
+
+for k1 = 1:length(locs)-1
+    dt = t(locs(k1+1))-t(locs(k1));
+    work(k1) = trapz(t(locs(k1):locs(k1+1)),Fa(locs(k1):locs(k1+1)).*vel(locs(k1):locs(k1+1)));
+    dis_k1 = dis(locs(k1):locs(k1+1));
+    amp(k1) = (max(dis_k1)-min(dis_k1))/2;
+    f(k1) = 1/dt;
+    omega(k1) = 2*pi*f(k1);
+    c(k1) = work(k1)/pi/amp(k1)^2/omega(k1);
+    zeta(k1)=c(k1)/2/omega(k1);
+end
+amp_real=amp;
+zeta_real=zeta;
+
+figure
+plot(amp_real,zeta_real)
 
 
 %% Calculate aerodynamic damping ratio
-zeta_polynomial = F_viv./udot./2./MM_eq./(2*pi*Freq).^2;
-zeta_filt_kalman = p_filt_m./udot./2./MM_eq./(2*pi*Freq).^2;
+% zeta_polynomial = F_viv./udot./2./MM_eq./(2*pi*Freq).^2;
+% zeta_filt_kalman = p_filt_m./udot./2./MM_eq./(2*pi*Freq).^2;
+
+%% Calculate the damping ratio based on displacement 
+
+
+
+
+[ex, frex] = ee(x_k_k(1,:), 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
+% [ex, frex] = ee(u_re, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
+% figure
+% plot(t, ex);
+% hold on
+% plot(t,x_k_k(1,:))
+% xlabel('Time (s)');
+% ylabel('Instantaneous Amplitude');
+% title('Instantaneous Amplitude vs Time');
+
+
+figure
+plot(t,frex)
+
+omgx = frex*2*pi;
+for k1 = 1:length(ex)-1
+    epsx(k1)=log(ex(k1)/ex(k1+1))/omgx(k1)*fs;
+end
+
+epsx = [epsx epsx(end)];
+
+figure
+plot(t,epsx)
+grid
+
+
+figure
+plot(x_k_k(1,:),x_k_k(2,:))
+
+% figure
+% [f, magnitude] = fft_transform(fs,u_re)
+% plot(f,magnitude)
+
 
 
 %% plot
@@ -210,13 +366,43 @@ ylabel('Modal Displacement')
 legend('True','Calculate using VIV force','Recalculated using VIV force estimated by Kalman filter','Kalman filter estimated')
 
 
+% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% plot(t,zeta_polynomial, 'LineWidth', 2);
+% hold on
+% plot(t,u_re*0.00001)
+% % plot(t,zeta_filt_kalman, 'LineWidth', 2);
+% xlabel('Time (s)')
+% ylabel('Aerodynamic damping ratio')
+% legend('True','Kalman filter estimated')
+
+% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% scatter(abs(u_re),zeta_polynomial)
+% xlabel('Displacement')
+% ylabel('Aerodynamic damping ratio')
+
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(t,zeta_polynomial, 'LineWidth', 2);
+scatter(ex,epsx,'green')
 hold on
-plot(t,zeta_filt_kalman, 'LineWidth', 2);
-xlabel('Time (s)')
+scatter(amp_filt_kalman,-zeta_filt_kalman,'o')
+scatter(amp_real,-zeta_real,'k')
+xlabel('Displacement')
 ylabel('Aerodynamic damping ratio')
-legend('True','Kalman filter estimated')
+ylim([-0.2 0])
+legend("calculated by displacement","calculated by force","real")
+
+% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% scatter(abs(u_re),zeta_filt_kalman)
+% xlabel('Displacement')
+% ylabel('Aerodynamic damping ratio')
+% ylim([-0.01 0.015])
+% 
+% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% % plot(t,zeta_polynomial, 'LineWidth', 2);
+% hold on
+% plot(t,zeta_filt_kalman, 'LineWidth', 2);
+% xlabel('Time (s)')
+% ylabel('Aerodynamic damping ratio')
+% legend('True','Kalman filter estimated')
 
 %% functions
 
@@ -354,4 +540,14 @@ for k1 = 1:np
     sigma_w12 = blkdiag(sigma_w12, sigma_w(k1) * eye(2));
 end
 
+end
+
+
+function [ amp,fre ] = ee( data,dt )
+%EE Summary of this function goes here
+%   Detailed explanation goes here
+[normalizeddata,amp]=splinenormalizeep(data);
+frecarrier=gradient(normalizeddata,dt);
+[normalizedfrecarrier,ampfrecarrier]=splinenormalizeep(frecarrier);
+fre=ampfrecarrier/2/pi;
 end
