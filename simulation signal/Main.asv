@@ -28,7 +28,7 @@ run('InitScript.m');
 
 %% 0 绘图参数
 fig_bool = ON;
-num_figs_in_row = 5; %每一行显示几个图
+num_figs_in_row = 7; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
 gap_between_images = [0, 0];
@@ -549,7 +549,7 @@ if parfor_loop_three_variables == ON
     zlabel('omega variation')
 
 
-    x = [-8*10^(9)  0 3e7 3.05e7 3.06e7 3.07e7 3.08e7 3.09e7 3.10e7 3.11e7 3.12e7 3.13e7 3.14e7 3.1489e7];
+    x = [-8*exp(-9) -exp(-1) 0 1e4 1e6 1e7 2e7 3e7 3.05e7 3.10e7 3.12e7 3.14e7 3.1489e7];
     Nx = length(x);
     c_lim = [min(x) max(x)];
     dx = min(diff(x));
@@ -562,13 +562,8 @@ if parfor_loop_three_variables == ON
     interp1(x(:),cmap(:,3),y(:)) ...
     ];
 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    x_list = X(:);
-    y_list = Y(:);
-    z_list = Z(:);
-    logL_list = logL(:);
-
-    scatter3(x_list,y_list,z_list,10,logL_list)
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    scatter3(X(:),Y(:),Z(:),10,logL(:))
     colormap(cmap2)
     % clim(c_lim)
     set(gca, 'XScale', 'log');
@@ -577,7 +572,9 @@ if parfor_loop_three_variables == ON
     hold on 
     scatter3(lambda,sigma_p,1,30,"red",'filled')
     [~,maxLogL_idx] = max(logL(:));
-
+    x_list = X(:);
+    y_list = Y(:);
+    z_list = Z(:);
     x_max = x_list(maxLogL_idx);
     y_max = y_list(maxLogL_idx);
     z_max = z_list(maxLogL_idx);
@@ -585,35 +582,6 @@ if parfor_loop_three_variables == ON
     xlabel('lambda')
     ylabel('sigma_p')
     zlabel('omega variation')
-
-    z_list_unique = unique(z_list);
-    for k2 = 1:length(z_list_unique)
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        x_list = X(:);
-        y_list = Y(:);
-        z_list = Z(:);
-        logL_list = logL(:);
-        index = Z(:) == z_list_unique(k2);
-    
-        scatter3(x_list(index),y_list(index),z_list(index),10,logL_list(index))
-        colormap(cmap2)
-        % clim(c_lim)
-        set(gca, 'XScale', 'log');
-        colorbar;  % 添加颜色栏
-        title('logL');
-        hold on 
-        scatter3(lambda,sigma_p,1,30,"red",'filled')
-        [~,maxLogL_idx] = max(logL(:));
-    
-        x_max = x_list(maxLogL_idx);
-        y_max = y_list(maxLogL_idx);
-        z_max = z_list(maxLogL_idx);
-        scatter3(x_max,y_max,z_max,30,"cyan",'filled')
-        xlabel('lambda')
-        ylabel('sigma_p')
-        zlabel('omega variation')
-        zlim([0.9,1.1])
-    end
     % save('result_three_variables.mat','X','Y','Z','logL','logSk','logek','lambda','sigma_p','x_max','y_max','z_max')
 end
 

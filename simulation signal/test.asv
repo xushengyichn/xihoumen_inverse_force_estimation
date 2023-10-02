@@ -55,7 +55,7 @@ figure
 % interp1(x(:),cmap(:,3),y(:)) ...
 % ];
 S = peaks(30);
-surf(abs(S))
+surf(S)
 
 
 colorbar
@@ -63,11 +63,11 @@ colorbar
 
 
 figure
-x = [0 0.00005 0.0001 0.0002 0.0003 0.005 10];
+x = [0 0.001 0.005 0.01 0.05 1 2 3 4 5];
 Nx = length(x);
-c_lim = [min(x) max(x)];
+clim = [min(x) max(x)];
 dx = min(diff(x));
-y = c_lim(1):dx:c_lim(2);
+y = clim(1):dx:clim(2);
 for k=1:Nx-1, y(y>x(k) & y<=x(k+1)) = x(k+1); end % NEW
 cmap = colormap(parula(Nx));
 cmap2 = [...
@@ -78,5 +78,5 @@ interp1(x(:),cmap(:,3),y(:)) ...
 % S = peaks(30);
 surf(abs(S))
 colormap(cmap2)
-clim(c_lim)
+caxis(clim)
 colorbar
