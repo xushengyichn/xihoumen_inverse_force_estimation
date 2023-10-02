@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com Date:
-%LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-02 12:47:01
+%LastEditors: xushengyichn xushengyichn@outlook.com
+%LastEditTime: 2023-10-03 01:27:08
 %Description: 计算简支梁施加荷载后的动力响应，并反算出荷载（分别按照集中力和模态力反算）
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -19,8 +19,8 @@ subStreamNumberDefault = 2132;
 run('InitScript.m');
 
 %% 0 绘图参数
-fig_bool = ON;
-num_figs_in_row = 10; %每一行显示几个图
+fig_bool = OFF;
+num_figs_in_row = 6; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
 gap_between_images = [0, 0];
@@ -246,7 +246,112 @@ logSk=result.logSk;
 logek=result.logek;
 
 
+%% 9 calculate aerodynamic damping ratio
+t = t;
+t = 0:1/fs:1/fs*(length(t)-1);
+[p,fd,td] = pspectrum(x_k_k(1,:),t,'spectrogram','FrequencyResolution',0.005);
+[ifq1,t1] = instfreq(p,fd,td);
+% close all
+figure
+plot(t1,ifq1)
+[f, magnitude] = fft_transform(fs,x_k_k(1,:))
+figure
+plot(f, magnitude)
+% 首先，我们对于t1范围内的t值执行插值
+inside_indices = t >= min(t1) & t <= max(t1);
+t_inside = t(inside_indices);
+ifq1_interpolated_inside = interp1(t1, ifq1, t_inside, 'linear');
 
+% 然后，我们对于t1范围外的t值保留最近的ifq1值
+t_outside_left = t(t < min(t1));
+t_outside_right = t(t > max(t1));
+ifq1_extrapolated_left = repmat(ifq1(1), size(t_outside_left));
+ifq1_extrapolated_right = repmat(ifq1(end), size(t_outside_right));
+
+% 最后，我们将这些值合并到一个数组中
+ifq1_interpolated = [ifq1_extrapolated_left  ifq1_interpolated_inside  ifq1_extrapolated_right];
+
+Fa = p_filt_m;
+vel = x_k_k(2,:);
+dis = x_k_k(1,:);
+t = t;
+
+% 找到峰值
+d = 100;
+p = 0;
+[peaks, locs] = findpeaks(dis,'MinPeakDistance', d,'MinPeakProminence', p);
+
+% 画图来验证峰值检测的准确性
+figure;
+plot(t, dis);
+hold on;
+plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
+hold off;
+title('Peak detection');
+xlabel('Time');
+ylabel('Displacement');
+
+
+for k1 = 1:length(locs)-1
+    dt = t(locs(k1+1))-t(locs(k1));
+    work(k1) = trapz(t(locs(k1):locs(k1+1)),Fa(locs(k1):locs(k1+1)).*vel(locs(k1):locs(k1+1)));
+    dis_k1 = dis(locs(k1):locs(k1+1));
+    amp(k1) = (max(dis_k1)-min(dis_k1))/2;
+    f(k1) = (ifq1_interpolated(locs(k1))+ifq1_interpolated(locs(k1+1)))/2;
+%     f(k1) = 0.321813289457002;
+    omega(k1) = 2*pi*f(k1);
+    c(k1) = work(k1)/pi/amp(k1)^2/omega(k1);
+    zeta(k1)=c(k1)/2/omega(k1);
+end
+
+amp_filt_kalman=amp;
+zeta_filt_kalman=zeta;
+figure
+scatter(amp_filt_kalman,-zeta_filt_kalman)
+hold on
+aa=[0 600];
+bb = [0 0];
+plot(aa,bb)
+
+
+%% traditional way
+
+[ex, frex] = ee(x_k_k(1,:), 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
+% [ex, frex] = ee(u_re, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
+% figure
+% plot(t, ex);
+% hold on
+% plot(t,x_k_k(1,:))
+% xlabel('Time (s)');
+% ylabel('Instantaneous Amplitude');
+% title('Instantaneous Amplitude vs Time');
+figure
+plot(t,frex)
+
+omgx = frex*2*pi;
+for k1 = 1:length(ex)-1
+    epsx(k1)=log(ex(k1)/ex(k1+1))/omgx(k1)*fs;
+end
+
+epsx = [epsx epsx(end)];
+
+figure
+plot(t,epsx)
+grid
+
+
+figure
+plot(t,ex)
+grid
+
+
+
+figure
+plot(ex,epsx)
+title("damping ratio with amplitude")
+
+figure
+plot(x_k_k(1,:),x_k_k(2,:))
 
 
 %% plot
