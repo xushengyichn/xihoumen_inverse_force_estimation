@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-09-27 12:52:24
-%LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-09-30 18:20:00
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\simulation signal\Main.m
+%LastEditors: xushengyichn xushengyichn@outlook.com
+%LastEditTime: 2023-10-02 02:13:10
+%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/simulation signal/Main.m
 %Description: 使用模拟荷载信号，测试反算气动力的准确性，以及参数选择的合理性
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -34,6 +34,8 @@ figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 gap_between_images = [0, 0];
 figureIdx = 0;
 
+parfor_loop_two_variables = OFF;
+parfor_loop_three_variables = ON;
 
 %% Generate force
 modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
@@ -191,8 +193,8 @@ Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
 
 
 
-%% parfor loop
-if 1
+%% parfor loop two variables
+if parfor_loop_two_variables == ON
 n1 = 10;
 n2 = 10;
 lambdas_m_list = logspace(-8,-1, n1);
@@ -258,13 +260,13 @@ end
 
 
 
-%% parfor loop
-if 0
+%% parfor loop three variables
+if parfor_loop_three_variables == ON
     n1 = 100;
     n2 = 100;
     n3 = 10;
     lambdas_m_list = logspace(-15,-1, n1);
-    sigma_ps_m_list = linspace(10,5000,n2);
+    sigma_ps_m_list = linspace(1,100,n2);
     omega_0_list = linspace(0.9,1.1,n3);
     [X, Y,Z] = meshgrid(lambdas_m_list, sigma_ps_m_list,omega_0_list);
     combinations = [reshape(X, [], 1), reshape(Y, [], 1),reshape(Z, [], 1)];
@@ -346,6 +348,15 @@ if fig_bool == ON
 
 
 
+   
+
+
+    
+
+end
+
+if parfor_loop_two_variables == ON
+
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t,yn(3,:))
     hold on
@@ -386,48 +397,50 @@ if fig_bool == ON
     hold on
     plot(log(lambda),sigma_p,'ro')
     plot(log(lambda_Max), sigma_p_Max, 'bo')  % 绘制最大值的位置
-   
-%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-%     contourf(X, Y, Z_2);  % 绘制等高线图
-%     set(gca, 'XScale', 'log');
-%     xlabel('lambdas');
-%     ylabel('sigma_ps');
-%     colorbar;  % 添加颜色栏
-%     title('logSk');
-% 
-% 
-%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-%     contourf(X, Y, Z_3);  % 绘制等高线图
-%     set(gca, 'XScale', 'log');
-%     xlabel('lambdas');
-%     ylabel('sigma_ps');
-%     colorbar;  % 添加颜色栏
-%     title('logek');
 
-    
-%     load result.mat
-%     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-%     scatter3(X(:),Y(:),Z(:),10,logL(:),'filled')
-%     set(gca, 'XScale', 'log');
-%     colorbar;  % 添加颜色栏
-%     title('logL');
-%     hold on 
-%     lambda = 0.00002;
-%     sigma_p = sqrt(400);
-%     f1 = 1;
-%     scatter3(lambda,sigma_p,1,30,"red")
-%     [~,maxLogL_idx] = max(logL(:));
-%     x_list = X(:);
-%     y_list = Y(:);
-%     z_list = Z(:);
-%     x_max = x_list(maxLogL_idx);
-%     y_max = y_list(maxLogL_idx);
-%     z_max = z_list(maxLogL_idx);
-%     scatter3(x_max,y_max,z_max,30,"cyan")
 
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_2);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('lambdas');
+    ylabel('sigma_ps');
+    colorbar;  % 添加颜色栏
+    title('logSk');
+
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_3);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('lambdas');
+    ylabel('sigma_ps');
+    colorbar;  % 添加颜色栏
+    title('logek');
+
+
+    save('result_two_variables.mat','X','Y','Z_1','Z_2','Z_3','logL','logSk','logek','lambda','sigma_p','lambda_Max','sigma_p_Max')
 end
 
 
+if parfor_loop_three_variables == ON
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    scatter3(X(:),Y(:),Z(:),10,logL(:),'filled')
+    set(gca, 'XScale', 'log');
+    colorbar;  % 添加颜色栏
+    title('logL');
+    hold on 
+    scatter3(lambda,sigma_p,1,30,"red")
+    [~,maxLogL_idx] = max(logL(:));
+    x_list = X(:);
+    y_list = Y(:);
+    z_list = Z(:);
+    x_max = x_list(maxLogL_idx);
+    y_max = y_list(maxLogL_idx);
+    z_max = z_list(maxLogL_idx);
+    scatter3(x_max,y_max,z_max,30,"cyan")
+
+    save('result_three_variables.mat','X','Y','Z','logL','logSk','logek','lambda','sigma_p','x_max','y_max','z_max')
+end
 
 
 % save('result.mat','X','Y','Z','logL','logSk','logek')
