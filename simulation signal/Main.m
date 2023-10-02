@@ -2,8 +2,8 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-09-27 12:52:24
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2023-10-02 02:18:20
-%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/simulation signal/Main.m
+%LastEditTime: 2023-10-03 00:08:39
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\simulation signal\Main.m
 %Description: 使用模拟荷载信号，测试反算气动力的准确性，以及参数选择的合理性
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -36,6 +36,7 @@ figureIdx = 0;
 
 parfor_loop_two_variables = OFF;
 parfor_loop_three_variables = OFF;
+parfor_loop_Q_R = OFF;
 
 %% Generate force
 modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
@@ -155,9 +156,13 @@ J_d_m = J_c_m;
 % sigma_ps_m = [sigma_p] * ones(1, np_m);
 
 
+% lambdas_m = [3.59381e-07] * ones(1, np_m);
+% 
+% sigma_ps_m = [44.5556] * ones(1, np_m);
+
 lambdas_m = [3.59381e-07] * ones(1, np_m);
 
-sigma_ps_m = [44.5556] * ones(1, np_m);
+sigma_ps_m = [50] * ones(1, np_m);
 
 % omega_0= f1*2*pi;
 
@@ -328,6 +333,73 @@ Z_2 = reshape(logSk, n2, n1);
 Z_3 = reshape(logek, n2, n1);
 end
 
+%% parfor loop two variables Q R
+if parfor_loop_Q_R == ON
+n1 = 10;
+n2 = 10;
+Q_list = logspace(-10,-1, n1);
+R_list = logspace(-10,-1, n2);
+[X, Y] = meshgrid(Q_list, R_list);
+combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
+numIterations = size(combinations,1);
+
+if isempty(gcp('nocreate'))
+    parpool();
+end
+
+b = ProgressBar(numIterations, ...
+    'IsParallel', true, ...
+    'WorkerDirectory', pwd(), ...
+    'Title', 'Parallel 1' ...
+    );
+b.setup([], [], []);
+
+
+
+parfor k1 = 1:numIterations
+% for k1 = 1:numIterations
+    parameters = combinations(k1,:);
+    lambdas_m = lambda * ones(1, np_m);
+    sigma_ps_m =sigma_p  * ones(1, np_m);
+    % omega_0= f1*2*pi;
+    [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
+    
+    Q_xd_temp = parameters(1) * eye(ns);
+    R_temp = parameters(2) * eye(n_sensors);
+    [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m,Q_xd_temp, sigma_w_m12, dt);
+    A_a_m = Fad_m;
+    G_a_m = Had_m;
+    Q_a_m = Qad_m;
+    R_a_m = R_temp;
+    yn_a = yn;
+    NN = N;
+    xa_history = zeros(ns + np_m * (2), NN);
+    pa_history = zeros(ns + np_m * (2), NN);
+    
+    x_ak = zeros(ns + np_m * (2), 1);
+    P_ak = 10 ^ (1) * eye(ns + np_m * (2));
+    
+    % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
+    [x_k_k, x_k_kmin, P_k_k, P_k_kmin,result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',false);
+    logL(k1)=result.logL;
+    logSk(k1) = result.logSk;
+    logek(k1)=result.logek;
+
+    % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
+    updateParallel([], pwd);
+end
+
+[~,MaxIdx]= max(logL);
+Q_Max = combinations(MaxIdx,1);
+R_Max = combinations(MaxIdx,2);
+
+b.release();
+
+Z_1 = reshape(logL, n2, n1);
+Z_2 = reshape(logSk, n2, n1);
+Z_3 = reshape(logek, n2, n1);
+end
+
 
 
 %% parfor loop three variables
@@ -479,8 +551,8 @@ if parfor_loop_two_variables == ON
     plot(lambda,sigma_p,'ro')
     plot(lambda_Max, sigma_p_Max, 'bo')  % 绘制最大值的位置
     set(gca, 'XScale', 'log');
-    xlabel('lambdas');
-    ylabel('sigma_ps');
+    xlabel('Q');
+    ylabel('R');
     colorbar;  % 添加颜色栏
 
     title('logL');
@@ -526,6 +598,70 @@ if parfor_loop_two_variables == ON
     % save('result_two_variables.mat','X','Y','Z_1','Z_2','Z_3','logL','logSk','logek','lambda','sigma_p','lambda_Max','sigma_p_Max')
 end
 
+if parfor_loop_Q_R == ON
+
+
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % n = 256;
+    % x = linspace(0, 1, n)';
+    % baseColormap = parula(n);
+    % customMap = [baseColormap(:,1), baseColormap(:,2), baseColormap(:,3)].*x.^2;  % 四次多项式映射
+    % colormap(customMap);
+    contourf(X, Y, Z_1,1000,'LineColor','none');   % 绘制等高线图
+
+    % clim([3.0e+07 3.1512e+07]);
+    hold on
+    plot(10^(-8),10^(-5),'ro')
+    plot(Q_Max, R_Max, 'bo')  % 绘制最大值的位置
+    set(gca, 'XScale', 'log');
+    set(gca, 'YScale', 'log');
+    xlabel('Q');
+    ylabel('R');
+    colorbar;  % 添加颜色栏
+
+    title('logL');
+    
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    test = sort(Z_1(:));
+    test_min = min(test);
+    test_max = max(test);
+    test = test(2:5:end,:);
+    clev = [test_min;test;test_max];
+    hc = contourfcmap(log(X), log(Y), Z_1,clev,jet(length(clev)-1), 'lo', [.8 .8 .8], 'hi', [.2 .2 .2], 'cbarloc', 'eastoutside', 'method', 'calccontour',   'evencb', true);
+    hold on
+    plot(log(10^(-8)),log(10^(-5)),'ro')
+    plot(log(Q_Max), log(R_Max), 'bo')  % 绘制最大值的位置
+    % logXTicks = -8:-1;  % 对数值
+    % xticks(logXTicks);
+    % newXTickLabels = "10^" + string(logXTicks);
+    % xticklabels(newXTickLabels);
+    title('logL');
+    xlabel('log(Q)');
+    ylabel('log(R)');
+
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_2);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('Q');
+    ylabel('R');
+    colorbar;  % 添加颜色栏
+    title('logSk');
+
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    contourf(X, Y, Z_3);  % 绘制等高线图
+    set(gca, 'XScale', 'log');
+    xlabel('Q');
+    ylabel('R');
+    colorbar;  % 添加颜色栏
+    title('logek');
+
+
+    % save('result_two_variables.mat','X','Y','Z_1','Z_2','Z_3','logL','logSk','logek','lambda','sigma_p','lambda_Max','sigma_p_Max')
+end
 
 if parfor_loop_three_variables == ON
 

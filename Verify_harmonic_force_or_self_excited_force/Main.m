@@ -14,6 +14,7 @@ close all
 addpath(genpath("F:\git\Function_shengyi_package"))
 addpath(genpath("F:\git\ssm_tools"))
 addpath(genpath("F:\git\HHT-Tutorial\HuangEMD"))
+addpath(genpath("D:\matlab\Mingjie杰哥参数识别程序\HHT-Tutorial-master"))
 subStreamNumberDefault = 2132;
 run('InitScript.m');
 %% 0 绘图参数
