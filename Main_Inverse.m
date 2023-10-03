@@ -328,7 +328,7 @@ plot(aa,bb)
 figure
 plot(t,frex)
 
-omgx = frex*2*pi;
+omgx = ifq1_interpolated*2*pi;
 for k1 = 1:length(ex)-1
     epsx(k1)=log(ex(k1)/ex(k1+1))/omgx(k1)*fs;
 end
@@ -341,14 +341,20 @@ grid
 
 
 figure
+hold on
+plot(t,x_k_k(1,:))
 plot(t,ex)
-grid
+
+
 
 
 
 figure
-plot(ex,epsx)
+scatter(ex,epsx)
 title("damping ratio with amplitude")
+ylim([-1 1])
+hold on 
+scatter(amp_filt_kalman,-zeta_filt_kalman)
 
 figure
 plot(x_k_k(1,:),x_k_k(2,:))
