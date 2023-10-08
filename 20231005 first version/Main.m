@@ -7,7 +7,7 @@ subStreamNumberDefault = 2132;
 run('InitScript.m');
 
 %% 0 绘图参数
-fig_bool = OFF;
+fig_bool = ON;
 num_figs_in_row = 6; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
@@ -54,12 +54,12 @@ loc_acc = [578 + 1650/4; 578 + 1650/2; 578 + 1650/4 * 3];
 loc_vel = [];
 loc_dis = [];
 
-yn(1, :) = Acc_Data.mergedData.AC2_1;
-yn(2, :) = Acc_Data.mergedData.AC2_3;
-yn(3, :) = Acc_Data.mergedData.AC3_1;
-yn(4, :) = Acc_Data.mergedData.AC3_3;
-yn(5, :) = Acc_Data.mergedData.AC4_1;
-yn(6, :) = Acc_Data.mergedData.AC4_3;
+yn(1, :) = Acc_Data.mergedData.AC2_1/1000*9.8;
+yn(2, :) = Acc_Data.mergedData.AC2_3/1000*9.8;
+yn(3, :) = Acc_Data.mergedData.AC3_1/1000*9.8;
+yn(4, :) = Acc_Data.mergedData.AC3_3/1000*9.8;
+yn(5, :) = Acc_Data.mergedData.AC4_1/1000*9.8;
+yn(6, :) = Acc_Data.mergedData.AC4_3/1000*9.8;
 timeDifferences = diff(Acc_Data.mergedData.Time); % Returns a duration array
 dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
 
@@ -69,7 +69,7 @@ dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds
 [A_c, B_c, G_c, J_c] = ssmod_c_mode(nmodes, omega2, Gamma, phi, S_a, S_v, S_d);
 
 acc_names = ["Main span 1/4", "Main span 1/2", "Main span 3/4"];
-omega_0 = 2 * pi * Freq;
+
 
 maxvalue = max(max(abs(yn)));
 fs = 1 / dt;
@@ -96,6 +96,8 @@ lambdas_m = [1e-1] * ones(1, np_m);
 
 sigma_ps_m = [100000] * ones(1, np_m);
 
+omega_0 = 2 * pi * Freq;
+
 [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
 [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
@@ -120,7 +122,7 @@ x_filt_original = xa_history(1:ns, :);
 H_d_m = H_c_m;
 p_filt_m = H_d_m * xa_history(ns + 1:end, :);
 Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
-
+[f, magnitude] = fft_transform(fs,x_k_k(1,:));
 %% 5 fft and bandpass filter for the estimated modal force
 for k1 = 1:nmodes
 
@@ -171,12 +173,7 @@ t = Acc_Data.mergedData.Time;
 % t = 0:1/fs:1/fs*(length(t)-1);
 [p,fd,td] = pspectrum(x_k_k(1,:),t,'spectrogram','FrequencyResolution',0.005);
 [ifq1,t1] = instfreq(p,fd,td);
-% close all
-figure
-plot(t1,ifq1)
-[f, magnitude] = fft_transform(fs,x_k_k(1,:));
-figure
-plot(f, magnitude)
+
 % 首先，我们对于t1范围内的t值执行插值
 inside_indices = t >= min(t1) & t <= max(t1);
 t_inside = t(inside_indices);
@@ -198,40 +195,34 @@ t = t;
 
 % 找到峰值
 d = 100;
-p = 0;
-[peaks, locs] = findpeaks(dis,'MinPeakDistance', d,'MinPeakProminence', p);
+pp = 0;
+[peaks, locs] = findpeaks(dis,'MinPeakDistance', d,'MinPeakProminence', pp);
 
-% 画图来验证峰值检测的准确性
-figure;
-plot(t, dis);
-hold on;
-plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
-hold off;
-title('Peak detection');
-xlabel('Time');
-ylabel('Displacement');
+
 
 
 for k1 = 1:length(locs)-1
-    dt = t(locs(k1+1))-t(locs(k1));%需要转换成double TODO
-    work(k1) = trapz(t(locs(k1):locs(k1+1)),Fa(locs(k1):locs(k1+1)).*vel(locs(k1):locs(k1+1)));
+    dt_duration = t(locs(k1+1)) - t(locs(k1)); % This difference is a duration
+    dt = seconds(dt_duration); % Convert duration to seconds
+
+    % Create an array of time intervals in seconds
+    timeIntervals = seconds(t(locs(k1):locs(k1+1)) - t(locs(k1)));
+
+    work(k1) = trapz(timeIntervals, Fa(locs(k1):locs(k1+1)).*vel(locs(k1):locs(k1+1)));
+
     dis_k1 = dis(locs(k1):locs(k1+1));
-    amp(k1) = (max(dis_k1)-min(dis_k1))/2;
-    f(k1) = (ifq1_interpolated(locs(k1))+ifq1_interpolated(locs(k1+1)))/2;
-%     f(k1) = 0.321813289457002;
-    omega(k1) = 2*pi*f(k1);
-    c(k1) = work(k1)/pi/amp(k1)^2/omega(k1);
-    zeta(k1)=c(k1)/2/omega(k1);
+    amp(k1) = (max(dis_k1) - min(dis_k1))/2;
+    f(k1) = (ifq1_interpolated(locs(k1)) + ifq1_interpolated(locs(k1+1))) / 2;
+
+    omega(k1) = 2 * pi * f(k1);
+    c(k1) = work(k1) / pi / amp(k1)^2 / omega(k1);
+    zeta(k1) = c(k1) / 2 / omega(k1);
 end
+
 
 amp_filt_kalman=amp;
 zeta_filt_kalman=zeta;
-figure
-scatter(amp_filt_kalman,-zeta_filt_kalman)
-hold on
-aa=[0 600];
-bb = [0 0];
-plot(aa,bb)
+
 
 
 
@@ -338,6 +329,37 @@ legend("cal","measure")
 xlim([0, 0.5])
 
 
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t1,ifq1)
+title("inst frequency")
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(f, magnitude)
+title("frequency of estimated vibration")
+
+
+instfreq(p,fd,td);
+
+
+
+% 画图来验证峰值检测的准确性
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t, dis);
+hold on;
+plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
+hold off;
+title('Peak detection');
+xlabel('Time');
+ylabel('Displacement');
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+scatter(amp_filt_kalman,-zeta_filt_kalman)
+hold on
+reference_amp=[0 600];
+reference_zeta = [0 0];
+plot(reference_amp,reference_zeta)
+title("amplitude dependent aerodynamic damping ratio")
 %% necessary functions
 function node = FindNodewithLocation(loc, node_loc, nodeondeck)
     %myFun - Description

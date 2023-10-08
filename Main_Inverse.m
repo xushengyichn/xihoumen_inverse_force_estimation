@@ -14,6 +14,7 @@ addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
 addpath(genpath("F:\git\Function_shengyi_package"))
 addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
 addpath(genpath("D:\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
+addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model"))
 
 subStreamNumberDefault = 2132;
 run('InitScript.m');
