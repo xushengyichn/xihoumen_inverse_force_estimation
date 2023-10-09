@@ -1,4 +1,14 @@
-function [result] = Main(input)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Author: ShengyiXu xushengyichn@outlook.com
+%Date: 2023-10-09 22:23:15
+%LastEditors: ShengyiXu xushengyichn@outlook.com
+%LastEditTime: 2023-10-09 23:00:54
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\Main.m
+%Description: 
+%
+%Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [result_Main] = Main(input,varargin)
 
     if nargin == 0
         clc; clear; close all;
@@ -18,11 +28,13 @@ function [result] = Main(input)
         %设置图片间隔
         input.gap_between_images = [0, 0];
         input.figureIdx = 0;
+        input.lambada = 1e-1;
+        input.sigma_p = 100000;
+        input.omega_0_variation =1;
+        input.displayText = params.ON;
 
-        %% 1 读取数据
         n = 4;
-        displayDates = 1;
-        [result] = viv2013(n, displayDates);
+        [result] = viv2013(n, params.OFF);
         input.start_time = result.startDate;
         input.end_time = result.endDate - hours(1.6);
         % start_time = datetime('2013-04-03 16:24:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
@@ -32,7 +44,11 @@ function [result] = Main(input)
         Main(input)
         return;
     end
-
+    p = inputParser;
+      addParameter(p, 'showtext', true, @islogical)
+      parse(p, varargin{:});
+    showtext = p.Results.showtext;
+    %% 1 读取数据
     start_time = input.start_time;
     end_time = input.end_time;
     wind_dir = input.wind_dir;
@@ -44,40 +60,45 @@ function [result] = Main(input)
     figureIdx = input.figureIdx;
     ON = input.ON;
     OFF = input.OFF;
-
+   
     [Wind_Data] = read_wind_data(start_time, end_time, wind_dir);
     [Acc_Data] = read_acceleration_data(start_time, end_time, acc_dir);
 
     [uniqueTimestamps, ia, ~] = unique(Acc_Data.mergedData.Time, 'stable');
 
     % Find duplicates by checking the difference in lengths
-    if length(uniqueTimestamps) < height(Acc_Data.mergedData)
-        disp('There are duplicate timestamps:');
-
-        % Get duplicated indices
-        duplicatedIndices = setdiff(1:height(Acc_Data.mergedData), ia);
-
-        % Display duplicates
-        for i = 1:length(duplicatedIndices)
-            disp(Acc_Data.mergedData.Time(duplicatedIndices(i)));
+    if showtext
+        if length(uniqueTimestamps) < height(Acc_Data.mergedData)
+            disp('There are duplicate timestamps:');
+    
+            % Get duplicated indices
+            duplicatedIndices = setdiff(1:height(Acc_Data.mergedData), ia);
+    
+            % Display duplicates
+            for i = 1:length(duplicatedIndices)
+                disp(Acc_Data.mergedData.Time(duplicatedIndices(i)));
+            end
+    
+        else
+            disp('No duplicates found.');
         end
-
-    else
-        disp('No duplicates found.');
     end
+
 
     % select which wind profile to use
 
     %% 判断涡振模态
     acc_1 = Acc_Data.mergedData.AC3_1;
     t = Acc_Data.mergedData.Time;
-    [p, fd, td] = pspectrum(acc_1, t, 'spectrogram', 'FrequencyResolution', 0.005);
-    instfreq(p, fd, td);
+    % [p, fd, td] = pspectrum(acc_1, t, 'spectrogram', 'FrequencyResolution', 0.005);
+    % instfreq(p, fd, td);
 
-    fs = 50;
-    [f, magnitude] = fft_transform(fs, acc_1);
-    figure
-    plot(f, magnitude)
+    % fs = 50;
+    % [f, magnitude] = fft_transform(fs, acc_1);
+    % figure
+    % plot(f, magnitude)
+
+
     %% 2 有限元模型
     % 读入ANSYS梁桥模型质量刚度矩阵  MCK矩阵 Import MCK matrix from ANSYS
     % 将ANSYS中的稀疏矩阵处理为完全矩阵 Handling sparse matrices in ANSYS as full matrices
@@ -85,7 +106,7 @@ function [result] = Main(input)
     % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
     modesel = [23];
     nmodes = length(modesel); ns = nmodes * 2;
-    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel);
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',showtext);
     mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc;
     Freq = Result.Freq;
     % Freq = 0.328194;
@@ -154,11 +175,11 @@ function [result] = Main(input)
     B_d_m = A_c \ (A_d - eye(size(A_d))) * B_c_m;
     J_d_m = J_c_m;
 
-    lambdas_m = [1e-1] * ones(1, np_m);
+    lambdas_m = [input.lambada] * ones(1, np_m);
 
-    sigma_ps_m = [100000] * ones(1, np_m);
+    sigma_ps_m = [input.sigma_p] * ones(1, np_m);
 
-    omega_0 = 2 * pi * Freq;
+    omega_0 = 2 * pi * Freq*input.omega_0_variation;
 
     [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
 
@@ -176,7 +197,7 @@ function [result] = Main(input)
     P_ak = 10 ^ (1) * eye(ns + np_m * (2));
 
     % G_a=G_a_m; A_a=A_a_m; Q_a=Q_a_m;
-    [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true);
+    [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
     % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
     xa_history = x_k_k;
     pa_history = P_k_k;
@@ -477,7 +498,9 @@ function [result] = Main(input)
         colorbar;
     end
 
-    result = 1;
+    result_Main.logL = logL;
+    result_Main.logSk = logSk;
+    result_Main.logek = logek;
     %% necessary functions
     function node = FindNodewithLocation(loc, node_loc, nodeondeck)
         %myFun - Description
