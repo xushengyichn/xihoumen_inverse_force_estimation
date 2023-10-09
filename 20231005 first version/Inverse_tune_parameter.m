@@ -74,13 +74,19 @@ Z_1 = reshape(logL, n2, n1);
 Z_2 = reshape(logSk, n2, n1);
 Z_3 = reshape(logek, n2, n1);
 
-
+save temp
 
 %% plot
 if fig_bool == params.ON
 
 
-    x = [-8*10^(9)  0 3e7 3.05e7 3.06e7 3.07e7 3.08e7 3.09e7 3.10e7 3.11e7 3.12e7 3.13e7 3.14e7 3.1489e7];
+    % x = [-8*10^(10),  -3*10^(10), -2*10^(10), -1.5*10^(10), -1.46*10^(10),-1.449*10^(10),-1.448*10^(10),-1.447*10^(10),-1.446*10^(10),-1.445*10^(10),-1.444*10^(10),-1.443*10^(10),-1.442*10^(10),-1.441*10^(10),-1.44*10^(10),-1.43*10^(10) ];
+    % Identify max value from data
+    max_val = max(logL);
+    
+    % Set up the intervals
+    % I've taken the maximum value from your data and set up intervals that focus granularity around it
+    x = [min(logL), linspace(-1.5*10^(10), max_val, 100)];
     Nx = length(x);
     c_lim = [min(x) max(x)];
     dx = min(diff(x));
