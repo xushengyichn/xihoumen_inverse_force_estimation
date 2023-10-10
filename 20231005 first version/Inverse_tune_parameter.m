@@ -80,28 +80,28 @@ save temp
 if fig_bool == params.ON
 
 
-    % x = [-8*10^(10),  -3*10^(10), -2*10^(10), -1.5*10^(10), -1.46*10^(10),-1.449*10^(10),-1.448*10^(10),-1.447*10^(10),-1.446*10^(10),-1.445*10^(10),-1.444*10^(10),-1.443*10^(10),-1.442*10^(10),-1.441*10^(10),-1.44*10^(10),-1.43*10^(10) ];
-    % Identify max value from data
-    max_val = max(logL);
-    
-    % Set up the intervals
-    % I've taken the maximum value from your data and set up intervals that focus granularity around it
-    x = [min(logL), linspace(-1.5*10^(10), max_val, 100)];
-    Nx = length(x);
-    c_lim = [min(x) max(x)];
-    dx = min(diff(x));
-    y = c_lim(1):dx:c_lim(2);
-    for k=1:Nx-1, y(y>x(k) & y<=x(k+1)) = x(k+1); end % NEW
-    cmap = colormap(parula(Nx));
-    cmap2 = [...
-    interp1(x(:),cmap(:,1),y(:)) ...
-    interp1(x(:),cmap(:,2),y(:)) ...
-    interp1(x(:),cmap(:,3),y(:)) ...
-    ];
+    % % x = [-8*10^(10),  -3*10^(10), -2*10^(10), -1.5*10^(10), -1.46*10^(10),-1.449*10^(10),-1.448*10^(10),-1.447*10^(10),-1.446*10^(10),-1.445*10^(10),-1.444*10^(10),-1.443*10^(10),-1.442*10^(10),-1.441*10^(10),-1.44*10^(10),-1.43*10^(10) ];
+    % % Identify max value from data
+    % max_val = max(logL);
+    % 
+    % % Set up the intervals
+    % % I've taken the maximum value from your data and set up intervals that focus granularity around it
+    % x = [linspace(min(logL), -1.7e+10, 5), linspace(-1.444e+10, max_val, 100)];
+    % Nx = length(x);
+    % c_lim = [min(x) max(x)];
+    % dx = min(diff(x));
+    % y = c_lim(1):dx:c_lim(2);
+    % for k=1:Nx-1, y(y>x(k) & y<=x(k+1)) = x(k+1); end % NEW
+    % cmap = colormap(parula(Nx));
+    % cmap2 = [...
+    % interp1(x(:),cmap(:,1),y(:)) ...
+    % interp1(x(:),cmap(:,2),y(:)) ...
+    % interp1(x(:),cmap(:,3),y(:)) ...
+    % ];
 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
-    colormap(cmap2)
+    % colormap(cmap2)
     contourf(X, Y, Z_1);  % 绘制等高线图
     set(gca, 'XScale', 'log');
     xlabel('lambdas');

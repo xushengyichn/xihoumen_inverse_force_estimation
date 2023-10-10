@@ -23,7 +23,7 @@ function [result_Main] = Main(input,varargin)
         input.OFF = params.OFF;
         %% 0 绘图参数
         input.fig_bool = params.ON;
-        input.num_figs_in_row = 12; %每一行显示几个图
+        input.num_figs_in_row = 5; %每一行显示几个图
         input.figPos = params.figPosSmall; %图的大小，参数基于InitScript.m中的设置
         %设置图片间隔
         input.gap_between_images = [0, 0];
@@ -33,10 +33,10 @@ function [result_Main] = Main(input,varargin)
         input.omega_0_variation =1;
         input.displayText = params.ON;
 
-        n = 4;
+        n = 16;
         [result] = viv2013(n, params.OFF);
         input.start_time = result.startDate;
-        input.end_time = result.endDate - hours(1.6);
+        input.end_time = result.endDate;
         % start_time = datetime('2013-04-03 16:24:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
         % end_time = datetime('2013-04-08 15:30:59', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
         input.wind_dir = "F:\test\result_wind_10min";
@@ -281,7 +281,7 @@ function [result_Main] = Main(input,varargin)
     pp = 0;
     [peaks, locs] = findpeaks(dis, 'MinPeakDistance', d, 'MinPeakProminence', pp);
 
-    ncycle = 10;
+    ncycle = 5;
 
     k2 = 1; % Continuous index for output arrays
 
@@ -412,7 +412,7 @@ function [result_Main] = Main(input,varargin)
         end
 
         set(hFigure, 'name', 'filtered modal force frequency', 'Numbertitle', 'off');
-
+        figureIdx=0;
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
         plot(f_re, magnitude_re)
         hold on
