@@ -2,9 +2,9 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-09 23:00:54
+%LastEditTime: 2023-10-11 23:05:51
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\Main.m
-%Description: 
+%Description: TODO:加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -23,36 +23,49 @@ function [result_Main] = Main(input,varargin)
         input.OFF = params.OFF;
         %% 0 绘图参数
         input.fig_bool = params.ON;
-        input.num_figs_in_row = 5; %每一行显示几个图
+        input.num_figs_in_row = 6; %每一行显示几个图
         input.figPos = params.figPosSmall; %图的大小，参数基于InitScript.m中的设置
         %设置图片间隔
         input.gap_between_images = [0, 0];
         input.figureIdx = 0;
-        input.lambada = 1e-1;
-        input.sigma_p = 100000;
-        input.omega_0_variation =1;
+        
         input.displayText = params.ON;
 
-        n = 16;
+        n = 4;
         [result] = viv2013(n, params.OFF);
         input.start_time = result.startDate;
         input.end_time = result.endDate;
-        % start_time = datetime('2013-04-03 16:24:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-        % end_time = datetime('2013-04-08 15:30:59', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+
+        % input.start_time = datetime('2013-02-06 01:30:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+        % input.end_time = datetime('2013-02-06 01:45:59', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+
         input.wind_dir = "F:\test\result_wind_10min";
         input.acc_dir = "F:\test\result";
+        input.ncycle = 1;%计算气动阻尼时n个周期算一次阻尼比
+        input.lambada = 1e-1;
+        input.sigma_p = 100000;
+        input.omega_0_variation =1;
         Main(input)
         return;
     end
     p = inputParser;
       addParameter(p, 'showtext', true, @islogical)
+      addParameter(p, 'shouldFilterYn', true, @islogical)
+      addParameter(p, 'shouldFilterp_filt_m', true, @islogical)
+      
       parse(p, varargin{:});
     showtext = p.Results.showtext;
+    shouldFilterYn = p.Results.shouldFilterYn;
+    shouldFilterp_filt_m = p.Results.shouldFilterp_filt_m;
     %% 1 读取数据
     start_time = input.start_time;
     end_time = input.end_time;
     wind_dir = input.wind_dir;
     acc_dir = input.acc_dir;
+    ncycle = input.ncycle;
+
+
+
     fig_bool = input.fig_bool;
     num_figs_in_row = input.num_figs_in_row;
     figPos = input.figPos;
@@ -138,14 +151,25 @@ function [result_Main] = Main(input,varargin)
     % yn(1, :) = Acc_Data.mergedData.AC3_1/1000*9.8;
     % yn(2, :) = Acc_Data.mergedData.AC3_3/1000*9.8;
 
+
+    timeDifferences = diff(Acc_Data.mergedData.Time); % Returns a duration array
+    dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
+    fs = 1 / dt;
+
     yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
     yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
     yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
     yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
     yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
     yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
-    timeDifferences = diff(Acc_Data.mergedData.Time); % Returns a duration array
-    dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
+
+    if shouldFilterYn == true
+        [f, magnitude] = fft_transform(fs, yn(3,:));
+        [~, idx] = max(magnitude);
+        f_keep = [f(idx) * 0.9, f(idx) * 1.1];
+        yn = bandpass(yn', f_keep, fs)';
+    end
+
 
     [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi, nodeondeck, Mapping_data);
 
@@ -155,7 +179,7 @@ function [result_Main] = Main(input,varargin)
     acc_names = ["Main span 1/4", "Main span 1/2", "Main span 3/4"];
 
     maxvalue = max(max(abs(yn)));
-    fs = 1 / dt;
+    
 
     % establish discrete time matrices
     N = length(Acc_Data.mergedData.Time);
@@ -204,15 +228,21 @@ function [result_Main] = Main(input,varargin)
     x_filt_original = xa_history(1:ns, :);
     H_d_m = H_c_m;
     p_filt_m = H_d_m * xa_history(ns + 1:end, :);
+
+    
     Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
     [f, magnitude] = fft_transform(fs, x_k_k(1, :));
     %% 5 fft and bandpass filter for the estimated modal force
     for k1 = 1:nmodes
 
-        if 0
-            % p_filt_m(k1, :) = fft_filter(fs, p_filt_m(k1, :), [0.15 0.55]);
-            % p_filt_m(k1, :) = bandpass(p_filt_m(k1, :), [0.3 0.55], fs);
-        end
+       
+            if shouldFilterp_filt_m == true
+                [f, magnitude] = fft_transform(fs, x_k_k(k1,:));
+                [~, idx] = max(magnitude);
+                f_keep = [f(idx) * 0.8, f(idx) * 1.2];
+                p_filt_m = fft_filter(fs, p_filt_m, f_keep);
+            end
+
 
         [f_p_filt_m(k1, :), magnitude_filt_m(k1, :)] = fft_transform(fs, p_filt_m(k1, :));
     end
@@ -251,20 +281,19 @@ function [result_Main] = Main(input,varargin)
 
     %% 9 calculate aerodynamic damping ratio
     t = Acc_Data.mergedData.Time;
-    % t = 0:1/fs:1/fs*(length(t)-1);
     f_keep = [Freq * 0.9, Freq * 1.1];
     [x_k_k_filtered] = fft_filter(fs, x_k_k(1, :), f_keep);
     [p, fd, td] = pspectrum(x_k_k_filtered, t, 'spectrogram', 'FrequencyResolution', 0.005);
-    [ifq1, t1] = instfreq(p, fd, td);
+    [ifq1, t2] = instfreq(p, fd, td);
 
     % 首先，我们对于t1范围内的t值执行插值
-    inside_indices = t >= min(t1) & t <= max(t1);
+    inside_indices = t >= min(t2) & t <= max(t2);
     t_inside = t(inside_indices);
-    ifq1_interpolated_inside = interp1(t1, ifq1, t_inside, 'linear');
+    ifq1_interpolated_inside = interp1(t2, ifq1, t_inside, 'linear');
 
     % 然后，我们对于t1范围外的t值保留最近的ifq1值
-    t_outside_left = t(t < min(t1));
-    t_outside_right = t(t > max(t1));
+    t_outside_left = t(t < min(t2));
+    t_outside_right = t(t > max(t2));
     ifq1_extrapolated_left = repmat(ifq1(1), size(t_outside_left));
     ifq1_extrapolated_right = repmat(ifq1(end), size(t_outside_right));
 
@@ -281,7 +310,7 @@ function [result_Main] = Main(input,varargin)
     pp = 0;
     [peaks, locs] = findpeaks(dis, 'MinPeakDistance', d, 'MinPeakProminence', pp);
 
-    ncycle = 5;
+    
 
     k2 = 1; % Continuous index for output arrays
 
@@ -327,7 +356,7 @@ function [result_Main] = Main(input,varargin)
 
     amp_filt_kalman = amp;
     zeta_filt_kalman = zeta_all;
-    zeta_aero_filt_kalman = zeta_filt_kalman - zeta; %气动阻尼= 总阻尼-机械阻尼
+    zeta_aero_filt_kalman = zeta_all; %气动阻尼= 总阻尼-机械阻尼
 
     if fig_bool == ON
 
@@ -342,7 +371,7 @@ function [result_Main] = Main(input,varargin)
             xlabel('time (s)')
             ylabel('acc (m/s^2)')
             set(gca, 'FontSize', 12)
-            legend('filtered modal force', 'Location', 'northwest')
+            legend('left','right', 'Location', 'northwest')
             title([acc_names(k1)]);
             ylim([-maxvalue, maxvalue])
         end
@@ -358,7 +387,7 @@ function [result_Main] = Main(input,varargin)
             xlabel('time (s)')
             ylabel('acc (m/s^2)')
             set(gca, 'FontSize', 12)
-            legend('filtered modal force', 'Location', 'northwest')
+            legend('left','right', 'Location', 'northwest')
             title([acc_names(k1)] + "filter");
             ylim([-maxvalue, maxvalue])
         end
@@ -374,7 +403,7 @@ function [result_Main] = Main(input,varargin)
             xlabel('time (s)')
             ylabel('acc (m/s^2)')
             set(gca, 'FontSize', 12)
-            legend('filtered modal force', 'Location', 'northwest')
+            legend('left','right', 'Location', 'northwest')
             title([acc_names(k1)] + "recalculate");
             ylim([-maxvalue, maxvalue])
         end
@@ -412,7 +441,7 @@ function [result_Main] = Main(input,varargin)
         end
 
         set(hFigure, 'name', 'filtered modal force frequency', 'Numbertitle', 'off');
-        figureIdx=0;
+        % figureIdx=0;
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
         plot(f_re, magnitude_re)
         hold on
@@ -428,7 +457,7 @@ function [result_Main] = Main(input,varargin)
         xlim([0, 0.5])
 
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        plot(t1, ifq1)
+        plot(t2, ifq1)
         title("inst frequency")
 
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -481,7 +510,7 @@ function [result_Main] = Main(input,varargin)
         plot(reference_amp, reference_zeta);
 
         title("amplitude dependent aerodynamic damping ratio");
-        ylim([-0.25, 0.25]);
+        ylim([-0.05, 0.05]);
 
         % Choose a color map (for example, 'jet') and display the color scale
         colormap('jet');
@@ -501,7 +530,13 @@ function [result_Main] = Main(input,varargin)
     result_Main.logL = logL;
     result_Main.logSk = logSk;
     result_Main.logek = logek;
-    %% necessary functions
+    
+
+end
+
+
+
+%% necessary functions
     function node = FindNodewithLocation(loc, node_loc, nodeondeck)
         %myFun - Description
         %
@@ -638,5 +673,3 @@ function [result_Main] = Main(input,varargin)
 
         yn(:, end + 1) = G_d * xn(:, end) + J_d * p(:, end) + v(:, end);
     end
-
-end
