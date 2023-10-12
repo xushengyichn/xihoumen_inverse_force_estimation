@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-11 23:05:51
+%LastEditTime: 2023-10-12 16:06:10
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\Main.m
 %Description: TODO:加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
@@ -50,8 +50,8 @@ function [result_Main] = Main(input,varargin)
     end
     p = inputParser;
       addParameter(p, 'showtext', true, @islogical)
-      addParameter(p, 'shouldFilterYn', true, @islogical)
-      addParameter(p, 'shouldFilterp_filt_m', true, @islogical)
+      addParameter(p, 'shouldFilterYn', false, @islogical)
+      addParameter(p, 'shouldFilterp_filt_m', false, @islogical)
       
       parse(p, varargin{:});
     showtext = p.Results.showtext;
@@ -116,8 +116,8 @@ function [result_Main] = Main(input,varargin)
     % 读入ANSYS梁桥模型质量刚度矩阵  MCK矩阵 Import MCK matrix from ANSYS
     % 将ANSYS中的稀疏矩阵处理为完全矩阵 Handling sparse matrices in ANSYS as full matrices
 
-    % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-    modesel = [23];
+    modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+    % modesel = [23];
     nmodes = length(modesel); ns = nmodes * 2;
     Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',showtext);
     mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc;
@@ -239,8 +239,9 @@ function [result_Main] = Main(input,varargin)
             if shouldFilterp_filt_m == true
                 [f, magnitude] = fft_transform(fs, x_k_k(k1,:));
                 [~, idx] = max(magnitude);
-                f_keep = [f(idx) * 0.8, f(idx) * 1.2];
-                p_filt_m = fft_filter(fs, p_filt_m, f_keep);
+                f_keep_temp = [f(idx) * 0.8, f(idx) * 1.2];
+                % p_filt_m = fft_filter(fs, p_filt_m, f_keep_temp);
+                p_filt_m = bandpass(p_filt_m', f_keep_temp, fs)';
             end
 
 
@@ -261,7 +262,7 @@ function [result_Main] = Main(input,varargin)
 
     %% 7 重构涡振响应
     p_reconstruct = p_filt_m;
-    % p_reconstruct([1 2 3 4 5 6 7 8 10 11 12 13 14],:)=0;
+    % p_reconstruct([1 2 3 ],:)=0;
     % p_reconstruct([1],:)=0;
     [~, yn_reconstruct, ~] = CalResponse(A_d, B_d, G_d, J_d, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
 
@@ -282,78 +283,118 @@ function [result_Main] = Main(input,varargin)
     %% 9 calculate aerodynamic damping ratio
     t = Acc_Data.mergedData.Time;
     f_keep = [Freq * 0.9, Freq * 1.1];
-    [x_k_k_filtered] = fft_filter(fs, x_k_k(1, :), f_keep);
-    [p, fd, td] = pspectrum(x_k_k_filtered, t, 'spectrogram', 'FrequencyResolution', 0.005);
-    [ifq1, t2] = instfreq(p, fd, td);
 
-    % 首先，我们对于t1范围内的t值执行插值
-    inside_indices = t >= min(t2) & t <= max(t2);
-    t_inside = t(inside_indices);
-    ifq1_interpolated_inside = interp1(t2, ifq1, t_inside, 'linear');
+    % calculate instaneous frequency
+    for k1 = 1:nmodes
+        % [x_k_k_filtered(k1, :)] = fft_filter(fs, x_k_k(k1, :), f_keep(k1,:));
+        [x_k_k_filtered(k1,:)] = bandpass(x_k_k(k1,:)', f_keep(k1,:), fs)';
+        % [f_p_filt_m(k1, :), magnitude_filt_m(k1, :)] = fft_transform(fs, p_filt_m(k1, :));
+        [p, fd, td] = pspectrum(x_k_k_filtered(k1, :), t, 'spectrogram', 'FrequencyResolution', 0.005);
+        [ifq(k1, :), t1(k1, :)] = instfreq(p, fd, td);
+        % 首先，我们对于t1范围内的t值执行插值
+        inside_indices = t >= min(t1(k1, :)) & t <= max(t1(k1, :));
+        t_inside = t(inside_indices);
+        ifq_interpolated_inside = interp1(t1(k1, :), ifq(k1, :), t_inside, 'linear');
+        % 然后，我们对于t1范围外的t值保留最近的ifq1值
+        t_outside_left = t(t < min(t1(k1, :)));
+        t_outside_right = t(t > max(t1(k1, :)));
+        ifq_extrapolated_left = repmat(ifq(k1, 1), size(t_outside_left));
+        ifq_extrapolated_right = repmat(ifq(k1, end), size(t_outside_right));
+        % 最后，我们将这些值合并到一个数组中
+        ifq_interpolated(k1, :) = [ifq_extrapolated_left(:)', ifq_interpolated_inside(:)', ifq_extrapolated_right(:)'];
 
-    % 然后，我们对于t1范围外的t值保留最近的ifq1值
-    t_outside_left = t(t < min(t2));
-    t_outside_right = t(t > max(t2));
-    ifq1_extrapolated_left = repmat(ifq1(1), size(t_outside_left));
-    ifq1_extrapolated_right = repmat(ifq1(end), size(t_outside_right));
+    end
 
-    % 最后，我们将这些值合并到一个数组中
-    ifq1_interpolated = [ifq1_extrapolated_left; ifq1_interpolated_inside; ifq1_extrapolated_right];
+
 
     Fa = p_filt_m;
-    vel = x_k_k(2, :);
-    dis = x_k_k(1, :);
-    t = t;
+    dis = x_k_k(1:nmodes, :);
+    vel = x_k_k(nmodes + 1:2*nmodes, :);
+    
+    dis_filtered = bandpass(dis', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
+
+    % 设定保存频率成分的变量
+    top_freqs = cell(1, nmodes);
 
     % 找到峰值
+    
+    for k1 = 1: nmodes
+        [f, magnitude] = fft_transform(fs,dis_filtered(k1,:));
+        df = f(2)-f(1);
+        d_temp =0.01/df;
+        [peaks, locs] = findpeaks(magnitude, 'MinPeakDistance', d_temp,'MinPeakProminence',100);
+        
+        % 如果找到了峰值，根据峰值大小对它们进行排序
+        if ~isempty(peaks)
+            [sortedPeaks, sortIndex] = sort(peaks, 'descend');
+            sortedLocs = locs(sortIndex);
+            
+            % 只保留最大的前三个峰值
+            n_temp =5;
+            if length(sortedPeaks) > n_temp
+                sortedPeaks = sortedPeaks(1:n_temp);
+                sortedLocs = sortedLocs(1:n_temp);
+            end
+            
+            % 保存前三个最大峰值的频率
+            top_freqs{k1} = f(sortedLocs);
+        end
+
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+
+        plot(f,magnitude)
+        hold on 
+        scatter(f(sortedLocs),sortedPeaks)
+        hold off
+        xlim([0,0.5])
+    end
+    
     d = 100;
     pp = 0;
     [peaks, locs] = findpeaks(dis, 'MinPeakDistance', d, 'MinPeakProminence', pp);
-
     
-
     k2 = 1; % Continuous index for output arrays
-
+    
     for k1 = 1:ncycle:(length(locs) - ncycle + 1)
         % Ensure we don't exceed array bounds
         if k1 + ncycle > length(locs)
             break; % Exit the loop if we're going to exceed the array bounds
         end
-
+    
         % This difference is a duration over ncycle periods
         dt_duration = t(locs(k1 + ncycle)) - t(locs(k1));
         dt = seconds(dt_duration); % Convert duration to seconds
-
+    
         % Create an array of time intervals in seconds over ncycle periods
         timeIntervals = seconds(t(locs(k1):locs(k1 + ncycle)) - t(locs(k1)));
-
+    
         % Work calculation over ncycle periods
         work(k2) = trapz(timeIntervals, Fa(locs(k1):locs(k1 + ncycle)) .* vel(locs(k1):locs(k1 + ncycle)));
-
+    
         % Average Amplitude calculation over ncycle periods
         sum_amplitudes = 0;
-
+    
         for cycle_offset = 0:(ncycle - 1)
             current_dis = dis(locs(k1 + cycle_offset):locs(k1 + cycle_offset + 1));
             current_amp = (max(current_dis) - min(current_dis)) / 2;
             sum_amplitudes = sum_amplitudes + current_amp;
         end
-
+    
         amp(k2) = sum_amplitudes / ncycle;
-
+    
         % Frequency calculation using the start and end of the ncycle periods
         f(k2) = (ifq1_interpolated(locs(k1)) + ifq1_interpolated(locs(k1 + ncycle))) / 2;
         omega(k2) = 2 * pi * f(k2);
         c(k2) = work(k2) / pi / amp(k2) ^ 2 / omega(k2) / ncycle;
         zeta_all(k2) = -c(k2) / 2 / omega(k2); %气动力做正功，移动到等号左边就为负阻尼
-
+    
         % Time stamp calculation over ncycle periods
         timestamp_cycle(k2) = mean(t(locs(k1):locs(k1 + ncycle)));
         wind_color(k2) = interp1(Wind_Data.resultsTable_UA4.Time_Start, Wind_Data.resultsTable_UA4.U, timestamp_cycle(k2));
-
+    
         k2 = k2 + 1; % Increment the continuous index
     end
-
+    
     amp_filt_kalman = amp;
     zeta_filt_kalman = zeta_all;
     zeta_aero_filt_kalman = zeta_all; %气动阻尼= 总阻尼-机械阻尼
