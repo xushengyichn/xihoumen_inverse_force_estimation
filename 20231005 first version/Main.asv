@@ -272,30 +272,113 @@ function [result_Main] = Main(input,varargin)
     
     Fa_filtered = bandpass(Fa', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
 
-    % 找到峰值设定保存频率成分的变量
+    % 设定保存频率成分的变量
     top_freqs = cell(1, nmodes);
-    for k1 = 1:nmodes
-        [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, Fa_filtered(k1, :));
-    end
 
+    % 找到峰值
     
+    % for k1 = 1: nmodes
+    %     [f, magnitude] = fft_transform(fs,dis_filtered(k1,:));
+    %     df = f(2)-f(1);
+    %     d_temp =0.01/df;
+    %     [peaks, locs] = findpeaks(magnitude, 'MinPeakDistance', d_temp,'MinPeakProminence',100);
+        
+    %     % 如果找到了峰值，根据峰值大小对它们进行排序
+    %     if ~isempty(peaks)
+    %         [sortedPeaks, sortIndex] = sort(peaks, 'descend');
+    %         sortedLocs = locs(sortIndex);
+            
+    %         % 只保留最大的前三个峰值
+    %         n_temp =5;
+    %         if length(sortedPeaks) > n_temp
+    %             sortedPeaks = sortedPeaks(1:n_temp);
+    %             sortedLocs = sortedLocs(1:n_temp);
+    %         end
+            
+    %         % 保存前三个最大峰值的频率
+    %         top_freqs{k1} = f(sortedLocs);
+    %     end
+
+    %     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+
+    %     plot(f,magnitude)
+    %     hold on 
+    %     scatter(f(sortedLocs),sortedPeaks)
+    %     hold off
+    %     xlim([0,0.5])
+    % end
+    
+    for k1 = 1:nmodes
+        [f, magnitude] = fft_transform(fs, Fa_filtered(k1, :));
+        df = f(2) - f(1);
+        d_temp = 0.01 / df;
+        [peaks, locs] = findpeaks(magnitude, 'MinPeakDistance', d_temp);
+        % 如果找到了峰值，根据峰值大小对它们进行排序
+        if ~isempty(peaks)
+            [sortedPeaks, sortIndex] = sort(peaks, 'descend');
+            sortedLocs = locs(sortIndex);
+         % 保留那些大于最大峰值10%的峰值
+        threshold = 0.05 * sortedPeaks(1); % 计算阈值
+        aboveThresholdIdx = find(sortedPeaks >= threshold); % 找到大于阈值的峰值索引
+        
+        % 保留大于阈值的峰值和对应的位置
+        significantPeaks = sortedPeaks(aboveThresholdIdx);
+        significantLocs = sortedLocs(aboveThresholdIdx);
+        
+        % 保存符合条件的峰值频率
+        top_freqs{k1} = f(significantLocs);
+
+        end
+        % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+        % 
+        % plot(f,magnitude)
+        % hold on 
+        % scatter(f(significantLocs),significantPeaks)
+        % hold off
+        % xlim([0,0.5])
+        % str = sprintf('mode freq %.2f Hz, mode sel %d',Freq(k1),modesel(k1));
+        % title(str)
+    end
 
     filtered_Fa = cell(1,nmodes);
     bandwidth = 0.01; %根据需要调整带宽
+
     for k1 = 1:nmodes
         frequencies = top_freqs{k1};
         Fa_current = Fa_filtered(k1, :);
-        filtered_Fa{k1} =filterSignals(Fa_current, frequencies, fs);
+
+        filtered_Fa_current = zeros(length(frequencies), length(Fa_current)); % 预分配空间
+
+        for k2 = 1:length(frequencies)
+             freq = frequencies(k2); % 获取当前频率
+            % 定义带通滤波器的频率范围
+            low_freq = max(0, freq - bandwidth/2);
+            high_freq = min(fs/2, freq + bandwidth/2);
+            
+            % 进行带通滤波
+            filtered_Fa_current(k2,:) = bandpass(Fa_current, [low_freq, high_freq], fs);
+                        % 保存滤波后的数据
+            
+        end
+        filtered_Fa{k1} = filtered_Fa_current;
+
     end
-    
 
     peaks_locs_cell = cell(nmodes, 1); % 初始化一个cell数组以保存peaks和locs的结构
 
     
-    % 寻找不同模态不同频率力信号的周期
+
+
+
+
+
+    
+    
     for k1 = 1:nmodes
         filtered_Fa_current = filtered_Fa{k1}; % 获取当前模式的滤波数据
-        peaks_locs_struct = struct(); % 初始化一个结构体以保存peaks和locs       
+        
+        peaks_locs_struct = struct(); % 初始化一个结构体以保存peaks和locs
+        
         for k2 = 1:size(filtered_Fa_current, 1)
             f_temp = top_freqs{k1}(k2);
             T_temp = 1/f_temp;
@@ -304,9 +387,11 @@ function [result_Main] = Main(input,varargin)
             [peaks, locs] = findpeaks(filtered_Fa_current(k2, :), ...
                                       'MinPeakDistance', d, ...
                                       'MinPeakProminence', pp);
+            
             % 将peaks和locs保存为结构体的字段
             peaks_locs_struct(k2).peaks = peaks;
             peaks_locs_struct(k2).locs = locs;
+
             % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
             % plot(t,filtered_Fa_current(k2, :))
             % hold on 
@@ -314,7 +399,10 @@ function [result_Main] = Main(input,varargin)
             % hold off
             % str = sprintf('mode freq %.2f Hz, mode sel %d',Freq(k1),modesel(k1));
             % title(str)
-        end 
+
+
+        end
+        
         peaks_locs_cell{k1} = peaks_locs_struct; % 将结构体保存在cell数组中
     end
 

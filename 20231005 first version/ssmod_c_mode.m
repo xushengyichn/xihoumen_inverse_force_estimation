@@ -1,0 +1,9 @@
+    function [A_c, B_c, G_c, J_c] = ssmod_c_mode(nmodes, omega2, Gamma, phi, S_a, S_v, S_d)
+        A_c = [zeros(nmodes), eye(nmodes); ...
+                   -omega2, -Gamma];
+        B_c = [zeros(nmodes, nmodes); ...
+                   eye(nmodes, nmodes)];
+        G_c = [S_d * phi - S_a * phi * omega2, ...
+                   S_v * phi - S_a * phi * Gamma];
+        J_c = [S_a * phi];
+    end
