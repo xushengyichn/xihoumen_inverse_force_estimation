@@ -61,13 +61,6 @@ function [result_Main] = Main(input,varargin)
     showtext = p.Results.showtext;
     shouldFilterYn = p.Results.shouldFilterYn;
     shouldFilterp_filt_m = p.Results.shouldFilterp_filt_m;
-    %% 预加载
-    % 如果结果文件存在，则加载
-    if exist('F:\git\xihoumen_inverse_force_estimation\20231005 first version\results_all.mat', 'file')
-        load('F:\git\xihoumen_inverse_force_estimation\20231005 first version\results_all.mat');
-    else
-       
- 
     
     %% 1 读取数据
     start_time = input.start_time;
@@ -352,11 +345,7 @@ function [result_Main] = Main(input,varargin)
         end 
         peaks_locs_cell{k1} = peaks_locs_struct; % 将结构体保存在cell数组中
     end
-save('results_all.mat','t',"peaks_locs_cell",'top_freqs','filtered_dis', ...
-    'filtered_vel','ifq_interpolated_allmodes','filtered_Fa','ncycle', ...
-    'Wind_Data','mode_deck','figureIdx', 'num_figs_in_row', 'figPos', ...
-    'gap_between_images');
-end
+
 
     amp_cell = cell(size(filtered_Fa)); % 初始化用于保存amp数组的cell
     zeta_all_cell = cell(size(filtered_Fa)); % 初始化用于保存zeta_all数组的cell
