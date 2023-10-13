@@ -15,6 +15,8 @@ function [result_Main] = Main(input,varargin)
         addpath(genpath("F:\git\ssm_tools\"))
         addpath(genpath("F:\git\Function_shengyi_package\"))
         addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
+        addpath(genpath("C:\Users\xushengyi\Documents\Github\"))
+        
 
         subStreamNumberDefault = 2132;
 
@@ -41,6 +43,8 @@ function [result_Main] = Main(input,varargin)
 
         input.wind_dir = "F:\test\result_wind_10min";
         input.acc_dir = "F:\test\result";
+        input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+        input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
         input.ncycle = 1;%计算气动阻尼时n个周期算一次阻尼比
         input.lambada = 1e-1;
         input.sigma_p = 10000;
@@ -296,6 +300,7 @@ function [result_Main] = Main(input,varargin)
         end
     end
 
+    tic
     bandwidth = 0.01; %根据需要调整带宽
     filtered_Fa = cell(1,nmodes);
     for k1 = 1:nmodes
@@ -317,7 +322,7 @@ function [result_Main] = Main(input,varargin)
         dis_current = dis_filtered(k1, :);
         filtered_dis{k1} =filterSignals(dis_current, frequencies, fs, bandwidth);
     end
-    
+    toc
 
     peaks_locs_cell = cell(nmodes, 1); % 初始化一个cell数组以保存peaks和locs的结构
 
