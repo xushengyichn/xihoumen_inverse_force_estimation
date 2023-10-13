@@ -2,8 +2,8 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-13 02:00:36
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\Main.m
+%LastEditTime: 2023-10-13 15:11:32
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\KalmanMain.m
 %Description: TODO:加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -51,7 +51,8 @@ function [result_Main] = KalmanMain(input,varargin)
         input.omega_0_variation =1;
         input.Q_value =10 ^ (-8);
         input.R_value = 10 ^ (-6);
-
+        
+        input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
         % KalmanMain(input,'showtext', false,'showfigure',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
         KalmanMain(input,'showtext', false,'showfigure',false)
         return;
@@ -82,7 +83,7 @@ function [result_Main] = KalmanMain(input,varargin)
     acc_dir = input.acc_dir;
 
 
-    
+    modesel= input.modesel;
 
     lambda = input.lambda;
     sigma_p = input.sigma_p;
@@ -135,7 +136,7 @@ function [result_Main] = KalmanMain(input,varargin)
     % 读入ANSYS梁桥模型质量刚度矩阵  MCK矩阵 Import MCK matrix from ANSYS
     % 将ANSYS中的稀疏矩阵处理为完全矩阵 Handling sparse matrices in ANSYS as full matrices
 
-    modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+    % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
     % modesel = [23];
     nmodes = length(modesel); ns = nmodes * 2;
     Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',showtext);
@@ -285,6 +286,12 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.logL = logL;
     result_Main.logSk = logSk;
     result_Main.logek = logek;
+    result_Main.t = t;
+    result_Main.p_filt_m = p_filt_m;
+    result_Main.x_k_k = x_k_k;
+    result_Main.nmodes = nmodes;
+    result_Main.Freq = Freq;
+    result_Main.fs = fs;
 
 
     if fig_bool == ON

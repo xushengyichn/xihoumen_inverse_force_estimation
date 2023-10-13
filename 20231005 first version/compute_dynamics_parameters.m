@@ -1,4 +1,14 @@
-function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs, Wind_Data)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Author: ShengyiXu xushengyichn@outlook.com
+%Date: 2023-10-13 01:48:38
+%LastEditors: ShengyiXu xushengyichn@outlook.com
+%LastEditTime: 2023-10-13 20:46:01
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\compute_dynamics_parameters.m
+%Description: 
+%
+%Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs)
 
 
     
@@ -11,6 +21,8 @@ function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, fr
 
         dt_duration = t(locs(k1 + ncycle)) - t(locs(k1));
         dt = seconds(dt_duration);
+        
+        t_cycle_mean(k2) = mean(t(locs(k1):locs(k1 + ncycle))); 
 
         timeIntervals = seconds(t(locs(k1):locs(k1 + ncycle)) - t(locs(k1)));
 
@@ -31,12 +43,13 @@ function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, fr
         zeta_all(k2) = -c(k2) / 2 / omega(k2);
         
         timestamp_cycle(k2) = mean(t(locs(k1):locs(k1 + ncycle)));
-        wind_color(k2) = interp1(Wind_Data.resultsTable_UA4.Time_Start, Wind_Data.resultsTable_UA4.U, timestamp_cycle(k2));
+        % wind_color(k2) = interp1(Wind_Data.resultsTable_UA4.Time_Start, Wind_Data.resultsTable_UA4.U, timestamp_cycle(k2));
         
         k2 = k2 + 1;
     end
     
     result.amp = amp;
     result.zeta_all = zeta_all;
-
+    result.work = work;
+    result.t_cycle_mean = t_cycle_mean;
 end

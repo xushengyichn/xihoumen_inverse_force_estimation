@@ -1,13 +1,21 @@
-function [result]=Cal_aero_damping_ratio()
+function [result]=Cal_aero_damping_ratio(input)
     
-input.ncycle = 1;%计算气动阻尼时n个周期算一次阻尼比
-ncycle = input.ncycle;
-input.wind_dir = "F:\test\result_wind_10min";
+% input.ncycle = 1;%计算气动阻尼时n个周期算一次阻尼比
+
+% input.wind_dir = "F:\test\result_wind_10min";
  % input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
-[Wind_Data] = read_wind_data(start_time, end_time, wind_dir);
+% [Wind_Data] = read_wind_data(start_time, end_time, wind_dir);
  %% 9 calculate aerodynamic damping ratio
-    
-    t = Acc_Data.mergedData.Time;
+
+    ncycle = input.ncycle;
+    t = input.t;
+    p_filt_m = input.p_filt_m;
+    x_k_k = input.x_k_k;
+    nmodes = input.nmodes;
+    Freq = input.Freq;
+    fs = input.fs;
+
+
     f_keep = [Freq * 0.9, Freq * 1.1];
 
 
@@ -108,16 +116,16 @@ input.wind_dir = "F:\test\result_wind_10min";
             freq_temp = ifq_interpolated_mode{j};
             dis_temp = dis_filtered_mode_signal{j};
             locs = peaks_locs_cell_mode(j).locs;
-            [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs, Wind_Data);
+            [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs);
             
             
             amp_mode{j} = result.amp; % 将此信号的amp数组保存到当前模式的cell中
             zeta_all_mode{j} = result.zeta_all; % 将此信号的zeta_all数组保存到当前模式的cell中
 
-            [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-            scatter(result.amp*max(mode_deck(:,i)), result.zeta_all)
-            titlestr= sprintf('mode freq %.2f Hz, mode sel %d, freq %.2f Hz',Freq(i),modesel(i),top_freqs{i}(j));
-            title(titlestr)
+            % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+            % scatter(result.amp*max(mode_deck(:,i)), result.zeta_all)
+            % titlestr= sprintf('mode freq %.2f Hz, mode sel %d, freq %.2f Hz',Freq(i),modesel(i),top_freqs{i}(j));
+            % title(titlestr)
             
 
         end
@@ -128,76 +136,12 @@ input.wind_dir = "F:\test\result_wind_10min";
 
 
 
+    result.amp_cell = amp_cell;
+    result.zeta_all_cell = zeta_all_cell;
 
 
 
 
 
 
-
-
-
-    if 0
-        
-            % Colorize scatter plot based on wind_U
-        scatter(amp_filt_kalman, zeta_aero_filt_kalman, [], wind_color, 'filled');
-
-        hold on;
-
-        reference_amp = [0 600];
-        reference_zeta = [0 0];
-        plot(reference_amp, reference_zeta);
-
-        title("amplitude dependent aerodynamic damping ratio");
-        ylim([-0.5, 0.5]);
-
-        % Choose a color map (for example, 'jet') and display the color scale
-        colormap('jet');
-        colorbar;
-
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-        % Colorize scatter plot based on wind_U
-        scatter(amp_filt_kalman * max(mode_deck), zeta_aero_filt_kalman, [], wind_color, 'filled');
-
-        hold on;
-
-        reference_amp = [0 0.12];
-        reference_zeta = [0 0];
-        plot(reference_amp, reference_zeta);
-
-        title("amplitude dependent aerodynamic damping ratio");
-        ylim([-0.05, 0.05]);
-
-        % Choose a color map (for example, 'jet') and display the color scale
-        colormap('jet');
-        colorbar;
-
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-        % Colorize scatter plot based on wind_U
-        scatter(amp_filt_kalman * max(mode_deck), work, [], wind_color, 'filled');
-        hold on;
-        title("amplitude dependent work");
-        % Choose a color map (for example, 'jet') and display the color scale
-        colormap('jet');
-        colorbar;
-
-                % 画图来验证峰值检测的准确性
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        plot(t, dis);
-        hold on;
-        plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
-        hold off;
-        title('Peak detection');
-        xlabel('Time');
-        ylabel('Displacement');
-
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        [p, fd, td] = pspectrum(dis, t, 'spectrogram', 'FrequencyResolution', 0.005);
-        instfreq(p, fd, td);
-
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-    end
 end
