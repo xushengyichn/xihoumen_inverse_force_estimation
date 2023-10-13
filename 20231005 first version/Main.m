@@ -267,6 +267,7 @@ function [result_Main] = Main(input,varargin)
     logek = result.logek;
 
     %% 9 calculate aerodynamic damping ratio
+    
     t = Acc_Data.mergedData.Time;
     f_keep = [Freq * 0.9, Freq * 1.1];
 
@@ -295,8 +296,8 @@ function [result_Main] = Main(input,varargin)
         end
     end
 
-    filtered_Fa = cell(1,nmodes);
     bandwidth = 0.01; %根据需要调整带宽
+    filtered_Fa = cell(1,nmodes);
     for k1 = 1:nmodes
         frequencies = top_freqs{k1};
         Fa_current = Fa_filtered(k1, :);
@@ -346,7 +347,10 @@ function [result_Main] = Main(input,varargin)
         end 
         peaks_locs_cell{k1} = peaks_locs_struct; % 将结构体保存在cell数组中
     end
-save('results_all.mat');
+save('results_all.mat','t',"peaks_locs_cell",'top_freqs','filtered_dis', ...
+    'filtered_vel','ifq_interpolated_allmodes','filtered_Fa','ncycle', ...
+    'Wind_Data','mode_deck','figureIdx', 'num_figs_in_row', 'figPos', ...
+    'gap_between_images');
 end
 
     amp_cell = cell(size(filtered_Fa)); % 初始化用于保存amp数组的cell
