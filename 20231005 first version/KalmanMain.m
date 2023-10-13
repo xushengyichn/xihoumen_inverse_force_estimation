@@ -21,15 +21,15 @@ function [result_Main] = KalmanMain(input,varargin)
         subStreamNumberDefault = 2132;
 
         params = Init_fun();
-        input.ON = params.ON;
-        input.OFF = params.OFF;
+        % input.ON = params.ON;
+        % input.OFF = params.OFF;
         %% 0 绘图参数
         
-        input.num_figs_in_row = 12; %每一行显示几个图
-        input.figPos = params.figPosSmall; %图的大小，参数基于InitScript.m中的设置
+        % input.num_figs_in_row = 12; %每一行显示几个图
+        % input.figPos = params.figPosSmall; %图的大小，参数基于InitScript.m中的设置
         %设置图片间隔
-        input.gap_between_images = [0, 0];
-        input.figureIdx = 0;
+        % input.gap_between_images = [0, 0];
+        % input.figureIdx = 0;
         % input.fig_bool = params.ON;
         % input.displayText = params.ON;
 
@@ -53,7 +53,7 @@ function [result_Main] = KalmanMain(input,varargin)
         input.R_value = 10 ^ (-6);
 
         % KalmanMain(input,'showtext', false,'showfigure',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
-        KalmanMain(input,'showtext', false,'showfigure',true)
+        KalmanMain(input,'showtext', false,'showfigure',false)
         return;
     end
     p = inputParser;
@@ -61,11 +61,20 @@ function [result_Main] = KalmanMain(input,varargin)
       addParameter(p, 'shouldFilterYn', false, @islogical)
       addParameter(p, 'shouldFilterp_filt_m', false, @islogical)
       addParameter(p, 'showfigure', true, @islogical)
+      addParameter(p, 'num_figs_in_row', 12, @isnumeric)
+      addParameter(p, 'figPos', [100,100,400,300], @isnumeric)
+      addParameter(p, 'gap_between_images', [0,0], @isnumeric)
+      addParameter(p, 'figureIdx', 0, @isnumeric)
       parse(p, varargin{:});
     showtext = p.Results.showtext;
     shouldFilterYn = p.Results.shouldFilterYn;
     shouldFilterp_filt_m = p.Results.shouldFilterp_filt_m;
     showfigure = p.Results.showfigure;
+    num_figs_in_row = p.Results.num_figs_in_row;
+    figPos = p.Results.figPos;
+    gap_between_images = p.Results.gap_between_images;
+    figureIdx = p.Results.figureIdx;
+
     %% 1 读取数据
     start_time = input.start_time;
     end_time = input.end_time;
@@ -74,12 +83,6 @@ function [result_Main] = KalmanMain(input,varargin)
 
 
     
-    num_figs_in_row = input.num_figs_in_row;
-    figPos = input.figPos;
-    gap_between_images = input.gap_between_images;
-    figureIdx = input.figureIdx;
-    ON = input.ON;
-    OFF = input.OFF;
 
     lambda = input.lambda;
     sigma_p = input.sigma_p;
@@ -88,7 +91,8 @@ function [result_Main] = KalmanMain(input,varargin)
     R_value = input.R_value;
 
     fig_bool = showfigure;
-   
+    ON = true;
+    OFF = false;
     
     [Acc_Data] = read_acceleration_data(start_time, end_time, acc_dir);
    
@@ -277,7 +281,10 @@ function [result_Main] = KalmanMain(input,varargin)
    
     t = Acc_Data.mergedData.Time;
     
-
+    %% output
+    result_Main.logL = logL;
+    result_Main.logSk = logSk;
+    result_Main.logek = logek;
 
 
     if fig_bool == ON
@@ -392,9 +399,7 @@ function [result_Main] = KalmanMain(input,varargin)
         
     end
 
-    result_Main.logL = logL;
-    result_Main.logSk = logSk;
-    result_Main.logek = logek;
+
     
 
 end

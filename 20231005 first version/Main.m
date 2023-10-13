@@ -16,25 +16,31 @@ gap_between_images = [0, 0];
 figureIdx = 0;
 
 %% 输入参数
-input.num_figs_in_row = 12; %每一行显示几个图
-input.figPos = figPos; %图的大小，参数基于InitScript.m中的设置
+% input.num_figs_in_row = 12; %每一行显示几个图
+% input.figPos = figPos; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
-input.ON =ON;
-input.OFF =OFF;
-input.gap_between_images = [0, 0];
-input.figureIdx = 0;
+% input.ON =ON;
+% input.OFF =OFF;
+% input.gap_between_images = [0, 0];
+% input.figureIdx = 0;
 n = 4;
 [result] = viv2013(n, OFF);
 input.start_time = result.startDate;
 input.end_time = result.endDate;
-% input.acc_dir = "F:\test\result";
-input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+input.acc_dir = "F:\test\result";
+% input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
 input.lambda = 10 ^ (-1);
 input.sigma_p = 10000;
 input.omega_0_variation =1;
 input.Q_value =10 ^ (-8);
 input.R_value = 10 ^ (-6);
+
+input.lambda = 10 ^ (-4.934808796013671);
+input.sigma_p = 6.895548550856822e+03;
+input.omega_0_variation =1.097383030422062;
+input.Q_value =10 ^ (-9.633948257379021);
+input.R_value = 10 ^ (-2.415076745081128);
 
 [result_Main] = KalmanMain(input,'showtext', false,'showfigure',false);
 logL = result_Main.logL;
@@ -55,12 +61,6 @@ IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
 
 options = optimoptions('ga', 'MaxGenerations', 100, 'Display', 'iter', 'UseParallel', true);
 [x, fval] = ga(@(params) fitnessFunction(params, external_params), 5, [], [], [], [], lb, ub, [], IntCon, options);
-% options = optimoptions('ga', ...
-%                        'MaxGenerations', 100, ...
-%                        'Display', 'iter', ...
-%                        'OutputFcn', @plotOptimizationOutput); % 设置输出函数
-% [x, fval] = ga(@fitnessFunction, 5, [], [], [], [], lb, ub, [], IntCon, options);
-
 % 保存结果
 save('optimization_results.mat', 'x', 'fval');
 
@@ -95,15 +95,3 @@ end
 
 
 
-function stop = plotOptimizationOutput(optimValues, state)
-    stop = false;
-    switch state
-        case 'init'
-            hold on;
-        case 'iter'
-            % 绘制当前最佳适应度值
-            plot(optimValues.iteration, optimValues.bestfval, '.b');
-        case 'done'
-            hold off;
-    end
-end
