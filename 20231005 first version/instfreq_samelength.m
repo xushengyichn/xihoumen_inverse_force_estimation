@@ -12,16 +12,36 @@ function [ifq_interpolated] = instfreq_samelength(fs, x_k_k, f_keep, t, varargin
     % Outputs:
     % ifq_interpolated - 输出描述
 
-    % 默认频率分辨率
-    freqRes = 0.005;
+    % % 默认频率分辨率
+    % freqRes = 0.005;
     
-    % 如果提供了可选参数，则使用提供的频率分辨率
-    if nargin > 4
-        freqRes = varargin{1};
-    end
+    % % 如果提供了可选参数，则使用提供的频率分辨率
+    % if nargin > 4
+    %     freqRes = varargin{1};
+    % end
+
+    p = inputParser;
+    addParameter(p,'showtext',true,@islogical);
+    addParameter(p,'showplot',true,@islogical);
+    addParameter(p,'freqRes',0.005,@isnumeric);% default freqRes is 0.005Hz
+    addParameter(p,'filterstyle','fft',@ischar);% fft use the function by myself, bandpass use the function in matlab. fft is much faster than bandpass but may not be accurate
+    parse(p,varargin{:});
+    showtext = p.Results.showtext;
+    showplot = p.Results.showplot;
+    filterstyle = p.Results.filterstyle;
+    freqRes = p.Results.freqRes;
     
     % 您的代码
-    x_k_k_filtered = bandpass(x_k_k', f_keep, fs)';
+        % 进行带通滤波
+    switch filterstyle
+        case 'fft'
+            x_k_k_filtered = fft_filter(fs, x_k_k', f_keep);
+        case 'bandpass'
+            x_k_k_filtered = bandpass(x_k_k', f_keep, fs)';
+        otherwise
+            error('Invalid filter style. Choose either "fft" or "bandpass".')
+    end
+    
     [p, fd, td] = pspectrum(x_k_k_filtered, t, 'spectrogram', 'FrequencyResolution', freqRes);
     [ifq, t1] = instfreq(p, fd, td);
     

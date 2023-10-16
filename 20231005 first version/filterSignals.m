@@ -1,4 +1,4 @@
-function filtered_signals = filterSignals(input_signal, frequencies, fs, bandwidth)
+function filtered_signals = filterSignals(input_signal, frequencies, fs, bandwidth, varargin)
     % filterSignals - 对输入信号进行带通滤波
     % 
     % Inputs:
@@ -13,6 +13,16 @@ function filtered_signals = filterSignals(input_signal, frequencies, fs, bandwid
     if nargin < 4
         bandwidth = 0.01; % 如果未指定带宽，则使用默认值
     end
+    
+    p = inputParser;
+    addParameter(p,'showtext',true,@islogical);
+    addParameter(p,'showplot',true,@islogical);
+    addParameter(p,'filterstyle','fft',@ischar);% fft use the function by myself, bandpass use the function in matlab. fft is much faster than bandpass but may not be accurate
+    parse(p,varargin{:});
+    showtext = p.Results.showtext;
+    showplot = p.Results.showplot;
+    filterstyle = p.Results.filterstyle;
+
 
     filtered_signals = cell(1, length(frequencies));
     
@@ -24,7 +34,14 @@ function filtered_signals = filterSignals(input_signal, frequencies, fs, bandwid
         high_freq = min(fs/2, freq + bandwidth/2); 
         
         % 进行带通滤波
-        filtered_signal = bandpass(input_signal, [low_freq, high_freq], fs);
+        switch filterstyle
+            case 'fft'
+                filtered_signal = fft_filter(fs, input_signal, [low_freq, high_freq]);
+            case 'bandpass'
+                filtered_signal = bandpass(input_signal, [low_freq, high_freq], fs);
+            otherwise
+                error('Invalid filter style. Choose either "fft" or "bandpass".')
+        end
         
         % 保存滤波后的信号
         filtered_signals{k} = filtered_signal;

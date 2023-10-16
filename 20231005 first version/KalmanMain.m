@@ -53,15 +53,15 @@ function [result_Main] = KalmanMain(input,varargin)
         input.R_value = 10 ^ (-6);
         
         input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-        % KalmanMain(input,'showtext', false,'showfigure',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
-        KalmanMain(input,'showtext', false,'showfigure',false)
+        % KalmanMain(input,'showtext', false,'showplot',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
+        KalmanMain(input,'showtext', false,'showplot',false)
         return;
     end
     p = inputParser;
       addParameter(p, 'showtext', true, @islogical)
       addParameter(p, 'shouldFilterYn', false, @islogical)
       addParameter(p, 'shouldFilterp_filt_m', false, @islogical)
-      addParameter(p, 'showfigure', true, @islogical)
+      addParameter(p, 'showplot', true, @islogical)
       addParameter(p, 'num_figs_in_row', 12, @isnumeric)
       addParameter(p, 'figPos', [100,100,400,300], @isnumeric)
       addParameter(p, 'gap_between_images', [0,0], @isnumeric)
@@ -70,7 +70,7 @@ function [result_Main] = KalmanMain(input,varargin)
     showtext = p.Results.showtext;
     shouldFilterYn = p.Results.shouldFilterYn;
     shouldFilterp_filt_m = p.Results.shouldFilterp_filt_m;
-    showfigure = p.Results.showfigure;
+    showplot = p.Results.showplot;
     num_figs_in_row = p.Results.num_figs_in_row;
     figPos = p.Results.figPos;
     gap_between_images = p.Results.gap_between_images;
@@ -91,7 +91,7 @@ function [result_Main] = KalmanMain(input,varargin)
     Q_value = input.Q_value;
     R_value = input.R_value;
 
-    fig_bool = showfigure;
+    fig_bool = showplot;
     ON = true;
     OFF = false;
     

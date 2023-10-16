@@ -44,7 +44,7 @@ input.R_value = 10 ^ (-2.415076745081128);
 
 input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
 
-[result_Main] = KalmanMain(input,'showtext', false,'showfigure',false);
+[result_Main] = KalmanMain(input,'showtext', false,'showplot',false);
 logL = result_Main.logL;
 
 
@@ -71,8 +71,12 @@ end
 %% Caldamping ratio
 input = result_Main;
 input.ncycle = 1;
-[result]=Cal_aero_damping_ratio(input);
+tic
+[result_Damping]=Cal_aero_damping_ratio(input,'showplot',false);
+toc
 
+
+amp_cell = result_Damping.amp_cell;
 
 
 if 0

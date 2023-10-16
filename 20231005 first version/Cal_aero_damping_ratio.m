@@ -1,4 +1,4 @@
-function [result]=Cal_aero_damping_ratio(input)
+function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     
 % input.ncycle = 1;%计算气动阻尼时n个周期算一次阻尼比
 
@@ -15,6 +15,14 @@ function [result]=Cal_aero_damping_ratio(input)
     Freq = input.Freq;
     fs = input.fs;
 
+    p = inputParser;
+    addParameter(p,'showtext',true,@islogical);
+    addParameter(p,'showplot',true,@islogical);
+    addParameter(p,'filterstyle','fft',@ischar);% fft use the function by myself, bandpass use the function in matlab. fft is much faster than bandpass but may not be accurate
+    parse(p,varargin{:});
+    showtext = p.Results.showtext;
+    showplot = p.Results.showplot;
+    filterstyle = p.Results.filterstyle;
 
     f_keep = [Freq * 0.9, Freq * 1.1];
 
@@ -24,26 +32,58 @@ function [result]=Cal_aero_damping_ratio(input)
     dis = x_k_k(1:nmodes, :);
     vel = x_k_k(nmodes + 1:2*nmodes, :);
     
-    Fa_filtered = bandpass(Fa', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
-    vel_filtered = bandpass(vel', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
-    dis_filtered = bandpass(dis', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
 
+    switch filterstyle
+        case 'fft'
+        
+        for k1 = 1:size(Fa, 1)
+            Fa_filtered(k1,:) = fft_filter(fs, Fa(k1,:), f_keep);
+        end
+        for k1 = 1:size(Fa, 1)
+            vel_filtered(k1,:) = fft_filter(fs, vel(k1,:), f_keep);
+        end
+        for k1 = 1:size(Fa, 1)
+            dis_filtered(k1,:) = fft_filter(fs, dis(k1,:), f_keep);
+        end
+        
+        case 'bandpass'
+        Fa_filtered = bandpass(Fa', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
+        vel_filtered = bandpass(vel', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
+        dis_filtered = bandpass(dis', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
+
+        otherwise
+        error('Invalid filter style. Choose either "fft" or "bandpass".')
+    end
+
+    % figure
+    % plot(Fa_filtered(1,:))
+    % hold on
+    % plot(Fa_filtered(1,:))
+    % [f1, magnitude1] = fft_transform(fs,Fa_filtered(1,:));
+    % [f2, magnitude2] = fft_transform(fs,Fa_filtered(1,:));
+    % [f3, magnitude3] = fft_transform(fs,Fa(1,:));
+    % figure
+    % plot(f1, magnitude1)
+    % hold on
+    % plot(f2, magnitude2)
+    % plot(f3, magnitude3)
+    % xlim([0, max(Freq) * 1.1])
     % 找到峰值设定保存频率成分的变量
+
     top_freqs = cell(1, nmodes);
     for k1 = 1:nmodes
-        [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, Fa_filtered(k1, :));
-        [top_freqs_vel{k1}, ~, ~] = extractSignificantFrequencies(fs, vel_filtered(k1, :));
+        [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, Fa_filtered(k1, :), 'showplot', showplot);
+        [top_freqs_vel{k1}, ~, ~] = extractSignificantFrequencies(fs, vel_filtered(k1, :),'showplot', showplot);
     end
-    
+
     ifq_interpolated_allmodes = cell(1, nmodes);
     for k1=1:nmodes
         for k2 = 1:length(top_freqs{k1})
             f_keep_temp = [top_freqs{k1}(k2) * 0.9, top_freqs{k1}(k2) * 1.1];
-            [ifq_interpolated_allmodes{k1}{k2}] = instfreq_samelength(fs, Fa(k1,:), f_keep_temp, t);
+            [ifq_interpolated_allmodes{k1}{k2}] = instfreq_samelength(fs, Fa(k1,:), f_keep_temp, t, 'showplot', showplot, 'showtext', showtext, 'filterstyle', filterstyle);
         end
     end
 
-    tic
     bandwidth = 0.01; %根据需要调整带宽
     filtered_Fa = cell(1,nmodes);
     for k1 = 1:nmodes
@@ -65,11 +105,11 @@ function [result]=Cal_aero_damping_ratio(input)
         dis_current = dis_filtered(k1, :);
         filtered_dis{k1} =filterSignals(dis_current, frequencies, fs, bandwidth);
     end
-    toc
+
 
     peaks_locs_cell = cell(nmodes, 1); % 初始化一个cell数组以保存peaks和locs的结构
 
-    
+
     % 寻找不同模态不同频率力信号的周期
     for k1 = 1:nmodes
         filtered_Fa_current = filtered_Fa{k1}; % 获取当前模式的滤波数据
@@ -136,8 +176,8 @@ function [result]=Cal_aero_damping_ratio(input)
 
 
 
-    result.amp_cell = amp_cell;
-    result.zeta_all_cell = zeta_all_cell;
+    result_Main.amp_cell = amp_cell;
+    result_Main.zeta_all_cell = zeta_all_cell;
 
 
 

@@ -1,7 +1,10 @@
-function [significantFreqs, significantPeaks, significantLocs] = extractSignificantFrequencies(fs, Fa, shouldPlot)
-    if nargin < 3
-        shouldPlot = false; % 默认不绘图
-    end
+function [significantFreqs, significantPeaks, significantLocs] = extractSignificantFrequencies(fs, Fa,varargin)
+     p = inputParser;
+    addParameter(p,'showtext',true,@islogical);
+    addParameter(p,'showplot',true,@islogical);
+    parse(p,varargin{:});
+    showtext = p.Results.showtext;
+    showplot = p.Results.showplot;
     
     [f, magnitude] = fft_transform(fs, Fa);
     df = f(2) - f(1);
@@ -29,7 +32,7 @@ function [significantFreqs, significantPeaks, significantLocs] = extractSignific
     end
     
     % 如果 shouldPlot 为真，则生成图形
-    if shouldPlot
+    if showplot
         figure;
         plot(f, magnitude);
         hold on;
