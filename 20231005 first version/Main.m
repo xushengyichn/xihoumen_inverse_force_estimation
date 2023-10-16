@@ -25,8 +25,8 @@ figureIdx = 0;
 % input.figureIdx = 0;
 n = 4;
 [result] = viv2013(n, OFF);
-input.start_time = result.startDate-hours(0.5);
-input.end_time = result.endDate+hours(0.5);
+input.start_time = result.startDate;
+input.end_time = result.endDate;
 input.acc_dir = "F:\test\result";
 % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
@@ -81,7 +81,7 @@ toc
 
 [result] = viv2013(n, OFF);
 start_time = result.startDate;
-end_time = result.endDate+hours(0.15);
+end_time = result.endDate;
 acc_dir = "F:\test\result_wind_10min";
 [result_wind] = read_wind_data(start_time,end_time,acc_dir);
 
@@ -96,6 +96,14 @@ top_freqs = result_Damping.top_freqs;
 t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
 
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+scatter(result_wind.resultsTable_UA6.Time_Start,result_wind.resultsTable_UA6.U);
+xlabel('Time (s)')
+ylabel('Wind speed (m/s^2)')
+title("Wind speed vs. Time")
+
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 plot(t,yn(1,:));
 hold on
 plot(t,h_hat(1,:));
@@ -103,7 +111,6 @@ xlabel('Time (s)')
 ylabel('Acceleration (m/s^2)')
 title("Acceleration vs. Time")
 legend("measure","filtered")
-
 
 
 for k1 = 1:nmodes
