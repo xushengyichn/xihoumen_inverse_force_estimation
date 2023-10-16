@@ -267,7 +267,7 @@ function [result_Main] = KalmanMain(input,varargin)
     loc_acc_v = [1403];
     % loc_acc_v = [578+1650/4*3;578+1650/2;578+1650/4];
     loc_vel_v = [];
-    loc_dis_v = [];
+    loc_dis_v = [1403];
     [S_a_v, S_v_v, S_d_v, n_sensors_v] = sensor_selection(loc_acc_v, loc_vel_v, loc_dis_v, node_loc, phi, nodeondeck, Mapping_data);
 
     G_c_v = [S_d_v * phi - S_a_v * phi * omega2, S_v_v * phi - S_a_v * phi * Gamma];

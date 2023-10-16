@@ -32,11 +32,11 @@ input.end_time = endDate_global;
 input.acc_dir = "F:\test\result";
 % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
-input.lambda = 10 ^ (-1);
-input.sigma_p = 10000;
-input.omega_0_variation =1;
-input.Q_value =10 ^ (-8);
-input.R_value = 10 ^ (-6);
+% input.lambda = 10 ^ (-1);
+% input.sigma_p = 10000;
+% input.omega_0_variation =1;
+% input.Q_value =10 ^ (-8);
+% input.R_value = 10 ^ (-6);
 
 input.lambda = 10 ^ (-4.934808796013671);
 input.sigma_p = 6.895548550856822e+03;
@@ -87,6 +87,28 @@ end_time = endDate_global;
 acc_dir = "F:\test\result_wind_10min";
 [result_wind] = read_wind_data(start_time,end_time,acc_dir);
 
+%% compare with ee
+yn = result_Main.yn;
+fs = 50;
+t = result_Main.t;
+disp_dir=acc2dsip(yn(1,:),50);
+[ex, frex] = ee(disp_dir.disp, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
+figure
+plot(t,frex)
+
+omgx = frex*2*pi;
+for k1 = 1:length(ex)-1
+    epsx(k1)=log(ex(k1)/ex(k1+1))/omgx(k1)*fs;
+end
+
+epsx = [epsx epsx(end)];
+
+% figure
+% % plot(t,epsx)
+% grid
+% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% scatter(ex,epsx,'green')
+
 %% plot 
 t = result_Main.t;
 yn = result_Main.yn;
@@ -114,6 +136,18 @@ ylabel('Acceleration (m/s^2)')
 title("Acceleration vs. Time")
 legend("measure","filtered")
 
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+
+plot(t,disp_dir.disp);
+hold on
+plot(t,h_hat(3,:));
+xlabel('Time (s)')
+ylabel('Displacement (m/s^2)')
+title("Displacement vs. Time")
+legend("measure","filtered")
+
+
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 [p, fd, td] = pspectrum(h_hat(1,:), t, 'spectrogram', 'FrequencyResolution', 0.005);
 instfreq(p, fd, td);
@@ -140,7 +174,7 @@ for k1 = 1:nmodes
         
         hold on
         plot([0,0.15],[-0.003,-0.003])
-
+        % scatter(ex,epsx,'green')
         str = "Mode : %d, Frequency : %.2f Hz";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
         xlim([0,0.15])
@@ -244,4 +278,13 @@ function logL = fitnessFunction(params,external_params)
     
         result_Main = KalmanMain(input, 'showtext', false, 'showfigure', false);
         logL = -result_Main.logL; % 因为 ga 试图最小化函数，所以取负数
-    end
+end
+
+function [ amp,fre ] = ee( data,dt )
+%EE Summary of this function goes here
+%   Detailed explanation goes here
+[normalizeddata,amp]=splinenormalizeep(data);
+frecarrier=gradient(normalizeddata,dt);
+[normalizedfrecarrier,ampfrecarrier]=splinenormalizeep(frecarrier);
+fre=ampfrecarrier/2/pi;
+end
