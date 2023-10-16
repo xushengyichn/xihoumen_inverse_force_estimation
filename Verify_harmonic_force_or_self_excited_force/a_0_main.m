@@ -244,4 +244,9 @@ result.F_viv = F_viv;
 result.u_re = u_re;
 result.udot_re = udot_re;
 result.u2dot_re = u2dot_re;
+
+result.MM = MM;
+result.CC = CC;
+result.KK = KK;
+
 end
