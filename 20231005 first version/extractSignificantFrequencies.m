@@ -1,7 +1,7 @@
 function [significantFreqs, significantPeaks, significantLocs] = extractSignificantFrequencies(fs, Fa,varargin)
      p = inputParser;
-    addParameter(p,'showtext',true,@islogical);
-    addParameter(p,'showplot',true,@islogical);
+    addParameter(p,'showtext',false,@islogical);
+    addParameter(p,'showplot',false,@islogical);
     parse(p,varargin{:});
     showtext = p.Results.showtext;
     showplot = p.Results.showplot;
@@ -33,12 +33,13 @@ function [significantFreqs, significantPeaks, significantLocs] = extractSignific
     
     % 如果 shouldPlot 为真，则生成图形
     if showplot
-        figure;
+        
         plot(f, magnitude);
         hold on;
         scatter(f(significantLocs), significantPeaks);
         hold off;
         xlim([0, 0.5]);
         title('Significant Frequencies');
+        hold off
     end
 end

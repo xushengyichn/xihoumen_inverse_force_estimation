@@ -25,8 +25,8 @@ figureIdx = 0;
 % input.figureIdx = 0;
 n = 4;
 [result] = viv2013(n, OFF);
-input.start_time = result.startDate;
-input.end_time = result.endDate;
+input.start_time = result.startDate-hours(0.5);
+input.end_time = result.endDate+hours(0.5);
 input.acc_dir = "F:\test\result";
 % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
@@ -46,7 +46,7 @@ input.R_value = 10 ^ (-2.415076745081128);
 modesel= 23;
 input.modesel= modesel;
 
-[result_Main] = KalmanMain(input,'showtext', false,'showplot',false);
+[result_Main] = KalmanMain(input,'showtext', true,'showplot',false);
 logL = result_Main.logL;
 mode_deck = result_Main.mode_deck;
 
@@ -72,93 +72,137 @@ end
 
 %% Caldamping ratio
 input = result_Main;
-input.ncycle = 1;
+input.ncycle = 5;
 tic
-[result_Damping]=Cal_aero_damping_ratio(input,'showplot',true,'filterstyle','fft');
+[result_Damping]=Cal_aero_damping_ratio(input,'showplot',false,'filterstyle','fft');
 toc
 
+%% read wind data
+
+[result] = viv2013(n, OFF);
+start_time = result.startDate;
+end_time = result.endDate+hours(0.15);
+acc_dir = "F:\test\result_wind_10min";
+[result_wind] = read_wind_data(start_time,end_time,acc_dir);
+
+%% plot 
 t = result_Main.t;
+yn = result_Main.yn;
+h_hat = result_Main.h_hat;
 nmodes = result_Main.nmodes;
 amp_cell = result_Damping.amp_cell;
 zeta_all_cell = result_Damping.zeta_all_cell;
 top_freqs = result_Damping.top_freqs;
+t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t,yn(1,:));
+hold on
+plot(t,h_hat(1,:));
+xlabel('Time (s)')
+ylabel('Acceleration (m/s^2)')
+title("Acceleration vs. Time")
+legend("measure","filtered")
+
+
 
 for k1 = 1:nmodes
     for k2 = 1:length(top_freqs{k1})
+        % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+        datetimeArray = t_cycle_mean_cell{k1}{k2};
+        
+        % 提取第一个 datetime 对象作为参考点
+        referenceDatetime = datetimeArray(1);
+        
+        % 计算每个 datetime 对象相对于参考点的秒数
+        secondsFromReference = seconds(datetimeArray - referenceDatetime);
+        
+        % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        scatter(amp_cell{k1}{k2},zeta_all_cell{k1}{k2})
+        scatter(amp_cell{k1}{k2}*max(mode_deck(:,k1)),zeta_all_cell{k1}{k2},[],secondsFromReference,'filled');
+        % 设置 colormap
+        colormap('jet')
+        colorbar
+        
+        hold on
+        plot([0,0.15],[-0.003,-0.003])
+
         str = "Mode : %d, Frequency : %.2f Hz";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
+        xlim([0,0.15])
+        ylim([-5,5]/100)
+        xlabel("Amplitude(m)")
+        ylabel("Damping ratio")
     end
 end
 
-if 0
+
+for k1 = 1:nmodes
+    for k2 = 1:length(top_freqs{k1})
+        % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+        datetimeArray = t_cycle_mean_cell{k1}{k2};
         
-    % Colorize scatter plot based on wind_U
-scatter(amp_filt_kalman, zeta_aero_filt_kalman, [], wind_color, 'filled');
+        % 提取第一个 datetime 对象作为参考点
+        referenceDatetime = datetimeArray(1);
+        
+        % 计算每个 datetime 对象相对于参考点的秒数
+        secondsFromReference = seconds(datetimeArray - referenceDatetime);
+        
+        % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
-hold on;
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+        scatter(secondsFromReference,amp_cell{k1}{k2}*max(mode_deck(:,k1)),[],secondsFromReference,'filled');
+        % 设置 colormap
+        colormap('jet')
+        colorbar
+        
+        hold on
+        plot([0,0.15],[-0.003,-0.003])
 
-reference_amp = [0 600];
-reference_zeta = [0 0];
-plot(reference_amp, reference_zeta);
-
-title("amplitude dependent aerodynamic damping ratio");
-ylim([-0.5, 0.5]);
-
-% Choose a color map (for example, 'jet') and display the color scale
-colormap('jet');
-colorbar;
-
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-% Colorize scatter plot based on wind_U
-scatter(amp_filt_kalman * max(mode_deck), zeta_aero_filt_kalman, [], wind_color, 'filled');
-
-hold on;
-
-reference_amp = [0 0.12];
-reference_zeta = [0 0];
-plot(reference_amp, reference_zeta);
-
-title("amplitude dependent aerodynamic damping ratio");
-ylim([-0.05, 0.05]);
-
-% Choose a color map (for example, 'jet') and display the color scale
-colormap('jet');
-colorbar;
-
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
-% Colorize scatter plot based on wind_U
-scatter(amp_filt_kalman * max(mode_deck), work, [], wind_color, 'filled');
-hold on;
-title("amplitude dependent work");
-% Choose a color map (for example, 'jet') and display the color scale
-colormap('jet');
-colorbar;
-
-        % 画图来验证峰值检测的准确性
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(t, dis);
-hold on;
-plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
-hold off;
-title('Peak detection');
-xlabel('Time');
-ylabel('Displacement');
-
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-[p, fd, td] = pspectrum(dis, t, 'spectrogram', 'FrequencyResolution', 0.005);
-instfreq(p, fd, td);
-
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
+        str = "Mode : %d, Frequency : %.2f Hz, Amp vs. Time";
+        title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
+        % xlim([0,0.15])
+        % ylim([-25,25]/100)
+        xlabel("Time(s)")
+        ylabel("Amplitude")
+    end
 end
 
 
+for k1 = 1:nmodes
+    for k2 = 1:length(top_freqs{k1})
+        % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+        datetimeArray = t_cycle_mean_cell{k1}{k2};
+        
+        % 提取第一个 datetime 对象作为参考点
+        referenceDatetime = datetimeArray(1);
+        
+        % 计算每个 datetime 对象相对于参考点的秒数
+        secondsFromReference = seconds(datetimeArray - referenceDatetime);
+        
+        % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
-% functions
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+        scatter(secondsFromReference,zeta_all_cell{k1}{k2},[],secondsFromReference,'filled');
+        % 设置 colormap
+        colormap('jet')
+        colorbar
+        
+        hold on
+        plot([0,0.15],[-0.003,-0.003])
+
+        str = "Mode : %d, Frequency : %.2f Hz";
+        title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
+        % xlim([0,0.15])
+        % ylim([-25,25]/100)
+        xlabel("Time(s)")
+        ylabel("Damping ratio")
+        
+    end
+end
+
+%% functions
 function logL = fitnessFunction(params,external_params)
         input.lambda = 10 ^ params(1);
         input.sigma_p = params(2);

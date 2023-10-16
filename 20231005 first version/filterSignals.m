@@ -15,8 +15,8 @@ function filtered_signals = filterSignals(input_signal, frequencies, fs, bandwid
     end
     
     p = inputParser;
-    addParameter(p,'showtext',true,@islogical);
-    addParameter(p,'showplot',true,@islogical);
+    addParameter(p,'showtext',false,@islogical);
+    addParameter(p,'showplot',false,@islogical);
     addParameter(p,'filterstyle','fft',@ischar);% fft use the function by myself, bandpass use the function in matlab. fft is much faster than bandpass but may not be accurate
     parse(p,varargin{:});
     showtext = p.Results.showtext;
@@ -39,6 +39,8 @@ function filtered_signals = filterSignals(input_signal, frequencies, fs, bandwid
                 filtered_signal = fft_filter(fs, input_signal, [low_freq, high_freq]);
             case 'bandpass'
                 filtered_signal = bandpass(input_signal, [low_freq, high_freq], fs);
+            case 'nofilter'
+            filtered_signal = input_signal;
             otherwise
                 error('Invalid filter style. Choose either "fft" or "bandpass".')
         end

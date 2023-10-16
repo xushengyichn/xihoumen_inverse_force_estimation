@@ -3,7 +3,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
 % input.ncycle = 1;%计算气动阻尼时n个周期算一次阻尼比
 
 % input.wind_dir = "F:\test\result_wind_10min";
- % input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+% input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 % [Wind_Data] = read_wind_data(start_time, end_time, wind_dir);
  %% 9 calculate aerodynamic damping ratio
 
@@ -51,6 +51,12 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         vel_filtered = bandpass(vel', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
         dis_filtered = bandpass(dis', [min(Freq) * 0.9, max(Freq) * 1.1], fs)';
 
+
+        case 'nofilter'
+        Fa_filtered = Fa;
+        vel_filtered = vel;
+        dis_filtered = dis;
+
         otherwise
         error('Invalid filter style. Choose either "fft" or "bandpass".')
     end
@@ -80,7 +86,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     for k1=1:nmodes
         for k2 = 1:length(top_freqs{k1})
             f_keep_temp = [top_freqs{k1}(k2) * 0.9, top_freqs{k1}(k2) * 1.1];
-            [ifq_interpolated_allmodes{k1}{k2}] = instfreq_samelength(fs, Fa(k1,:), f_keep_temp, t, 'showplot', showplot, 'showtext', showtext, 'filterstyle', filterstyle);
+            [ifq_interpolated_allmodes{k1}{k2}] = instfreq_samelength(fs, Fa(k1,:), f_keep_temp, t, 'showplot', showplot, 'showtext', showtext);
         end
     end
 
@@ -89,21 +95,21 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     for k1 = 1:nmodes
         frequencies = top_freqs{k1};
         Fa_current = Fa_filtered(k1, :);
-        filtered_Fa{k1} =filterSignals(Fa_current, frequencies, fs, bandwidth);
+        filtered_Fa{k1} =filterSignals(Fa_current, frequencies, fs, bandwidth,'filterstyle','fft','showplot', showplot);
     end
 
     filtered_vel = cell(1,nmodes);
     for k1 = 1:nmodes
         frequencies = top_freqs{k1};
         vel_current = vel_filtered(k1, :);
-        filtered_vel{k1} =filterSignals(vel_current, frequencies, fs, bandwidth);
+        filtered_vel{k1} =filterSignals(vel_current, frequencies, fs, bandwidth,'filterstyle','fft','showplot', showplot);
     end
 
     filtered_dis = cell(1,nmodes);
     for k1 = 1:nmodes
         frequencies = top_freqs{k1};
         dis_current = dis_filtered(k1, :);
-        filtered_dis{k1} =filterSignals(dis_current, frequencies, fs, bandwidth);
+        filtered_dis{k1} =filterSignals(dis_current, frequencies, fs, bandwidth,'filterstyle','fft','showplot', showplot);
     end
 
 
@@ -112,9 +118,9 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
 
     % 寻找不同模态不同频率力信号的周期
     for k1 = 1:nmodes
-        filtered_Fa_current = filtered_Fa{k1}; % 获取当前模式的滤波数据
+        filtered_Fa_current = filtered_Fa{k1}; % 获取当前模态的滤波数据
         peaks_locs_struct = struct(); % 初始化一个结构体以保存peaks和locs       
-        for k2 = 1:length(filtered_Fa_current)
+        for k2 = 1:length(top_freqs{k1})
             f_temp = top_freqs{k1}(k2);
             T_temp = 1/f_temp;
             d = T_temp * 50*0.9;
@@ -141,7 +147,8 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     zeta_all_cell = cell(size(filtered_Fa)); % 初始化用于保存zeta_all数组的cell
 
     for i = 1:length(filtered_Fa)
-        force_mode_signals = filtered_Fa{i}; % 获取当前模式下的力信号
+        % i = 9
+        force_mode_signals = filtered_Fa{i}; % 获取当前模态下的力信号
         vel_filtered_mode_signal = filtered_vel{i}; % 获取当前模式下的速度信号
         dis_filtered_mode_signal = filtered_dis{i}; % 获取当前模式下的位移信号
         ifq_interpolated_mode = ifq_interpolated_allmodes{i}; % 获取当前模式下的ifq_interpolated
@@ -151,16 +158,23 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         zeta_all_mode = {}; % 初始化用于保存当前模式zeta_all的cell
         
         for j = 1:length(force_mode_signals) % 遍历当前模式下的每个信号
-            Fa_temp = force_mode_signals{j};
-            vel_temp = vel_filtered_mode_signal{j};
+            % Fa_temp = force_mode_signals{j};
+            % vel_temp = vel_filtered_mode_signal{j};
             freq_temp = ifq_interpolated_mode{j};
-            dis_temp = dis_filtered_mode_signal{j};
+            % dis_temp = dis_filtered_mode_signal{j};
+
+            Fa_temp = Fa(i,:);
+            vel_temp = vel(i,:);
+            dis_temp = dis(i,:);
+
             locs = peaks_locs_cell_mode(j).locs;
-            [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs);
+            [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs,'showplot', showplot);
             
-            
+          
+
             amp_mode{j} = result.amp; % 将此信号的amp数组保存到当前模式的cell中
             zeta_all_mode{j} = result.zeta_all; % 将此信号的zeta_all数组保存到当前模式的cell中
+            t_cycle_mean_mode{j} = result.t_cycle_mean;
 
             % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
             % scatter(result.amp*max(mode_deck(:,i)), result.zeta_all)
@@ -172,6 +186,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         
         amp_cell{i} = amp_mode; % 将当前模式的amp cell保存到总cell中
         zeta_all_cell{i} = zeta_all_mode; % 将当前模式的zeta_all cell保存到总cell中
+        t_cycle_mean_cell{i}=t_cycle_mean_mode;
     end
 
 
@@ -185,5 +200,6 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     result_Main.filtered_vel = filtered_vel;
     result_Main.filtered_dis = filtered_dis;
     result_Main.ifq_interpolated_allmodes = ifq_interpolated_allmodes;
+    result_Main.t_cycle_mean_cell=t_cycle_mean_cell;
     
 end

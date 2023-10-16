@@ -21,8 +21,8 @@ function [ifq_interpolated] = instfreq_samelength(fs, x_k_k, f_keep, t, varargin
     % end
 
     p = inputParser;
-    addParameter(p,'showtext',true,@islogical);
-    addParameter(p,'showplot',true,@islogical);
+    addParameter(p,'showtext',false,@islogical);
+    addParameter(p,'showplot',false,@islogical);
     addParameter(p,'freqRes',0.005,@isnumeric);% default freqRes is 0.005Hz
     addParameter(p,'filterstyle','fft',@ischar);% fft use the function by myself, bandpass use the function in matlab. fft is much faster than bandpass but may not be accurate
     parse(p,varargin{:});

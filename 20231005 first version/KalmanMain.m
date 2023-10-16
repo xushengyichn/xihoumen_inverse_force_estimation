@@ -147,7 +147,12 @@ function [result_Main] = KalmanMain(input,varargin)
     mode_vec = Result.mode_vec;
     nodeondeck = Result.nodeondeck;
     Mapping_data = Result.Mapping;
+    
     zeta = ones(size(modesel)) * 0.3/100;
+    % zeta = ones(size(modesel)) * 4/100;
+    if showtext
+        disp("Damping ratio of the structure is set as "+num2str(zeta));
+    end
     omega = diag(2 * pi * Freq);
     CC_eq = 2 .* MM_eq .* omega .* zeta;
 
@@ -160,7 +165,8 @@ function [result_Main] = KalmanMain(input,varargin)
     %% 3 传感器布置
     % accelerometer location
     % loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
-    loc_acc = [990.5; 1403; 1815.5];
+    loc_acc = [1403];
+    % loc_acc = [990.5; 1403; 1815.5];
     loc_vel = [];
     loc_dis = [];
 
@@ -168,12 +174,15 @@ function [result_Main] = KalmanMain(input,varargin)
     dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
     fs = 1 / dt;
     acc_names = ["Main span 1/4", "Main span 1/2", "Main span 3/4"];
-    yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
-    yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
-    yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
-    yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
-    yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
-    yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+    % yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
+    % yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
+    % yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
+    % yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
+    % yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
+    % yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+
+    yn(1, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
+    yn(2, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
 
     if shouldFilterYn == true
         [f, magnitude] = fft_transform(fs, yn(3,:));
@@ -254,7 +263,8 @@ function [result_Main] = KalmanMain(input,varargin)
     end
 
     %% 6 virtual sensoring
-    loc_acc_v = [990.5; 1403; 1815.5];
+    % loc_acc_v = [990.5; 1403; 1815.5];
+    loc_acc_v = [1403];
     % loc_acc_v = [578+1650/4*3;578+1650/2;578+1650/4];
     loc_vel_v = [];
     loc_dis_v = [];
@@ -271,8 +281,8 @@ function [result_Main] = KalmanMain(input,varargin)
     [~, yn_reconstruct, ~] = CalResponse(A_d, B_d, G_d, J_d, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
 
     % fft
-    [f_origin, magnitude_origin] = fft_transform(1 / dt, yn(3, :));
-    [f_re, magnitude_re] = fft_transform(1 / dt, yn_reconstruct(3, :));
+    % [f_origin, magnitude_origin] = fft_transform(1 / dt, yn(3, :));
+    % [f_re, magnitude_re] = fft_transform(1 / dt, yn_reconstruct(3, :));
 
     %% 8 marginal likelihood
     logL = result.logL;
@@ -293,12 +303,14 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.Freq = Freq;
     result_Main.fs = fs;
     result_Main.mode_deck = mode_deck;
+    result_Main.yn=yn;
+    result_Main.h_hat = h_hat;
     
 
 
     if fig_bool == ON
 
-        for k1 = 1:length(acc_names)
+        for k1 = 1:length(loc_acc)
             [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
             % subplot(1, nmodes, k1)
@@ -310,11 +322,11 @@ function [result_Main] = KalmanMain(input,varargin)
             ylabel('acc (m/s^2)')
             set(gca, 'FontSize', 12)
             legend('left','right', 'Location', 'northwest')
-            title([acc_names(k1)]);
+            title([num2str(loc_acc(k1))]);
             ylim([-maxvalue, maxvalue])
         end
 
-        for k1 = 1:length(acc_names)
+        for k1 = 1:length(loc_acc)
             [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
             % subplot(1, nmodes, k1)
@@ -326,11 +338,11 @@ function [result_Main] = KalmanMain(input,varargin)
             ylabel('acc (m/s^2)')
             set(gca, 'FontSize', 12)
             legend('left','right', 'Location', 'northwest')
-            title([acc_names(k1)] + "filter");
+            title([num2str(loc_acc(k1))] + "filter");
             ylim([-maxvalue, maxvalue])
         end
 
-        for k1 = 1:length(acc_names)
+        for k1 = 1:length(loc_acc)
             [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
             % subplot(1, nmodes, k1)
@@ -342,7 +354,7 @@ function [result_Main] = KalmanMain(input,varargin)
             ylabel('acc (m/s^2)')
             set(gca, 'FontSize', 12)
             legend('left','right', 'Location', 'northwest')
-            title([acc_names(k1)] + "recalculate");
+            title([num2str(loc_acc(k1))] + "recalculate");
             ylim([-maxvalue, maxvalue])
         end
 
@@ -378,21 +390,21 @@ function [result_Main] = KalmanMain(input,varargin)
             % ylim([0, 50])
         end
 
-        set(hFigure, 'name', 'filtered modal force frequency', 'Numbertitle', 'off');
-        % figureIdx=0;
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        plot(f_re, magnitude_re)
-        hold on
-        plot(f_origin, magnitude_origin)
-        legend("cal", "measure")
-        xlim([0, 0.5])
-
-        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        plot(f_re, log(magnitude_re))
-        hold on
-        plot(f_origin, log(magnitude_origin))
-        legend("cal", "measure")
-        xlim([0, 0.5])
+        % set(hFigure, 'name', 'filtered modal force frequency', 'Numbertitle', 'off');
+        % % figureIdx=0;
+        % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+        % plot(f_re, magnitude_re)
+        % hold on
+        % plot(f_origin, magnitude_origin)
+        % legend("cal", "measure")
+        % xlim([0, 0.5])
+        % 
+        % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+        % plot(f_re, log(magnitude_re))
+        % hold on
+        % plot(f_origin, log(magnitude_origin))
+        % legend("cal", "measure")
+        % xlim([0, 0.5])
 
         % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
         % plot(t2, ifq1)

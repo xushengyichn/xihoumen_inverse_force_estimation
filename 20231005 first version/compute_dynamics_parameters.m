@@ -8,13 +8,23 @@
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs)
+function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, freq_temp, dis_temp , locs,varargin)
+    p = inputParser;
+    addParameter(p,'showtext',false,@islogical);
+    addParameter(p,'showplot',false,@islogical);
+    parse(p,varargin{:});
+    showtext = p.Results.showtext;
+    showplot = p.Results.showplot;
 
 
     
     k2 = 1;
     
-    for k1 = 1:ncycle:(length(locs) - ncycle + 1)
+    overlap = 0.5; % 设置重叠的比例，例如0.5代表50%重叠
+    step = round(ncycle * (1 - overlap)); % 计算每步应该移动的距离
+
+    for k1 = 1:step:(length(locs) - ncycle + 1) % 更新k1的迭代方式
+    % for k1 = 1:ncycle:(length(locs) - ncycle + 1)
         if k1 + ncycle > length(locs)
             break;
         end
@@ -46,6 +56,18 @@ function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, fr
         % wind_color(k2) = interp1(Wind_Data.resultsTable_UA4.Time_Start, Wind_Data.resultsTable_UA4.U, timestamp_cycle(k2));
         
         k2 = k2 + 1;
+
+        if showplot
+            plot(t(locs(k1):locs(k1 + ncycle)),Fa_temp(locs(k1):locs(k1 + ncycle)) ...
+                /max(abs(Fa_temp(locs(k1):locs(k1 + ncycle)))))
+            hold on
+            plot(t(locs(k1):locs(k1 + ncycle)),vel_temp(locs(k1):locs(k1 + ncycle)) ...
+                /max(abs(vel_temp(locs(k1):locs(k1 + ncycle)))))
+            title("Fa vs. vel, zeta = "+num2str(zeta_all(k2-1)))
+            legend("Fa","vel")
+            hold off
+            % pause
+        end
     end
     
     result.amp = amp;
