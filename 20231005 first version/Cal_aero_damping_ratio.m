@@ -178,10 +178,12 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
 
     result_Main.amp_cell = amp_cell;
     result_Main.zeta_all_cell = zeta_all_cell;
-
-
-
-
-
-
+    result_Main.top_freqs = top_freqs;
+    result_Main.top_freqs_vel = top_freqs_vel;
+    result_Main.peaks_locs_cell = peaks_locs_cell;
+    result_Main.filtered_Fa = filtered_Fa;
+    result_Main.filtered_vel = filtered_vel;
+    result_Main.filtered_dis = filtered_dis;
+    result_Main.ifq_interpolated_allmodes = ifq_interpolated_allmodes;
+    
 end

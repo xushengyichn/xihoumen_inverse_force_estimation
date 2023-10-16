@@ -42,11 +42,13 @@ input.omega_0_variation =1.097383030422062;
 input.Q_value =10 ^ (-9.633948257379021);
 input.R_value = 10 ^ (-2.415076745081128);
 
-input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+% modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+modesel= 23;
+input.modesel= modesel;
 
 [result_Main] = KalmanMain(input,'showtext', false,'showplot',false);
 logL = result_Main.logL;
-
+mode_deck = result_Main.mode_deck;
 
 
 
@@ -72,12 +74,23 @@ end
 input = result_Main;
 input.ncycle = 1;
 tic
-[result_Damping]=Cal_aero_damping_ratio(input,'showplot',false);
+[result_Damping]=Cal_aero_damping_ratio(input,'showplot',true,'filterstyle','fft');
 toc
 
-
+t = result_Main.t;
+nmodes = result_Main.nmodes;
 amp_cell = result_Damping.amp_cell;
+zeta_all_cell = result_Damping.zeta_all_cell;
+top_freqs = result_Damping.top_freqs;
 
+for k1 = 1:nmodes
+    for k2 = 1:length(top_freqs{k1})
+        [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+        scatter(amp_cell{k1}{k2},zeta_all_cell{k1}{k2})
+        str = "Mode : %d, Frequency : %.2f Hz";
+        title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
+    end
+end
 
 if 0
         

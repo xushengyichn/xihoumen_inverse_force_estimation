@@ -292,6 +292,8 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.nmodes = nmodes;
     result_Main.Freq = Freq;
     result_Main.fs = fs;
+    result_Main.mode_deck = mode_deck;
+    
 
 
     if fig_bool == ON
