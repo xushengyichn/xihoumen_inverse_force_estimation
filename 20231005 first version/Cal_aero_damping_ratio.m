@@ -31,6 +31,8 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     Fa = p_filt_m;
     dis = x_k_k(1:nmodes, :);
     vel = x_k_k(nmodes + 1:2*nmodes, :);
+
+
     
 
     switch filterstyle
@@ -61,19 +63,28 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         error('Invalid filter style. Choose either "fft" or "bandpass".')
     end
 
-    % figure
-    % plot(Fa_filtered(1,:))
-    % hold on
-    % plot(Fa_filtered(1,:))
-    % [f1, magnitude1] = fft_transform(fs,Fa_filtered(1,:));
-    % [f2, magnitude2] = fft_transform(fs,Fa_filtered(1,:));
-    % [f3, magnitude3] = fft_transform(fs,Fa(1,:));
-    % figure
-    % plot(f1, magnitude1)
-    % hold on
-    % plot(f2, magnitude2)
-    % plot(f3, magnitude3)
-    % xlim([0, max(Freq) * 1.1])
+    if showplot
+        figure
+        plot(t,Fa(1,:))
+        hold on
+        plot(t,Fa_filtered(1,:))
+        xlabel('Time(s)')
+        ylabel("Modal force")
+        legend("Kalman Filter","Bandpass")
+        [f2, magnitude2] = fft_transform(fs,Fa_filtered(1,:));
+        % [f2, magnitude2] = fft_transform(fs,Fa_filtered(1,:));
+        [f1, magnitude1] = fft_transform(fs,Fa(1,:));
+        
+        figure
+        plot(f1, magnitude1)
+        hold on
+        plot(f2, magnitude2)
+        % plot(f3, magnitude3)
+        xlim([0, max(Freq) * 1.1])
+        xlabel('Frequency(Hz)')
+        ylabel("Value")
+        legend("Kalman Filter","Bandpass")
+    end
     % 找到峰值设定保存频率成分的变量
 
     top_freqs = cell(1, nmodes);
@@ -158,11 +169,12 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         zeta_all_mode = {}; % 初始化用于保存当前模式zeta_all的cell
         
         for j = 1:length(force_mode_signals) % 遍历当前模式下的每个信号
+            freq_temp = ifq_interpolated_mode{j};
+
             % Fa_temp = force_mode_signals{j};
             % vel_temp = vel_filtered_mode_signal{j};
-            freq_temp = ifq_interpolated_mode{j};
             % dis_temp = dis_filtered_mode_signal{j};
-
+            % 
             Fa_temp = Fa(i,:);
             vel_temp = vel(i,:);
             dis_temp = dis(i,:);

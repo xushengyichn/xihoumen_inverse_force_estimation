@@ -42,6 +42,7 @@ function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, fr
         for cycle_offset = 0:(ncycle - 1)
             current_dis = dis_temp(locs(k1 + cycle_offset):locs(k1 + cycle_offset + 1));
             current_amp = (max(current_dis) - min(current_dis)) / 2;
+            % current_amp = rms(current_dis)*sqrt(2);
             sum_amplitudes = sum_amplitudes + current_amp;
         end
 
@@ -49,6 +50,7 @@ function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, fr
         
         f(k2) = (freq_temp(locs(k1)) + freq_temp(locs(k1 + ncycle))) / 2;
         omega(k2) = 2 * pi * f(k2);
+        % omega(k2) = 2 * pi * mean(freq_temp);
         c(k2) = work(k2) / pi / amp(k2) ^ 2 / omega(k2) / ncycle;
         zeta_all(k2) = -c(k2) / 2 / omega(k2);
         

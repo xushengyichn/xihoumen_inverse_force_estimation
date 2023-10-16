@@ -9,7 +9,7 @@ run("InitScript.m")
 
 %% 0 绘图参数
 fig_bool = ON;
-num_figs_in_row = 12; %每一行显示几个图
+num_figs_in_row = 3; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
 gap_between_images = [0, 0];
@@ -25,8 +25,10 @@ figureIdx = 0;
 % input.figureIdx = 0;
 n = 4;
 [result] = viv2013(n, OFF);
-input.start_time = result.startDate;
-input.end_time = result.endDate;
+startDate_global = result.startDate-hours(0.5);
+endDate_global= result.endDate+hours(1);
+input.start_time = startDate_global;
+input.end_time = endDate_global;
 input.acc_dir = "F:\test\result";
 % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
@@ -79,9 +81,9 @@ toc
 
 %% read wind data
 
-[result] = viv2013(n, OFF);
-start_time = result.startDate;
-end_time = result.endDate;
+% [result] = viv2013(n, OFF);
+start_time = startDate_global;
+end_time = endDate_global;
 acc_dir = "F:\test\result_wind_10min";
 [result_wind] = read_wind_data(start_time,end_time,acc_dir);
 
@@ -112,6 +114,10 @@ ylabel('Acceleration (m/s^2)')
 title("Acceleration vs. Time")
 legend("measure","filtered")
 
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+[p, fd, td] = pspectrum(h_hat(1,:), t, 'spectrogram', 'FrequencyResolution', 0.005);
+instfreq(p, fd, td);
+ylim([0.1,0.5])
 
 for k1 = 1:nmodes
     for k2 = 1:length(top_freqs{k1})
@@ -159,13 +165,13 @@ for k1 = 1:nmodes
         % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        scatter(secondsFromReference,amp_cell{k1}{k2}*max(mode_deck(:,k1)),[],secondsFromReference,'filled');
+        scatter(datetimeArray,amp_cell{k1}{k2}*max(mode_deck(:,k1)),[],secondsFromReference,'filled');
         % 设置 colormap
         colormap('jet')
-        colorbar
+        % colorbar
         
-        hold on
-        plot([0,0.15],[-0.003,-0.003])
+        % hold on
+        % plot([0,0.15],[-0.003,-0.003])
 
         str = "Mode : %d, Frequency : %.2f Hz, Amp vs. Time";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
@@ -191,13 +197,13 @@ for k1 = 1:nmodes
         % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-        scatter(secondsFromReference,zeta_all_cell{k1}{k2},[],secondsFromReference,'filled');
+        scatter(datetimeArray,zeta_all_cell{k1}{k2},[],secondsFromReference,'filled');
         % 设置 colormap
         colormap('jet')
-        colorbar
+        % colorbar
         
-        hold on
-        plot([0,0.15],[-0.003,-0.003])
+        % hold on
+        % plot([datetimeArray(1),datetimeArray(end)],[-0.003,-0.003])
 
         str = "Mode : %d, Frequency : %.2f Hz";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
