@@ -187,7 +187,7 @@ function [result_Main] = KalmanMain(input,varargin)
     nodeondeck = Result.nodeondeck;
     Mapping_data = Result.Mapping;
     
-    zeta = ones(size(modesel)) * 0.3/100;
+    % zeta = ones(size(modesel)) * 0.3/100;
     zeta = ones(size(modesel)) * 0/100;
     if showtext
         disp("Damping ratio of the structure is set as "+num2str(zeta));

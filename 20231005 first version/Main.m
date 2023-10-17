@@ -39,11 +39,17 @@ input.acc_dir = "F:\test\result";
 % input.Q_value =10 ^ (-8);
 % input.R_value = 10 ^ (-6);
 
-input.lambda = 10 ^ (-4.934808796013671);
-input.sigma_p = 6.895548550856822e+03;
-input.omega_0_variation =1.097383030422062;
-input.Q_value =10 ^ (-9.633948257379021);
-input.R_value = 10 ^ (-2.415076745081128);
+% input.lambda = 10 ^ (-4.934808796013671);
+% input.sigma_p = 6.895548550856822e+03;
+% input.omega_0_variation =1.097383030422062;
+% input.Q_value =10 ^ (-9.633948257379021);
+% input.R_value = 10 ^ (-2.415076745081128);
+
+input.lambda = 10 ^ (-4.993486819657864);
+input.sigma_p = 1.441514803767596e+04;
+input.omega_0_variation =0.904969462898074;
+input.Q_value =10 ^ (-9.901777612793937);
+input.R_value = 10 ^ (-3.866588296864785);
 
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
 modesel= 23;
@@ -190,7 +196,7 @@ for k1 = 1:nmodes
         % scatter(ex,epsx,'green')
         str = "Mode : %d, Frequency : %.2f Hz";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
-        xlim([0,0.15])
+        xlim([0.05,0.12])
         ylim([-0.5,0.5]/100)
         xlabel("Amplitude(m)")
         ylabel("Damping ratio")
@@ -254,8 +260,8 @@ for k1 = 1:nmodes
 
         str = "Mode : %d, Frequency : %.2f Hz";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
-        % xlim([0,0.15])
-        % ylim([-25,25]/100)
+        % xlim([0.05,0.12])
+        ylim([-0.5,0.5]/100)
         xlabel("Time(s)")
         ylabel("Damping ratio")
         
