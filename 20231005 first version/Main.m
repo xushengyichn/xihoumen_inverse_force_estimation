@@ -2,6 +2,7 @@ clc; clear; close all;
 addpath(genpath("F:\git\ssm_tools\"))
 addpath(genpath("F:\git\Function_shengyi_package\"))
 addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
+addpath(genpath("F:\git\HHT-Tutorial\"))
 
 subStreamNumberDefault = 2132;
 
@@ -25,8 +26,8 @@ figureIdx = 0;
 % input.figureIdx = 0;
 n = 4;
 [result] = viv2013(n, OFF);
-startDate_global = result.startDate-hours(0.5);
-endDate_global= result.endDate+hours(1);
+startDate_global = result.startDate;
+endDate_global= result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
 input.acc_dir = "F:\test\result";
@@ -48,7 +49,7 @@ input.R_value = 10 ^ (-2.415076745081128);
 modesel= 23;
 input.modesel= modesel;
 
-[result_Main] = KalmanMain(input,'showtext', true,'showplot',false);
+[result_Main] = KalmanMain(input,'showtext', true,'showplot',false,'filterstyle','fft','f_keep', 0.33*[0.9,1.1]);
 logL = result_Main.logL;
 mode_deck = result_Main.mode_deck;
 
@@ -57,7 +58,8 @@ mode_deck = result_Main.mode_deck;
 if 0
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    external_params.modelsel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+    % external_params.modelsel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+    external_params.modelsel = [23];
     % 定义参数的范围
     lb = [-5, 10, 0.9, -10, -10]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [-1, 1e5, 1.1, -1, -1]; % 这里的值也是假设的
@@ -74,9 +76,9 @@ end
 
 %% Caldamping ratio
 input = result_Main;
-input.ncycle = 5;
+input.ncycle = 3;
 tic
-[result_Damping]=Cal_aero_damping_ratio(input,'showplot',false,'filterstyle','fft');
+[result_Damping]=Cal_aero_damping_ratio(input,'showplot',false,'filterstyle','nofilter');
 toc
 
 %% read wind data
@@ -118,6 +120,7 @@ amp_cell = result_Damping.amp_cell;
 zeta_all_cell = result_Damping.zeta_all_cell;
 top_freqs = result_Damping.top_freqs;
 t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+yn_reconstruct =result_Main.yn_reconstruct;
 
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 scatter(result_wind.resultsTable_UA6.Time_Start,result_wind.resultsTable_UA6.U);
@@ -131,19 +134,29 @@ title("Wind speed vs. Time")
 plot(t,yn(1,:));
 hold on
 plot(t,h_hat(1,:));
+plot(t,yn_reconstruct(1,:))
 xlabel('Time (s)')
 ylabel('Acceleration (m/s^2)')
 title("Acceleration vs. Time")
-legend("measure","filtered")
+legend("measure","filtered","reconstruct")
 
 
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-
+% Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+% mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc;nodeondeck = Result.nodeondeck;
+% eig_vec=Result.eig_vec;
+% Mapping_data = Result.Mapping;
+% loc_acc = [1403];
+% acc_node=FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+% acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+% acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+% node_shape = mean(eig_vec(acc_matrix_seq));
 plot(t,disp_dir.disp);
 hold on
 plot(t,h_hat(3,:));
+
 xlabel('Time (s)')
-ylabel('Displacement (m/s^2)')
+ylabel('Displacement (m)')
 title("Displacement vs. Time")
 legend("measure","filtered")
 
@@ -178,7 +191,7 @@ for k1 = 1:nmodes
         str = "Mode : %d, Frequency : %.2f Hz";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
         xlim([0,0.15])
-        ylim([-5,5]/100)
+        ylim([-0.5,0.5]/100)
         xlabel("Amplitude(m)")
         ylabel("Damping ratio")
     end
@@ -276,7 +289,7 @@ function logL = fitnessFunction(params,external_params)
         % input.acc_dir = "F:\test\result";
         input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
     
-        result_Main = KalmanMain(input, 'showtext', false, 'showfigure', false);
+        result_Main = KalmanMain(input,'showtext', false,'showplot',false,'filterstyle','fft','f_keep', 0.33*[0.9,1.1]);
         logL = -result_Main.logL; % 因为 ga 试图最小化函数，所以取负数
 end
 

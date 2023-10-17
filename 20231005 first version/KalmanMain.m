@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-13 15:11:32
+%LastEditTime: 2023-10-17 11:05:15
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\KalmanMain.m
 %Description: TODO:加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
@@ -66,11 +66,15 @@ function [result_Main] = KalmanMain(input,varargin)
       addParameter(p, 'figPos', [100,100,400,300], @isnumeric)
       addParameter(p, 'gap_between_images', [0,0], @isnumeric)
       addParameter(p, 'figureIdx', 0, @isnumeric)
+      addParameter(p, 'f_keep', 0.33*[0.9,1.1], @isnumeric)
+      addParameter(p,'filterstyle','nofilter',@ischar);% fft use the function by myself, bandpass use the function in matlab. fft is much faster than bandpass but may not be accurate
       parse(p, varargin{:});
+    filterstyle = p.Results.filterstyle;
     showtext = p.Results.showtext;
     shouldFilterYn = p.Results.shouldFilterYn;
     shouldFilterp_filt_m = p.Results.shouldFilterp_filt_m;
     showplot = p.Results.showplot;
+    f_keep = p.Results.f_keep;
     num_figs_in_row = p.Results.num_figs_in_row;
     figPos = p.Results.figPos;
     gap_between_images = p.Results.gap_between_images;
@@ -96,6 +100,41 @@ function [result_Main] = KalmanMain(input,varargin)
     OFF = false;
     
     [Acc_Data] = read_acceleration_data(start_time, end_time, acc_dir);
+
+    switch filterstyle
+        case 'fft'
+        timeDifferences = diff(Acc_Data.mergedData.Time); % Returns a duration array
+        dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
+        fs = 1 / dt;
+        Acc_Data.mergedData.AC2_1 = fft_filter(fs, Acc_Data.mergedData.AC2_1, f_keep)';
+        Acc_Data.mergedData.AC2_2 = fft_filter(fs, Acc_Data.mergedData.AC2_2, f_keep)'; 
+        Acc_Data.mergedData.AC2_3 = fft_filter(fs, Acc_Data.mergedData.AC2_3, f_keep)';
+        Acc_Data.mergedData.AC3_1 = fft_filter(fs, Acc_Data.mergedData.AC3_1, f_keep)';
+        Acc_Data.mergedData.AC3_2 = fft_filter(fs, Acc_Data.mergedData.AC3_2, f_keep)';
+        Acc_Data.mergedData.AC3_3 = fft_filter(fs, Acc_Data.mergedData.AC3_3, f_keep)';
+        Acc_Data.mergedData.AC4_1 = fft_filter(fs, Acc_Data.mergedData.AC4_1, f_keep)';
+        Acc_Data.mergedData.AC4_2 = fft_filter(fs, Acc_Data.mergedData.AC4_2, f_keep)';
+        Acc_Data.mergedData.AC4_3 = fft_filter(fs, Acc_Data.mergedData.AC4_3, f_keep)';
+
+
+        
+        case 'bandpass'
+        timeDifferences = diff(Acc_Data.mergedData.Time); % Returns a duration array
+        dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
+        fs = 1 / dt;
+        Acc_Data.mergedData.AC2_1 = bandpass(Acc_Data.mergedData.AC2_1', f_keep, fs)';
+        Acc_Data.mergedData.AC2_2 = bandpass(Acc_Data.mergedData.AC2_2', f_keep, fs)';
+        Acc_Data.mergedData.AC2_3 = bandpass(Acc_Data.mergedData.AC2_3', f_keep, fs)';
+        Acc_Data.mergedData.AC3_1 = bandpass(Acc_Data.mergedData.AC3_1', f_keep, fs)';
+        Acc_Data.mergedData.AC3_2 = bandpass(Acc_Data.mergedData.AC3_2', f_keep, fs)';
+        Acc_Data.mergedData.AC3_3 = bandpass(Acc_Data.mergedData.AC3_3', f_keep, fs)';
+
+        case 'nofilter'
+        
+
+        otherwise
+        error('Invalid filter style. Choose either "fft" or "bandpass".')
+    end
    
     [uniqueTimestamps, ia, ~] = unique(Acc_Data.mergedData.Time, 'stable');
 
@@ -149,7 +188,7 @@ function [result_Main] = KalmanMain(input,varargin)
     Mapping_data = Result.Mapping;
     
     zeta = ones(size(modesel)) * 0.3/100;
-    % zeta = ones(size(modesel)) * 4/100;
+    zeta = ones(size(modesel)) * 0/100;
     if showtext
         disp("Damping ratio of the structure is set as "+num2str(zeta));
     end
@@ -305,6 +344,7 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.mode_deck = mode_deck;
     result_Main.yn=yn;
     result_Main.h_hat = h_hat;
+    result_Main.yn_reconstruct = yn_reconstruct;
     
 
 
