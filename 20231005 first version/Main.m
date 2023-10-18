@@ -57,6 +57,12 @@ input.modesel= modesel;
 
 [result_Main] = KalmanMain(input,'showtext', true,'showplot',false,'filterstyle','fft','f_keep', 0.33*[0.9,1.1]);
 logL = result_Main.logL;
+logSk = result_Main.logSk;
+logek = result_Main.logek;
+% display logL logSk logek
+dispstr = sprintf("logL = %f, logSk = %f, logek = %f", logL, logSk, logek);
+disp(dispstr)
+
 mode_deck = result_Main.mode_deck;
 
 
@@ -101,8 +107,7 @@ fs = 50;
 t = result_Main.t;
 disp_dir=acc2dsip(yn(1,:),50);
 [ex, frex] = ee(disp_dir.disp, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
-figure
-plot(t,frex)
+
 
 omgx = frex*2*pi;
 for k1 = 1:length(ex)-1
@@ -112,10 +117,53 @@ end
 epsx = [epsx epsx(end)];
 
 % figure
-% % plot(t,epsx)
+% plot(t,epsx)
 % grid
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% scatter(ex,epsx,'green')
+
+%% Recalcualte the modal displacement
+nmodes = result_Main.nmodes;
+Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc;nodeondeck = Result.nodeondeck;
+eig_vec=Result.eig_vec;
+Mapping_data = Result.Mapping;
+loc_acc = [1403];
+acc_node=FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+node_shape = mean(eig_vec(acc_matrix_seq));
+
+h_hat = result_Main.h_hat;
+MM = result_Main.MM;
+CC = result_Main.CC;
+KK = result_Main.KK;
+t_temp = result_Main.t;
+t_temp = (datenum(t_temp) - datenum('1970-01-01 00:00:00')) * 86400; % Convert to seconds since epocht = result_Main.t;
+t_temp = t_temp - t_temp(1); % Subtract the first element of t from all elements of t
+p_filt_m = result_Main.p_filt_m;
+[u udot u2dot] = NewmarkInt(t_temp,MM,CC,KK,p_filt_m,1/2,1/4,0,0);
+x_filt_original = result_Main.x_filt_original;
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t_temp,x_filt_original(1,:))
+hold on
+plot(t_temp,u)
+legend("filtered","recalculate")
+title("u")
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t_temp,x_filt_original(2,:))
+hold on
+plot(t_temp,udot)
+legend("filtered","recalculate")
+title("udot")
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t_temp,h_hat(1,:)/node_shape)
+hold on
+plot(t_temp,u2dot)
+legend("filtered","recalculate")
+title("u2dot")
+
 
 %% plot 
 t = result_Main.t;
@@ -268,6 +316,65 @@ for k1 = 1:nmodes
     end
 end
 
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+
+data =disp_dir.disp;
+minData = min(data);
+maxData = max(data);
+normalizedData = 2 * ((data - minData) / (maxData - minData)) - 1;
+plot(t,normalizedData);
+
+
+xlabel('Time (s)')
+ylabel('Displacement (m)')
+title("Displacement vs. Time")
+legend("measure","filtered")
+hold on
+for k1 = 1:nmodes
+    for k2 = 1:length(top_freqs{k1})
+        % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+        datetimeArray = t_cycle_mean_cell{k1}{k2};
+        
+        % 提取第一个 datetime 对象作为参考点
+        referenceDatetime = datetimeArray(1);
+        
+        % 计算每个 datetime 对象相对于参考点的秒数
+        secondsFromReference = seconds(datetimeArray - referenceDatetime);
+        
+        % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+        data = zeta_all_cell{k1}{k2};
+        minData = min(data);
+        maxData = max(data);
+        normalizedData = 2 * ((data - minData) / (maxData - minData)) - 1;
+        scatter(datetimeArray,(normalizedData-mean(normalizedData(end/4:end*3/4)))*10,[],secondsFromReference,'filled');
+        % 设置 colormap
+        colormap('jet')
+        % colorbar
+        
+        % hold on
+        % plot([datetimeArray(1),datetimeArray(end)],[-0.003,-0.003])
+
+        str = "Mode : %d, Frequency : %.2f Hz";
+        title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
+        % xlim([0.05,0.12])
+        ylim([-1,1])
+        xlabel("Time(s)")
+        ylabel("Damping ratio")
+        
+    end
+end
+
+hold off
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t,frex)
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(t,ex)
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+scatter(ex,epsx,'green')
+ylim([-0.01,0.01])
 %% functions
 function logL = fitnessFunction(params,external_params)
         input.lambda = 10 ^ params(1);

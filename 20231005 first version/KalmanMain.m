@@ -305,7 +305,7 @@ function [result_Main] = KalmanMain(input,varargin)
     % loc_acc_v = [990.5; 1403; 1815.5];
     loc_acc_v = [1403];
     % loc_acc_v = [578+1650/4*3;578+1650/2;578+1650/4];
-    loc_vel_v = [];
+    loc_vel_v = [1403];
     loc_dis_v = [1403];
     [S_a_v, S_v_v, S_d_v, n_sensors_v] = sensor_selection(loc_acc_v, loc_vel_v, loc_dis_v, node_loc, phi, nodeondeck, Mapping_data);
 
@@ -345,7 +345,10 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.yn=yn;
     result_Main.h_hat = h_hat;
     result_Main.yn_reconstruct = yn_reconstruct;
-    
+    result_Main.x_filt_original=x_filt_original;
+    result_Main.MM = MM_eq;
+    result_Main.CC = CC_eq;
+    result_Main.KK = KK_eq;
 
 
     if fig_bool == ON
