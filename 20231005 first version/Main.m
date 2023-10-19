@@ -39,13 +39,20 @@ input.acc_dir = "F:\test\result";
 % input.Q_value =10 ^ (-8);
 % input.R_value = 10 ^ (-6);
 
+input.lambda = 10 ^ (-1.001242541230301);
+% input.sigma_p = 9.063096667830060e+04;
+% input.omega_0_variation =0.902647415472734;
+% input.Q_value =10 ^ (-1.016211706804576);
+% input.R_value = 10 ^ (-1.003148221125874);
+
 % input.lambda = 10 ^ (-4.934808796013671);
 % input.sigma_p = 6.895548550856822e+03;
 % input.omega_0_variation =1.097383030422062;
 % input.Q_value =10 ^ (-9.633948257379021);
 % input.R_value = 10 ^ (-2.415076745081128);
 
-input.lambda = 10 ^ (-4.993486819657864);
+
+% input.lambda = 10 ^ (-4.993486819657864);
 input.sigma_p = 1.441514803767596e+04;
 input.omega_0_variation =0.904969462898074;
 input.Q_value =10 ^ (-9.901777612793937);
@@ -70,8 +77,8 @@ mode_deck = result_Main.mode_deck;
 if 0
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    % external_params.modelsel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-    external_params.modelsel = [23];
+    % external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+    external_params.modesel = [23];
     % 定义参数的范围
     lb = [-5, 10, 0.9, -10, -10]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [-1, 1e5, 1.1, -1, -1]; % 这里的值也是假设的
@@ -88,7 +95,7 @@ end
 
 %% Caldamping ratio
 input = result_Main;
-input.ncycle = 3;
+input.ncycle = 10;
 tic
 [result_Damping]=Cal_aero_damping_ratio(input,'showplot',false,'filterstyle','nofilter');
 toc
@@ -309,7 +316,10 @@ for k1 = 1:nmodes
         str = "Mode : %d, Frequency : %.2f Hz";
         title(sprintf(str,modesel(k1),top_freqs{k1}(k2)));
         % xlim([0.05,0.12])
-        ylim([-0.5,0.5]/100)
+        hold on
+        plot([datetimeArray(1),datetimeArray(end)],[-0.003,-0.003])
+        
+        ylim([-0.5,0]/100)
         xlabel("Time(s)")
         ylabel("Damping ratio")
         
@@ -348,7 +358,7 @@ for k1 = 1:nmodes
         minData = min(data);
         maxData = max(data);
         normalizedData = 2 * ((data - minData) / (maxData - minData)) - 1;
-        scatter(datetimeArray,(normalizedData-mean(normalizedData(end/4:end*3/4)))*10,[],secondsFromReference,'filled');
+        scatter(datetimeArray,(normalizedData-mean(normalizedData(end/4:end*3/4)))*1000,[],secondsFromReference,'filled');
         % 设置 colormap
         colormap('jet')
         % colorbar
@@ -396,7 +406,7 @@ function logL = fitnessFunction(params,external_params)
         % input.gap_between_images = [0, 0];
         % input.figureIdx = 0;
         n = 4;
-        [result] = viv2013(n, OFF);
+        [result] = viv2013(n, false);
         input.start_time = result.startDate;
         input.end_time = result.endDate;
         % input.acc_dir = "F:\test\result";

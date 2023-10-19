@@ -5,7 +5,7 @@ function [significantFreqs, significantPeaks, significantLocs] = extractSignific
     parse(p,varargin{:});
     showtext = p.Results.showtext;
     showplot = p.Results.showplot;
-    
+    Fa = Fa(end/10:end/10*9);%边界效应
     [f, magnitude] = fft_transform(fs, Fa);
     df = f(2) - f(1);
     d_temp = 0.01 / df;
