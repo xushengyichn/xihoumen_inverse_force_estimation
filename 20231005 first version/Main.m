@@ -36,7 +36,7 @@ input.end_time = endDate_global;
 input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
 % input.acc_dir = "F:\test\result";
 % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-
+input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 % input.lambda = 10 ^ (-1);
 % input.sigma_p = 10000;
 % input.omega_0_variation =1;
@@ -95,7 +95,12 @@ if 0
 end
 
 %% Caldamping ratio
-input = result_Main;
+fields = fieldnames(result_Main);
+for i = 1:numel(fields)
+    input.(fields{i}) = result_Main.(fields{i});
+end
+
+% input = result_Main;
 input.ncycle = 10;
 tic
 [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
@@ -104,11 +109,10 @@ toc
 %% read wind data
 
 % [result] = viv2013(n, OFF);
-start_time = startDate_global;
-end_time = endDate_global;
-acc_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-% acc_dir = "F:\test\result_wind_10min";
-[result_wind] = read_wind_data(start_time, end_time, acc_dir);
+start_time = input.start_time;
+end_time = input.end_time;
+wind_dir = input.wind_dir;
+[result_wind] = read_wind_data(start_time, end_time, wind_dir);
 
 %% compare with ee
 yn = result_Main.yn;
@@ -392,7 +396,8 @@ if fig_bool
     title("Amplitude vs. Time calculated by ee")
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     scatter(ex, epsx, 'green')
-    ylim([-0.01, 0.01])
+    xlim([0.05, 0.12])
+    ylim([-0.5, 0.5] / 100)
     xlabel('Amplitude (m)')
     ylabel('Damping ratio')
     title("Damping ratio vs. Amplitude calculated by ee")
