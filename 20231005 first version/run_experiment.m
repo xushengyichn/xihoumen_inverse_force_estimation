@@ -220,6 +220,7 @@ function [results_experiment] = run_experiment(input,varargin)
     results_experiment.loc_acc = loc_acc;
     results_experiment.mode_deck = mode_deck;
     results_experiment.mode_deck_re = mode_deck_re;
+    results_experiment.work_cell = result_Damping.work_cell;
     
 
     %% plot

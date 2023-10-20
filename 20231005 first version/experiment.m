@@ -2,7 +2,7 @@
 %Author: xushengyichn xushengyichn@outlook.com
 %Date: 2023-10-20 12:45:02
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2023-10-20 14:25:45
+%LastEditTime: 2023-10-20 15:15:00
 %FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/20231005 first version/experiment.m
 %Description: 由于选择不同参数会对阻尼比计算结果产生影响，因此需要进行参数选择实验
 %
@@ -238,9 +238,50 @@ for t1 = 1:length(experiment_names)
 end
 legend(experiment_names)
 
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    h_hat = results_experiment.(exp_name).h_hat;
+    t = results_experiment.(exp_name).t;
+    t_seconds = seconds(t - t(1));
+    p_filt_m = results_experiment.(exp_name).p_filt_m;
+    v= h_hat(3, :);
+    f = p_filt_m(1, :);
 
+    power = f.*v;
+    total_work_done = trapz(t_seconds, power);
+    disp(['Total work done by the force = ', num2str(total_work_done), ' experiment name: ', exp_name])
 
+    cumulated_work_done = cumtrapz(t_seconds, power);
+    plot(t, cumulated_work_done);
+    hold on
+    xlabel("Time(s)")
+    ylabel("Cumulated work done")
+    title("Cumulated work done comparison")
+    grid on;
+end
 
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    h_hat = results_experiment.(exp_name).h_hat;
+    t = results_experiment.(exp_name).t;
+    t_seconds = seconds(t - t(1));
+    p_filt_m = results_experiment.(exp_name).p_filt_m;
+    v= h_hat(3, :);
+    f = p_filt_m(1, :);
+
+    power = f.*v;
+    
+    plot(t, power);
+    hold on
+    xlabel("Time(s)")
+    ylabel("Power")
+    title("Power comparison")
+    grid on;
+end
+
+% TODO: 为什么累计的功都是上升的？
 
 % 
 % offset = [0,0,-4.5/1000,1.5/1000];

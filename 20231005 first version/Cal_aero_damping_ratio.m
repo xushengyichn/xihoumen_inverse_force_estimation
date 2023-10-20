@@ -187,7 +187,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
             amp_mode{j} = result.amp; % 将此信号的amp数组保存到当前模式的cell中
             zeta_all_mode{j} = result.zeta_all; % 将此信号的zeta_all数组保存到当前模式的cell中
             t_cycle_mean_mode{j} = result.t_cycle_mean;
-
+            work_mode{j} = result.work;
             % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
             % scatter(result.amp*max(mode_deck(:,i)), result.zeta_all)
             % titlestr= sprintf('mode freq %.2f Hz, mode sel %d, freq %.2f Hz',Freq(i),modesel(i),top_freqs{i}(j));
@@ -199,6 +199,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         amp_cell{i} = amp_mode; % 将当前模式的amp cell保存到总cell中
         zeta_all_cell{i} = zeta_all_mode; % 将当前模式的zeta_all cell保存到总cell中
         t_cycle_mean_cell{i}=t_cycle_mean_mode;
+        work_cell{i}=work_mode;
     end
 
 
@@ -213,5 +214,6 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     result_Main.filtered_dis = filtered_dis;
     result_Main.ifq_interpolated_allmodes = ifq_interpolated_allmodes;
     result_Main.t_cycle_mean_cell=t_cycle_mean_cell;
+    result_Main.work_cell=work_cell;
     
 end
