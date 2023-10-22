@@ -127,6 +127,25 @@ epsx = [epsx epsx(end)];
 % plot(t,epsx)
 % grid
 
+%% compare with damping ratio calculated by acc
+
+amp_cell = result_Damping.amp_cell;
+t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+amp_temp =amp_cell{1}{1};
+t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
+m_cycle = input.ncycle; %cycles to be averaged
+for k1=1:length(amp_temp)-m_cycle
+    deltam=log(amp_temp(k1)/amp_temp(k1+m_cycle));
+    zetam(k1)=sqrt(deltam^2/(4*m_cycle*pi^2+deltam^2));
+    if deltam>0
+        zetam(k1)=abs(zetam(k1));
+    else
+        zetam(k1)=-abs(zetam(k1));
+    end
+end
+
+
+
 %% Recalcualte the modal displacement
 nmodes = result_Main.nmodes;
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
