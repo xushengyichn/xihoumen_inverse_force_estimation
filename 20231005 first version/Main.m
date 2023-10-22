@@ -7,6 +7,14 @@ addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
+addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
+addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
+addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
+addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
+addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
+
+
+
 subStreamNumberDefault = 2132;
 
 run("InitScript.m")
@@ -33,10 +41,13 @@ startDate_global = result.startDate;
 endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
-input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+% input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+input.acc_dir = "D:\xihoumendata\acc";
 % input.acc_dir = "F:\test\result";
 % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+% input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+input.wind_dir = "D:\xihoumendata\wind";
+
 % input.lambda = 10 ^ (-1);
 % input.sigma_p = 10000;
 % input.omega_0_variation =1;
@@ -140,16 +151,33 @@ t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
 amp_temp =amp_cell{1}{1};
 t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
 m_cycle = input.ncycle; %cycles to be averaged
-for k1=1:length(amp_temp)-m_cycle
-    deltam=log(amp_temp(k1)/amp_temp(k1+m_cycle));
-    zetam(k1)=sqrt(deltam^2/(4*m_cycle*pi^2+deltam^2));
-    if deltam>0
-        zetam(k1)=abs(zetam(k1));
+zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+
+for k1=1:length(t_cycle_mean_temp)
+    if k1 <= m_cycle/2 % Beginning boundary
+        start_idx = 1;
+        end_idx = start_idx + m_cycle;
+    elseif k1 > length(t_cycle_mean_temp) - m_cycle/2 % Ending boundary
+        end_idx = length(t_cycle_mean_temp);
+        start_idx = end_idx - m_cycle;
+    else % Middle
+        start_idx = k1 - floor(m_cycle/2);
+        end_idx = k1 + floor(m_cycle/2);
+    end
+    
+    deltam = log(amp_temp(start_idx)/amp_temp(end_idx));
+    
+    zetam(k1) = sqrt(deltam^2 / (4*m_cycle*pi^2 + deltam^2));
+    
+    if deltam > 0
+        zetam(k1) = abs(zetam(k1));
     else
-        zetam(k1)=-abs(zetam(k1));
+        zetam(k1) = -abs(zetam(k1));
     end
 end
 
+figure
+scatter(amp_temp,zetam)
 
 
 %% Recalcualte the modal displacement
@@ -280,6 +308,45 @@ if fig_bool
         end
 
     end
+
+
+        for k1 = 1:nmodes
+
+        for k2 = 1:length(top_freqs{k1})
+            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+            datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+            % 提取第一个 datetime 对象作为参考点
+            referenceDatetime = datetimeArray(1);
+
+            % 计算每个 datetime 对象相对于参考点的秒数
+            secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+            [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+            scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
+            % 设置 colormap
+            colormap('jet')
+            colorbar
+
+            hold on
+            % plot([0, 0.15], [-0.003, -0.003])
+            % scatter(ex,epsx,'green')
+            scatter(amp_temp* max(mode_deck(:, k1)),zetam,'green')
+            str = "Mode : %d, Frequency : %.2f Hz";
+            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+            xlim([0.05, 0.12])
+            ylim([-0.5, 0.5] / 100)
+            xlabel("Amplitude(m)")
+            ylabel("Damping ratio")
+            legend("use force","use acc")
+        end
+
+        end
+
+        
+        
 
     for k1 = 1:nmodes
 
