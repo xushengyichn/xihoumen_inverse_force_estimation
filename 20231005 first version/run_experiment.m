@@ -119,6 +119,33 @@ function [results_experiment] = run_experiment(input,varargin)
 
     end
 
+    %% Recalcualte the modal displacement
+    nmodes = result_Main.nmodes;
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23],'showtext',showtext);
+    mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+    eig_vec = Result.eig_vec;
+    Mapping_data = Result.Mapping;
+    loc_acc = [1403];
+    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+    node_shape = mean(eig_vec(acc_matrix_seq));
+
+    h_hat = result_Main.h_hat;
+    MM = result_Main.MM;
+    CC = result_Main.CC;
+    KK = result_Main.KK;
+    t_temp = result_Main.t;
+    t_temp = (datenum(t_temp) - datenum('1970-01-01 00:00:00')) * 86400; % Convert to seconds since epocht = result_Main.t;
+    t_temp = t_temp - t_temp(1); % Subtract the first element of t from all elements of t
+    p_filt_m = result_Main.p_filt_m;
+    [u udot u2dot] = NewmarkInt(t_temp, MM, CC, KK, p_filt_m, 1/2, 1/4, 0, 0);
+    x_filt_original = result_Main.x_filt_original;
+
+    input.u =u;
+    input.udot = udot;
+    input.u2dot = u2dot;
+
     %% Caldamping ratio
     fields = fieldnames(result_Main);
     for i = 1:numel(fields)
@@ -191,28 +218,7 @@ function [results_experiment] = run_experiment(input,varargin)
             zetam(k1) = -abs(zetam(k1));
         end
     end
-    %% Recalcualte the modal displacement
-    nmodes = result_Main.nmodes;
-    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23],'showtext',showtext);
-    mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
-    eig_vec = Result.eig_vec;
-    Mapping_data = Result.Mapping;
-    loc_acc = [1403];
-    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
-    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
-    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
-    node_shape = mean(eig_vec(acc_matrix_seq));
 
-    h_hat = result_Main.h_hat;
-    MM = result_Main.MM;
-    CC = result_Main.CC;
-    KK = result_Main.KK;
-    t_temp = result_Main.t;
-    t_temp = (datenum(t_temp) - datenum('1970-01-01 00:00:00')) * 86400; % Convert to seconds since epocht = result_Main.t;
-    t_temp = t_temp - t_temp(1); % Subtract the first element of t from all elements of t
-    p_filt_m = result_Main.p_filt_m;
-    [u udot u2dot] = NewmarkInt(t_temp, MM, CC, KK, p_filt_m, 1/2, 1/4, 0, 0);
-    x_filt_original = result_Main.x_filt_original;
 
 
     results_experiment = struct();

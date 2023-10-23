@@ -32,6 +32,9 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     dis = x_k_k(1:nmodes, :);
     vel = x_k_k(nmodes + 1:2*nmodes, :);
 
+    dis = input.u;
+    vel = input.udot;
+
 
     
 
