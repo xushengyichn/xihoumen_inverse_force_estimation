@@ -20,7 +20,7 @@ function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, fr
     
     k2 = 1;
     
-    overlap = 0.5; % 设置重叠的比例，例如0.5代表50%重叠
+    overlap = 0.9; % 设置重叠的比例，例如0.5代表50%重叠
     step = round(ncycle * (1 - overlap)); % 计算每步应该移动的距离
 
     for k1 = 1:step:(length(locs) - ncycle + 1) % 更新k1的迭代方式

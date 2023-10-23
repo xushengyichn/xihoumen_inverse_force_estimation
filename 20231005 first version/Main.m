@@ -42,11 +42,12 @@ endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
 % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-input.acc_dir = "D:\xihoumendata\acc";
-% input.acc_dir = "F:\test\result";
+% input.acc_dir = "D:\xihoumendata\acc";
+input.acc_dir = "F:\test\result";
 % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-input.wind_dir = "D:\xihoumendata\wind";
+% input.wind_dir = "D:\xihoumendata\wind";
+input.wind_dir = "F:\test\result_wind_10min";
 
 % input.lambda = 10 ^ (-1);
 % input.sigma_p = 10000;
@@ -134,11 +135,33 @@ disp_dir = acc2dsip(yn(1, :), 50);
 
 omgx = frex * 2 * pi;
 
-for k1 = 1:length(ex) - 1
-    epsx(k1) = log(ex(k1) / ex(k1 + 1)) / omgx(k1) * fs;
+% for k1 = 1:length(ex) - 1
+%     epsx(k1) = log(ex(k1) / ex(k1 + 1)) / omgx(k1) * fs;
+% end
+
+% npoints = 150;
+% for k1 = 1:length(ex) - npoints
+%     epsx(k1) = log(ex(k1) / ex(k1 + npoints)) / omgx(k1) * (fs/npoints);
+% end
+
+
+npoints = 150;
+for k1 = 1:length(ex) - npoints
+    for k2 = 1:npoints
+        epsx_temp(k2) = log(ex(k1+k2-1) / ex(k1 + k2)) / omgx(k1) * fs;
+    end
+        epsx(k1) = mean(epsx_temp);
+        clear epsx_temp
 end
 
-epsx = [epsx epsx(end)];
+% 填充 epsx 数组的其余部分。你可以根据需要选择不同的填充方法。
+% 在这里，我选择用最后一个计算值填充。
+for k2 = k1+1:length(ex)
+    epsx(k2) = epsx(k1);
+end
+
+
+
 
 % figure
 % plot(t,epsx)
@@ -167,7 +190,7 @@ for k1=1:length(t_cycle_mean_temp)
     
     deltam = log(amp_temp(start_idx)/amp_temp(end_idx));
     
-    zetam(k1) = sqrt(deltam^2 / (4*m_cycle*pi^2 + deltam^2));
+    zetam(k1) = sqrt(deltam^2 / (4*m_cycle^2*pi^2 + deltam^2));
     
     if deltam > 0
         zetam(k1) = abs(zetam(k1));
@@ -176,8 +199,8 @@ for k1=1:length(t_cycle_mean_temp)
     end
 end
 
-figure
-scatter(amp_temp,zetam)
+% figure
+% scatter(amp_temp,zetam)
 
 
 %% Recalcualte the modal displacement
@@ -205,6 +228,7 @@ x_filt_original = result_Main.x_filt_original;
 
 %% plot
 if fig_bool
+    %% filtered and recalcuated displacement
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t_temp, x_filt_original(1, :))
     hold on
@@ -212,6 +236,7 @@ if fig_bool
     legend("filtered", "recalculate")
     title("u")
 
+    %% filtered and recalcuated velocity
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t_temp, x_filt_original(2, :))
     hold on
@@ -219,6 +244,7 @@ if fig_bool
     legend("filtered", "recalculate")
     title("udot")
 
+    %% filtered and recalcuated acceleration
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t_temp, h_hat(1, :) / node_shape)
     hold on
@@ -236,12 +262,14 @@ if fig_bool
     t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
     yn_reconstruct = result_Main.yn_reconstruct;
 
+    %% wind speed during the period
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     scatter(result_wind.resultsTable_UA6.Time_Start, result_wind.resultsTable_UA6.U);
     xlabel('Time (s)')
     ylabel('Wind speed (m/s^2)')
     title("Wind speed vs. Time")
 
+    %% measured, filtered and recalcuated acceleration
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t, yn(1, :));
     hold on
@@ -252,6 +280,7 @@ if fig_bool
     title("Acceleration vs. Time")
     legend("measure", "filtered", "reconstruct")
 
+    %% measured(direct intergal), filtered displacement
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     % Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
     % mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc;nodeondeck = Result.nodeondeck;
@@ -271,11 +300,13 @@ if fig_bool
     title("Displacement vs. Time")
     legend("measure", "filtered")
 
+    %% instant frequency of the filtered acceleration 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     [p, fd, td] = pspectrum(h_hat(1, :), t, 'spectrogram', 'FrequencyResolution', 0.005);
     instfreq(p, fd, td);
     ylim([0.1, 0.5])
 
+    %% amplitude dependent damping ratio
     for k1 = 1:nmodes
 
         for k2 = 1:length(top_freqs{k1})
@@ -310,44 +341,10 @@ if fig_bool
     end
 
 
-        for k1 = 1:nmodes
-
-        for k2 = 1:length(top_freqs{k1})
-            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
-            datetimeArray = t_cycle_mean_cell{k1}{k2};
-
-            % 提取第一个 datetime 对象作为参考点
-            referenceDatetime = datetimeArray(1);
-
-            % 计算每个 datetime 对象相对于参考点的秒数
-            secondsFromReference = seconds(datetimeArray - referenceDatetime);
-
-            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
-
-            [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-            scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
-            % 设置 colormap
-            colormap('jet')
-            colorbar
-
-            hold on
-            % plot([0, 0.15], [-0.003, -0.003])
-            % scatter(ex,epsx,'green')
-            scatter(amp_temp* max(mode_deck(:, k1)),zetam,'green')
-            str = "Mode : %d, Frequency : %.2f Hz";
-            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
-            xlim([0.05, 0.12])
-            ylim([-0.5, 0.5] / 100)
-            xlabel("Amplitude(m)")
-            ylabel("Damping ratio")
-            legend("use force","use acc")
-        end
-
-        end
 
         
         
-
+%% amp vs. time
     for k1 = 1:nmodes
 
         for k2 = 1:length(top_freqs{k1})
@@ -381,6 +378,7 @@ if fig_bool
 
     end
 
+    %% damping ratio vs time
     for k1 = 1:nmodes
 
         for k2 = 1:length(top_freqs{k1})
@@ -418,6 +416,7 @@ if fig_bool
 
     end
 
+    %% damping ratio and displacement with time
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 
     data = disp_dir.disp;
@@ -468,18 +467,21 @@ if fig_bool
 
     end
 
-    hold off
+    %% calculated by ee instant frequency
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t, frex)
     xlabel('Time (s)')
     ylabel('Frequency (Hz)')
     title("Frequency vs. Time calculated by ee")
 
+    %% 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t, ex)
     xlabel('Time (s)')
     ylabel('Amplitude (m)')
     title("Amplitude vs. Time calculated by ee")
+
+    %%
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     scatter(ex, epsx, 'green')
     xlim([0.05, 0.12])
@@ -487,6 +489,82 @@ if fig_bool
     xlabel('Amplitude (m)')
     ylabel('Damping ratio')
     title("Damping ratio vs. Amplitude calculated by ee")
+
+    %%
+        for k1 = 1:nmodes
+
+        for k2 = 1:length(top_freqs{k1})
+            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+            datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+            % 提取第一个 datetime 对象作为参考点
+            referenceDatetime = datetimeArray(1);
+
+            % 计算每个 datetime 对象相对于参考点的秒数
+            secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+            [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+            % scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
+            scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)),zeta_all_cell{k1}{k2},'red');
+            % 设置 colormap
+            colormap('jet')
+            colorbar
+
+            hold on
+            % plot([0, 0.15], [-0.003, -0.003])
+            % scatter(ex,epsx,'green')
+            scatter(amp_temp* max(mode_deck(:, k1)),zetam-0.3/100,'blue')
+            scatter(ex, epsx-0.3/100, 'green')
+            str = "Mode : %d, Frequency : %.2f Hz";
+            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+            xlim([0.05, 0.12])
+            ylim([-0.5, 0.5] / 100)
+            xlabel("Amplitude(m)")
+            ylabel("Damping ratio")
+            legend("use force","use acc","use ee")
+        end
+
+        end
+
+
+            %%
+        for k1 = 1:nmodes
+
+        for k2 = 1:length(top_freqs{k1})
+            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+            datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+            % 提取第一个 datetime 对象作为参考点
+            referenceDatetime = datetimeArray(1);
+
+            % 计算每个 datetime 对象相对于参考点的秒数
+            secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+            [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+            % scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
+            scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)),zeta_all_cell{k1}{k2},'red');
+            % 设置 colormap
+            colormap('jet')
+            colorbar
+
+            hold on
+            % plot([0, 0.15], [-0.003, -0.003])
+            % scatter(ex,epsx,'green')
+            scatter(amp_temp* max(mode_deck(:, k1)),zetam-0.3/100,'blue')
+            str = "Mode : %d, Frequency : %.2f Hz";
+            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+            xlim([0.05, 0.12])
+            ylim([-0.5, 0.5] / 100)
+            xlabel("Amplitude(m)")
+            ylabel("Damping ratio")
+            legend("use force","use acc")
+        end
+
+        end
 
 end
 
