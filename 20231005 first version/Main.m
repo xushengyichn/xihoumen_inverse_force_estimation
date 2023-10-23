@@ -43,11 +43,12 @@ input.start_time = startDate_global;
 input.end_time = endDate_global;
 % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
 % input.acc_dir = "D:\xihoumendata\acc";
-input.acc_dir = "F:\test\result";
-% input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+% input.acc_dir = "F:\test\result";
+input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 % input.wind_dir = "D:\xihoumendata\wind";
-input.wind_dir = "F:\test\result_wind_10min";
+% input.wind_dir = "F:\test\result_wind_10min";
+input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 
 % input.lambda = 10 ^ (-1);
 % input.sigma_p = 10000;
@@ -67,13 +68,22 @@ input.wind_dir = "F:\test\result_wind_10min";
 % input.Q_value =10 ^ (-9.633948257379021);
 % input.R_value = 10 ^ (-2.415076745081128);
 
-% input.lambda = 10 ^ (-4.993486819657864);
-input.lambda = 10 ^ (-1);
-input.sigma_p = 1.441514803767596e+04;
+% % input.lambda = 10 ^ (-4.993486819657864);
+% input.lambda = 10 ^ (-1);
+% input.sigma_p = 1.441514803767596e+04;
+% % input.sigma_p = 100;
+% input.omega_0_variation = 0.904969462898074;
+% input.Q_value = 10 ^ (-9.901777612793937);
+% input.R_value = 10 ^ (-3.866588296864785);
+
+
+
+input.lambda = 10 ^ (-2.748806418335396);
+input.sigma_p =4.041540821465747e+04;
 % input.sigma_p = 100;
-input.omega_0_variation = 0.904969462898074;
-input.Q_value = 10 ^ (-9.901777612793937);
-input.R_value = 10 ^ (-3.866588296864785);
+input.omega_0_variation = 1.015685635145482;
+input.Q_value = 10 ^ (-1.005545623474248);
+input.R_value = 10 ^ (-1.103266293300500);
 
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
 modesel = 23;
@@ -643,7 +653,10 @@ function target = fitnessFunction(params, external_params)
     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
     result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-
+    fields = fieldnames(result_Main);
+    for i = 1:numel(fields)
+        input.(fields{i}) = result_Main.(fields{i});
+    end
     input.ncycle = 10;
     [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
     amp_cell = result_Damping.amp_cell;
