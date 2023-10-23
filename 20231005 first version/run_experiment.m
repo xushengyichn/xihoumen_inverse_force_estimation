@@ -1,4 +1,4 @@
-function [results_experiment] = run_experiment(input,varargin)
+function [results_experiment] = run_experiment(input, varargin)
 
     if nargin == 0
         clc; clear; close all;
@@ -36,11 +36,11 @@ function [results_experiment] = run_experiment(input,varargin)
         endDate_global = result.endDate;
         input.start_time = startDate_global;
         input.end_time = endDate_global;
-        input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-        % input.acc_dir = "F:\test\result";
+        % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+        input.acc_dir = "F:\test\result";
         % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-        input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-
+        % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+        input.wind_dir = "F:\test\result_wind_10min";
         % input.lambda = 10 ^ (-1);
         % input.sigma_p = 10000;
         % input.omega_0_variation =1;
@@ -69,24 +69,26 @@ function [results_experiment] = run_experiment(input,varargin)
         modesel = 23;
         input.modesel = modesel;
 
-        results_experiment=run_experiment(input, 'showtext', false, 'showplot', false);
+        results_experiment = run_experiment(input, 'showtext', false, 'showplot', false);
         return;
     end
-    
+
     p = inputParser;
-      addParameter(p, 'showtext', true, @islogical)
-      addParameter(p, 'showplot', false, @islogical)
-      addParameter(p, 'num_figs_in_row', 12, @isnumeric)
-      addParameter(p, 'figPos', [100,100,400,300], @isnumeric)
-      addParameter(p, 'gap_between_images', [0,0], @isnumeric)
-      addParameter(p, 'figureIdx', 0, @isnumeric)
-      parse(p, varargin{:});
+    addParameter(p, 'showtext', true, @islogical)
+    addParameter(p, 'showplot', false, @islogical)
+    addParameter(p, 'caldamp', true, @islogical)
+    addParameter(p, 'num_figs_in_row', 12, @isnumeric)
+    addParameter(p, 'figPos', [100, 100, 400, 300], @isnumeric)
+    addParameter(p, 'gap_between_images', [0, 0], @isnumeric)
+    addParameter(p, 'figureIdx', 0, @isnumeric)
+    parse(p, varargin{:});
     showtext = p.Results.showtext;
     showplot = p.Results.showplot;
     num_figs_in_row = p.Results.num_figs_in_row;
     figPos = p.Results.figPos;
     gap_between_images = p.Results.gap_between_images;
     figureIdx = p.Results.figureIdx;
+    caldamp = p.Results.caldamp;
 
     [result_Main] = KalmanMain(input, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
     logL = result_Main.logL;
@@ -94,8 +96,8 @@ function [results_experiment] = run_experiment(input,varargin)
     logek = result_Main.logek;
     % display logL logSk logek
     if showtext
-    dispstr = sprintf("logL = %f, logSk = %f, logek = %f", logL, logSk, logek);
-    disp(dispstr)
+        dispstr = sprintf("logL = %f, logSk = %f, logek = %f", logL, logSk, logek);
+        disp(dispstr)
     end
 
     mode_deck = result_Main.mode_deck;
@@ -121,7 +123,7 @@ function [results_experiment] = run_experiment(input,varargin)
 
     %% Recalcualte the modal displacement
     nmodes = result_Main.nmodes;
-    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23],'showtext',showtext);
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23], 'showtext', showtext);
     mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
     eig_vec = Result.eig_vec;
     Mapping_data = Result.Mapping;
@@ -142,102 +144,96 @@ function [results_experiment] = run_experiment(input,varargin)
     [u udot u2dot] = NewmarkInt(t_temp, MM, CC, KK, p_filt_m, 1/2, 1/4, 0, 0);
     x_filt_original = result_Main.x_filt_original;
 
-    input.u =u;
+    input.u = u;
     input.udot = udot;
     input.u2dot = u2dot;
 
     %% Caldamping ratio
     fields = fieldnames(result_Main);
+
     for i = 1:numel(fields)
         input.(fields{i}) = result_Main.(fields{i});
     end
 
-    % input = result_Main;
-    input.ncycle = 10;
+    if caldamp
+        % input = result_Main;
+        input.ncycle = 10;
 
-    [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+        [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
 
+        %% read wind data
 
-    %% read wind data
+        % [result] = viv2013(n, OFF);
+        start_time = input.start_time;
+        end_time = input.end_time;
+        wind_dir = input.wind_dir;
 
-    % [result] = viv2013(n, OFF);
-    start_time = input.start_time;
-    end_time = input.end_time;
-    wind_dir = input.wind_dir;
+        % wind_dir = "F:\test\result_wind_10min";
+        [result_wind] = read_wind_data(start_time, end_time, wind_dir);
 
-    % wind_dir = "F:\test\result_wind_10min";
-    [result_wind] = read_wind_data(start_time, end_time, wind_dir);
+        %% compare with ee
+        yn = result_Main.yn;
+        fs = 50;
+        t = result_Main.t;
+        disp_dir = acc2dsip(yn(1, :), 50);
+        [ex, frex] = ee(disp_dir.disp, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
 
-    %% compare with ee
-    yn = result_Main.yn;
-    fs = 50;
-    t = result_Main.t;
-    disp_dir = acc2dsip(yn(1, :), 50);
-    [ex, frex] = ee(disp_dir.disp, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
+        omgx = frex * 2 * pi;
 
-    omgx = frex * 2 * pi;
-
-    for k1 = 1:length(ex) - 1
-        epsx(k1) = log(ex(k1) / ex(k1 + 1)) / omgx(k1) * fs;
-    end
-
-    epsx = [epsx epsx(end)];
-
-    % figure
-    % plot(t,epsx)
-    % grid
-
-    %% compare with damping ratio calculated by acc
-    
-    amp_cell = result_Damping.amp_cell;
-    t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
-    amp_temp =amp_cell{1}{1};
-    t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
-    m_cycle = input.ncycle; %cycles to be averaged
-    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
-    
-    for k1=1:length(t_cycle_mean_temp)
-        if k1 <= m_cycle/2 % Beginning boundary
-            start_idx = 1;
-            end_idx = start_idx + m_cycle;
-        elseif k1 > length(t_cycle_mean_temp) - m_cycle/2 % Ending boundary
-            end_idx = length(t_cycle_mean_temp);
-            start_idx = end_idx - m_cycle;
-        else % Middle
-            start_idx = k1 - floor(m_cycle/2);
-            end_idx = k1 + floor(m_cycle/2);
+        for k1 = 1:length(ex) - 1
+            epsx(k1) = log(ex(k1) / ex(k1 + 1)) / omgx(k1) * fs;
         end
-        
-        deltam = log(amp_temp(start_idx)/amp_temp(end_idx));
-        
-        zetam(k1) = sqrt(deltam^2 / (4*m_cycle^2*pi^2 + deltam^2));
-        
-        if deltam > 0
-            zetam(k1) = abs(zetam(k1));
-        else
-            zetam(k1) = -abs(zetam(k1));
+
+        epsx = [epsx epsx(end)];
+
+        % figure
+        % plot(t,epsx)
+        % grid
+
+        %% compare with damping ratio calculated by acc
+
+        amp_cell = result_Damping.amp_cell;
+        t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+        amp_temp = amp_cell{1}{1};
+        t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
+        m_cycle = input.ncycle; %cycles to be averaged
+        zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+
+        for k1 = 1:length(t_cycle_mean_temp)
+
+            if k1 <= m_cycle / 2 % Beginning boundary
+                start_idx = 1;
+                end_idx = start_idx + m_cycle;
+            elseif k1 > length(t_cycle_mean_temp) - m_cycle / 2 % Ending boundary
+                end_idx = length(t_cycle_mean_temp);
+                start_idx = end_idx - m_cycle;
+            else % Middle
+                start_idx = k1 - floor(m_cycle / 2);
+                end_idx = k1 + floor(m_cycle / 2);
+            end
+
+            deltam = log(amp_temp(start_idx) / amp_temp(end_idx));
+
+            zetam(k1) = sqrt(deltam ^ 2 / (4 * m_cycle ^ 2 * pi ^ 2 + deltam ^ 2));
+
+            if deltam > 0
+                zetam(k1) = abs(zetam(k1));
+            else
+                zetam(k1) = -abs(zetam(k1));
+            end
+
         end
+
     end
-
-
 
     results_experiment = struct();
     results_experiment.result_Main = result_Main;
-    results_experiment.result_Damping = result_Damping;
-    results_experiment.result_wind = result_wind;
-    results_experiment.disp_dir = disp_dir;
-    results_experiment.ex = ex;
-    results_experiment.epsx = epsx;
-    results_experiment.yn = yn;
+    
     results_experiment.h_hat = h_hat;
     results_experiment.nmodes = nmodes;
-    results_experiment.amp_cell = result_Damping.amp_cell;
-    results_experiment.zeta_all_cell = result_Damping.zeta_all_cell;
-    results_experiment.top_freqs = result_Damping.top_freqs;
-    results_experiment.t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
     results_experiment.yn_reconstruct = result_Main.yn_reconstruct;
     results_experiment.node_shape = node_shape;
-    results_experiment.t = t;
+    
     results_experiment.u = u;
     results_experiment.udot = udot;
     results_experiment.u2dot = u2dot;
@@ -257,9 +253,22 @@ function [results_experiment] = run_experiment(input,varargin)
     results_experiment.loc_acc = loc_acc;
     results_experiment.mode_deck = mode_deck;
     results_experiment.mode_deck_re = mode_deck_re;
-    results_experiment.work_cell = result_Damping.work_cell;
-    results_experiment.zetam = zetam;
-    
+
+    if caldamp
+        results_experiment.result_wind = result_wind;
+        results_experiment.work_cell = result_Damping.work_cell;
+        results_experiment.zetam = zetam;
+        results_experiment.result_Damping = result_Damping;
+        results_experiment.amp_cell = result_Damping.amp_cell;
+        results_experiment.zeta_all_cell = result_Damping.zeta_all_cell;
+        results_experiment.top_freqs = result_Damping.top_freqs;
+        results_experiment.t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+        results_experiment.disp_dir = disp_dir;
+        results_experiment.ex = ex;
+        results_experiment.epsx = epsx;
+        results_experiment.yn = yn;
+        results_experiment.t = t;
+    end
 
     %% plot
     if showplot
@@ -501,8 +510,8 @@ function [results_experiment] = run_experiment(input,varargin)
         title("Amplitude vs. Time calculated by ee")
         [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
         scatter(ex, epsx, 'green')
-            xlim([0.05, 0.12])
-    ylim([-0.5, 0.5] / 100)
+        xlim([0.05, 0.12])
+        ylim([-0.5, 0.5] / 100)
         xlabel('Amplitude (m)')
         ylabel('Damping ratio')
         title("Damping ratio vs. Amplitude calculated by ee")

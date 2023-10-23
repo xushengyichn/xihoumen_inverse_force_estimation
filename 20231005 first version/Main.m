@@ -55,7 +55,7 @@ input.wind_dir = "F:\test\result_wind_10min";
 % input.Q_value =10 ^ (-8);
 % input.R_value = 10 ^ (-6);
 
-input.lambda = 10 ^ (-1.001242541230301);
+% input.lambda = 10 ^ (-1.001242541230301);
 % input.sigma_p = 9.063096667830060e+04;
 % input.omega_0_variation =0.902647415472734;
 % input.Q_value =10 ^ (-1.016211706804576);
@@ -68,6 +68,7 @@ input.lambda = 10 ^ (-1.001242541230301);
 % input.R_value = 10 ^ (-2.415076745081128);
 
 % input.lambda = 10 ^ (-4.993486819657864);
+input.lambda = 10 ^ (-1);
 input.sigma_p = 1.441514803767596e+04;
 input.omega_0_variation = 0.904969462898074;
 input.Q_value = 10 ^ (-9.901777612793937);
@@ -106,6 +107,31 @@ if 0
     save('optimization_results.mat', 'x', 'fval');
 
 end
+%% Recalcualte the modal displacement
+nmodes = result_Main.nmodes;
+Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+eig_vec = Result.eig_vec;
+Mapping_data = Result.Mapping;
+loc_acc = [1403];
+acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+node_shape = mean(eig_vec(acc_matrix_seq));
+
+h_hat = result_Main.h_hat;
+MM = result_Main.MM;
+CC = result_Main.CC;
+KK = result_Main.KK;
+t_temp = result_Main.t;
+t_temp = (datenum(t_temp) - datenum('1970-01-01 00:00:00')) * 86400; % Convert to seconds since epocht = result_Main.t;
+t_temp = t_temp - t_temp(1); % Subtract the first element of t from all elements of t
+p_filt_m = result_Main.p_filt_m;
+[u udot u2dot] = NewmarkInt(t_temp, MM, CC, KK, p_filt_m, 1/2, 1/4, 0, 0);
+
+input.u=u;
+input.udot = udot;
+input.u2dot = u2dot;
 
 %% Caldamping ratio
 fields = fieldnames(result_Main);
@@ -205,27 +231,7 @@ end
 % scatter(amp_temp,zetam)
 
 
-%% Recalcualte the modal displacement
-nmodes = result_Main.nmodes;
-Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
-mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
-eig_vec = Result.eig_vec;
-Mapping_data = Result.Mapping;
-loc_acc = [1403];
-acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
-acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
-acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
-node_shape = mean(eig_vec(acc_matrix_seq));
 
-h_hat = result_Main.h_hat;
-MM = result_Main.MM;
-CC = result_Main.CC;
-KK = result_Main.KK;
-t_temp = result_Main.t;
-t_temp = (datenum(t_temp) - datenum('1970-01-01 00:00:00')) * 86400; % Convert to seconds since epocht = result_Main.t;
-t_temp = t_temp - t_temp(1); % Subtract the first element of t from all elements of t
-p_filt_m = result_Main.p_filt_m;
-[u udot u2dot] = NewmarkInt(t_temp, MM, CC, KK, p_filt_m, 1/2, 1/4, 0, 0);
 x_filt_original = result_Main.x_filt_original;
 
 %% plot
@@ -264,6 +270,12 @@ if fig_bool
     t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
     yn_reconstruct = result_Main.yn_reconstruct;
 
+    %% filtered and recalcuated acceleration
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(t_temp, p_filt_m)
+    hold on
+    legend("filtered")
+    title("filtered viv force")
     %% wind speed during the period
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     scatter(result_wind.resultsTable_UA6.Time_Start, result_wind.resultsTable_UA6.U);
