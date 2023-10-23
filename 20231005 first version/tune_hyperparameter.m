@@ -37,8 +37,10 @@ input.start_time = startDate_global;
 input.end_time = endDate_global;
 % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-input.acc_dir = "F:\test\result";
-input.wind_dir = "F:\test\result_wind_10min";
+% input.acc_dir = "F:\test\result";
+% input.wind_dir = "F:\test\result_wind_10min";
+input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 
 
 % % 定义每个实验的参数
