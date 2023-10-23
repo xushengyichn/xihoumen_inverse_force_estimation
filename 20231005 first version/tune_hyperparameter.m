@@ -18,6 +18,10 @@ addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
 addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
+addpath(genpath("C:\Users\xushengyi\Documents\Github\ssm_tools"))
+addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package\"))
+addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model\"))
+
 subStreamNumberDefault = 2132;
 
 run("InitScript.m")
@@ -56,9 +60,10 @@ input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 % };
 
 n1=10;
-n2=10;
-lambda_list = logspace(-10,-1,n1);
+n2=30;
+lambda_list = logspace(-5,-1,n1);
 sigma_p_list = linspace(1e2,1e5,n2);
+% sigma_p_list = logspace(2,5,n2);
 
 [X, Y] = meshgrid(lambda_list, sigma_p_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
@@ -94,9 +99,9 @@ parfor i = 1:size(combinations, 1)
     local_input.modesel = modesel;
     
     % 运行实验并保存结果
-    tic
+    % tic
     results_experiment = run_experiment(local_input, 'showtext', false, 'showplot', false,'caldamp',false);
-    toc
+    % toc
     logL(i) = results_experiment.result_Main.logL;
     logSk(i) = results_experiment.result_Main.logSk;
     logek(i) = results_experiment.result_Main.logek;
@@ -142,5 +147,36 @@ if fig_bool == ON
     ylabel('sigma_ps');
     colorbar;  % 添加颜色栏
     title('logek');
+
+    % 画 logL 的三维图
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+surf(X, Y, Z_1);  % 创建三维表面图
+set(gca, 'XScale', 'log');
+xlabel('lambdas');
+ylabel('sigma_ps');
+zlabel('logL');
+colorbar;  % 添加颜色栏
+title('3D plot of logL');
+
+% 画 logSk 的三维图
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+surf(X, Y, Z_2);  % 创建三维表面图
+set(gca, 'XScale', 'log');
+xlabel('lambdas');
+ylabel('sigma_ps');
+zlabel('logSk');
+colorbar;  % 添加颜色栏
+title('3D plot of logSk');
+
+% 画 logek 的三维图
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+surf(X, Y, Z_3);  % 创建三维表面图
+set(gca, 'XScale', 'log');
+xlabel('lambdas');
+ylabel('sigma_ps');
+zlabel('logek');
+colorbar;  % 添加颜色栏
+title('3D plot of logek');
+
 
 end
