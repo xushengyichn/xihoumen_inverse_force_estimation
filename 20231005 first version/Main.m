@@ -78,6 +78,7 @@ modesel = 23;
 input.modesel = modesel;
 
 [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
@@ -115,7 +116,8 @@ end
 % input = result_Main;
 input.ncycle = 10;
 tic
-[result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+[result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'fft');
+% [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
 toc
 
 %% read wind data

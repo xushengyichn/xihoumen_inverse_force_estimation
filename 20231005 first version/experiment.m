@@ -35,8 +35,10 @@ startDate_global = result.startDate;
 endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
-input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+% input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+% input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+input.acc_dir = "F:\test\result";
+input.wind_dir = "F:\test\result_wind_10min";
 
 
 experiment_names = {'exp1', 'exp2', 'exp3','exp4'}; % 定义实验的名称
@@ -65,8 +67,8 @@ parameters = {
 % parameters = {
 %     {10^(-1.001242541230301), 1.441514803767596e+04, 0.9, 10^(-9.901777612793937), 10^(-3.866588296864785)},
 %     {10^(-1.001242541230301), 1.441514803767596e+04, 1, 10^(-9.901777612793937), 10^(-3.866588296864785)},
-%     {10^(-1.001242541230301), 1.441514803767596e+04, 0.1, 10^(-9.901777612793937), 10^(-3.866588296864785)},
-%     {10^(-1.001242541230301), 1.441514803767596e+04, 0.2, 10^(-9.901777612793937), 10^(-3.866588296864785)},
+%     {10^(-1.001242541230301), 1.441514803767596e+04, 1.1, 10^(-9.901777612793937), 10^(-3.866588296864785)},
+%     {10^(-1.001242541230301), 1.441514803767596e+04, 1.2, 10^(-9.901777612793937), 10^(-3.866588296864785)},
 %     % 在这里添加其他实验的参数
 % };
 
@@ -154,6 +156,7 @@ for t1 = 1:length(experiment_names)
     t_cycle_mean_cell = results_experiment.(exp_name).result_Damping.t_cycle_mean_cell;
     mode_deck = results_experiment.(exp_name).mode_deck;
     top_freqs = results_experiment.(exp_name).result_Damping.top_freqs;
+    zetam = results_experiment.(exp_name).zetam;
     k1 = 1;
     k2 = 1;
 
@@ -173,8 +176,48 @@ for t1 = 1:length(experiment_names)
 
     hold on
    
-    % scatter(ex,epsx,'green')
-    str = "Mode : %d, Frequency : %.2f Hz";
+    % % scatter(ex,epsx,'green')
+    str = "Using Force: Mode : %d, Frequency : %.2f Hz";
+    title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+    xlim([0.05, 0.12])
+    ylim([-0.5, 0.5] / 100)
+    xlabel("Amplitude(m)")
+    ylabel("Damping ratio")
+    
+end
+legend(experiment_names)
+plot([0, 0.15], [-0.003, -0.003])
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    amp_cell = results_experiment.(exp_name).result_Damping.amp_cell;
+    zeta_all_cell = results_experiment.(exp_name).result_Damping.zeta_all_cell;
+    t_cycle_mean_cell = results_experiment.(exp_name).result_Damping.t_cycle_mean_cell;
+    mode_deck = results_experiment.(exp_name).mode_deck;
+    top_freqs = results_experiment.(exp_name).result_Damping.top_freqs;
+    zetam = results_experiment.(exp_name).zetam;
+    k1 = 1;
+    k2 = 1;
+
+    % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+    datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+    % 提取第一个 datetime 对象作为参考点
+    referenceDatetime = datetimeArray(1);
+
+    % 计算每个 datetime 对象相对于参考点的秒数
+    secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+    % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+    scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zetam-0.3/100, []);
+    
+
+    hold on
+   
+    % % scatter(ex,epsx,'green')
+    str = "Using Acceleration: Mode : %d, Frequency : %.2f Hz";
     title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
     xlim([0.05, 0.12])
     ylim([-0.5, 0.5] / 100)
@@ -241,6 +284,20 @@ legend(experiment_names)
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 for t1 = 1:length(experiment_names)
     exp_name = experiment_names{t1};
+    yn_reconstruct = results_experiment.(exp_name).yn_reconstruct;
+    t = results_experiment.(exp_name).t;
+    plot(t, yn_reconstruct(1, :));
+    hold on
+    xlabel("Time(s)")
+    ylabel("Acceleration(m/s^2)")
+    title("Recalculated acceleration")
+end
+legend(experiment_names)
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
     h_hat = results_experiment.(exp_name).h_hat;
     t = results_experiment.(exp_name).t;
     t_seconds = seconds(t - t(1));
@@ -260,6 +317,14 @@ for t1 = 1:length(experiment_names)
     title("Cumulated work done comparison")
     grid on;
 end
+
+% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% for t1 = 1:length(experiment_names)
+%     exp_name = experiment_names{t1};
+%     workcell = results_experiment.(exp_name).result_Damping.work_cell;
+%     workcell_temp = workcell{1}{1}
+% 
+% end
 
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 for t1 = 1:length(experiment_names)
@@ -281,8 +346,8 @@ for t1 = 1:length(experiment_names)
     grid on;
 end
 
-% TODO: 为什么累计的功都是上升的？
-
+% TODO: 为什么累计的功都是上升的，因为气动力在这里基本都做正功，阻尼力做负功
+save results_experiment
 % 
 % offset = [0,0,-4.5/1000,1.5/1000];
 % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);

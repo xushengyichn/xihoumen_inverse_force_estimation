@@ -160,6 +160,37 @@ function [results_experiment] = run_experiment(input,varargin)
     % plot(t,epsx)
     % grid
 
+    %% compare with damping ratio calculated by acc
+    
+    amp_cell = result_Damping.amp_cell;
+    t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+    amp_temp =amp_cell{1}{1};
+    t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
+    m_cycle = input.ncycle; %cycles to be averaged
+    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+    
+    for k1=1:length(t_cycle_mean_temp)
+        if k1 <= m_cycle/2 % Beginning boundary
+            start_idx = 1;
+            end_idx = start_idx + m_cycle;
+        elseif k1 > length(t_cycle_mean_temp) - m_cycle/2 % Ending boundary
+            end_idx = length(t_cycle_mean_temp);
+            start_idx = end_idx - m_cycle;
+        else % Middle
+            start_idx = k1 - floor(m_cycle/2);
+            end_idx = k1 + floor(m_cycle/2);
+        end
+        
+        deltam = log(amp_temp(start_idx)/amp_temp(end_idx));
+        
+        zetam(k1) = sqrt(deltam^2 / (4*m_cycle^2*pi^2 + deltam^2));
+        
+        if deltam > 0
+            zetam(k1) = abs(zetam(k1));
+        else
+            zetam(k1) = -abs(zetam(k1));
+        end
+    end
     %% Recalcualte the modal displacement
     nmodes = result_Main.nmodes;
     Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23],'showtext',showtext);
@@ -221,6 +252,7 @@ function [results_experiment] = run_experiment(input,varargin)
     results_experiment.mode_deck = mode_deck;
     results_experiment.mode_deck_re = mode_deck_re;
     results_experiment.work_cell = result_Damping.work_cell;
+    results_experiment.zetam = zetam;
     
 
     %% plot

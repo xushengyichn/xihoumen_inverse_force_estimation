@@ -38,6 +38,16 @@ function [result] = compute_dynamics_parameters(ncycle, t, Fa_temp, vel_temp, fr
 
         work(k2) = trapz(timeIntervals, Fa_temp(locs(k1):locs(k1 + ncycle)) .* vel_temp(locs(k1):locs(k1 + ncycle)));
         
+        % if k1 == 1000
+        %     aaaaaa=1;
+        %     plot(t,Fa_temp.* vel_temp)
+        %     hold on
+        %     plot(t(locs(k1):locs(k1 + ncycle)),Fa_temp(locs(k1):locs(k1 + ncycle)) .* vel_temp(locs(k1):locs(k1 + ncycle)))
+        %     hold off
+        % end
+
+
+
         sum_amplitudes = 0;
         for cycle_offset = 0:(ncycle - 1)
             current_dis = dis_temp(locs(k1 + cycle_offset):locs(k1 + cycle_offset + 1));

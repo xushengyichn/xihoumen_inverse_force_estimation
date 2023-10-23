@@ -170,7 +170,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         
         for j = 1:length(force_mode_signals) % 遍历当前模式下的每个信号
             freq_temp = ifq_interpolated_mode{j};
-
+            % 
             % Fa_temp = force_mode_signals{j};
             % vel_temp = vel_filtered_mode_signal{j};
             % dis_temp = dis_filtered_mode_signal{j};
