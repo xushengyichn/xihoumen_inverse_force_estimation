@@ -76,28 +76,36 @@ b = ProgressBar(numIterations, ...
     'Title', 'Parallel 2' ...
     );
 b.setup([], [], []);
+lambda_vals = combinations(:, 1);
+sigma_p_vals = combinations(:, 2);
 
 parfor i = 1:size(combinations, 1)
-    % 设置input的参数
-    input.lambda = combinations(i, 1);
-    input.sigma_p = combinations(i, 2);
-    input.omega_0_variation = 0.904969462898074;
-    input.Q_value = 10 ^ (-9.901777612793937);
-    input.R_value = 10 ^ (-3.866588296864785);
+    % 创建input的局部副本
+    local_input = input;
+    
+    % 设置local_input的参数
+    local_input.lambda = lambda_vals(i);
+    local_input.sigma_p = sigma_p_vals(i);
+    local_input.omega_0_variation = 0.904969462898074;
+    local_input.Q_value = 10 ^ (-9.901777612793937);
+    local_input.R_value = 10 ^ (-3.866588296864785);
     
     modesel = 23;
-    input.modesel = modesel;
+    local_input.modesel = modesel;
     
     % 运行实验并保存结果
     tic
-    results_experiment = run_experiment(input, 'showtext', false, 'showplot', false,'caldamp',false);
+    results_experiment = run_experiment(local_input, 'showtext', false, 'showplot', false,'caldamp',false);
     toc
     logL(i) = results_experiment.result_Main.logL;
     logSk(i) = results_experiment.result_Main.logSk;
-    logek(i)= results_experiment.result_Main.logek;
+    logek(i) = results_experiment.result_Main.logek;
+    
     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
     updateParallel([], pwd);
 end
+
+
 
 b.release();
 
