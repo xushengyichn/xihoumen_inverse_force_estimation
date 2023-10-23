@@ -72,20 +72,20 @@ lambda_vals = combinations(:, 1);
 sigma_p_vals = combinations(:, 2);
 numIterations = size(combinations,1);
 
-% if isempty(gcp('nocreate'))
-%     parpool();
-% end
-% 
-% b = ProgressBar(numIterations, ...
-%     'IsParallel', true, ...
-%     'WorkerDirectory', pwd(), ...
-%     'Title', 'Parallel 2' ...
-%     );
-% b.setup([], [], []);
+if isempty(gcp('nocreate'))
+    parpool();
+end
+
+b = ProgressBar(numIterations, ...
+    'IsParallel', true, ...
+    'WorkerDirectory', pwd(), ...
+    'Title', 'Parallel 2' ...
+    );
+b.setup([], [], []);
 
 
-% parfor i = 1:numIterations
-for i = 1:numIterations
+parfor i = 1:numIterations
+% for i = 1:numIterations
     % 创建input的局部副本
     local_input = input;
     
@@ -120,12 +120,12 @@ for i = 1:numIterations
     logek(i) = logek_new;
     logL(i) = logSk(i) + logek(i);
     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
-    % updateParallel([], pwd);
+    updateParallel([], pwd);
 end
 
 
 
-% b.release();
+b.release();
 
 Z_1 = reshape(logL, n2, n1);
 Z_2 = reshape(logSk, n2, n1);
