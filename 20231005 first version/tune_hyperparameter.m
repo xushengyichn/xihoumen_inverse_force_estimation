@@ -2,7 +2,7 @@
 %Author: xushengyichn xushengyichn@outlook.com
 %Date: 2023-10-20 12:45:02
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-23 22:40:33
+%LastEditTime: 2023-10-23 23:30:40
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\tune_hyperparameter.m
 %Description: 由于选择不同参数会对阻尼比计算结果产生影响，因此需要进行参数选择实验
 %
@@ -41,10 +41,10 @@ input.start_time = startDate_global;
 input.end_time = endDate_global;
 % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-% input.acc_dir = "F:\test\result";
-% input.wind_dir = "F:\test\result_wind_10min";
-input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+input.acc_dir = "F:\test\result";
+input.wind_dir = "F:\test\result_wind_10min";
+% input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+% input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 
 
 % % 定义每个实验的参数
@@ -68,7 +68,8 @@ sigma_p_list = linspace(1e2,1e5,n2);
 [X, Y] = meshgrid(lambda_list, sigma_p_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 
-
+lambda_vals = combinations(:, 1);
+sigma_p_vals = combinations(:, 2);
 numIterations = size(combinations,1);
 
 if isempty(gcp('nocreate'))
@@ -81,10 +82,10 @@ b = ProgressBar(numIterations, ...
     'Title', 'Parallel 2' ...
     );
 b.setup([], [], []);
-lambda_vals = combinations(:, 1);
-sigma_p_vals = combinations(:, 2);
 
-parfor i = 1:size(combinations, 1)
+
+parfor i = 1:numIterations
+% for i = 1:numIterations
     % 创建input的局部副本
     local_input = input;
     
@@ -102,10 +103,22 @@ parfor i = 1:size(combinations, 1)
     % tic
     results_experiment = run_experiment(local_input, 'showtext', false, 'showplot', false,'caldamp',false);
     % toc
-    logL(i) = results_experiment.result_Main.logL;
+    % logL(i) = results_experiment.result_Main.logL;
     logSk(i) = results_experiment.result_Main.logSk;
-    logek(i) = results_experiment.result_Main.logek;
-    
+    % logek(i) = results_experiment.result_Main.logek;
+    node_shape = results_experiment.node_shape;
+    h_hat = results_experiment.h_hat;
+    u2dot = results_experiment.u2dot;
+    invSk = results_experiment.invSk;
+    u2dot_real = u2dot.*ones(2,1)*node_shape;
+    logek_new = [];
+    for k2 = 1:length(u2dot)
+        ek_temp = u2dot_real(:,k2)- h_hat(1:2,k2);
+        logek_temp = -0.5*ek_temp'*invSk*ek_temp;
+        logek_new =logek_new + logek_temp;
+    end
+    logek(i) = logek_new;
+    logL(i) = logSk(i) + logek(i);
     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
     updateParallel([], pwd);
 end

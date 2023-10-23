@@ -327,7 +327,7 @@ function [result_Main] = KalmanMain(input,varargin)
     logL = result.logL;
     logSk = result.logSk;
     logek = result.logek;
-
+    invSk = result.invSk;
    
     t = Acc_Data.mergedData.Time;
     
@@ -335,6 +335,7 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.logL = logL;
     result_Main.logSk = logSk;
     result_Main.logek = logek;
+    result_Main.invSk = invSk;
     result_Main.t = t;
     result_Main.p_filt_m = p_filt_m;
     result_Main.x_k_k = x_k_k;

@@ -94,6 +94,7 @@ function [results_experiment] = run_experiment(input, varargin)
     logL = result_Main.logL;
     logSk = result_Main.logSk;
     logek = result_Main.logek;
+    invSk = result_Main.invSk;
     % display logL logSk logek
     if showtext
         dispstr = sprintf("logL = %f, logSk = %f, logek = %f", logL, logSk, logek);
@@ -233,6 +234,7 @@ function [results_experiment] = run_experiment(input, varargin)
     results_experiment.nmodes = nmodes;
     results_experiment.yn_reconstruct = result_Main.yn_reconstruct;
     results_experiment.node_shape = node_shape;
+    results_experiment.invSk = invSk;
     
     results_experiment.u = u;
     results_experiment.udot = udot;
