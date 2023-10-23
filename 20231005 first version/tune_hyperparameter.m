@@ -77,7 +77,7 @@ b = ProgressBar(numIterations, ...
     );
 b.setup([], [], []);
 
-for i = 1:size(combinations, 1)
+parfor i = 1:size(combinations, 1)
     % 设置input的参数
     input.lambda = combinations(i, 1);
     input.sigma_p = combinations(i, 2);
@@ -95,6 +95,8 @@ for i = 1:size(combinations, 1)
     logL(i) = results_experiment.result_Main.logL;
     logSk(i) = results_experiment.result_Main.logSk;
     logek(i)= results_experiment.result_Main.logek;
+    % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
+    updateParallel([], pwd);
 end
 
 b.release();
