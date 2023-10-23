@@ -143,8 +143,8 @@ end
 % input = result_Main;
 input.ncycle = 10;
 tic
-[result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'fft');
-% [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+% [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'fft');
+[result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
 toc
 
 %% read wind data
@@ -583,8 +583,40 @@ if fig_bool
 
 end
 
+% %% functions
+% function logL = fitnessFunction(params, external_params)
+%     input.lambda = 10 ^ params(1);
+%     input.sigma_p = params(2);
+%     input.omega_0_variation = params(3);
+%     input.Q_value = 10 ^ params(4);
+%     input.R_value = 10 ^ params(5);
+
+%     input.modesel = external_params.modesel;
+%     %  figPos = external_params.figPos;
+%     % ON = external_params.ON;
+%     % OFF = external_params.OFF;
+
+%     % input.num_figs_in_row = 12; %每一行显示几个图
+%     % input.figPos = figPos; %图的大小，参数基于InitScript.m中的设置
+%     %设置图片间隔
+%     % input.ON =ON;
+%     % input.OFF =OFF;
+%     % input.gap_between_images = [0, 0];
+%     % input.figureIdx = 0;
+%     n = 4;
+%     [result] = viv2013(n, false);
+%     input.start_time = result.startDate;
+%     input.end_time = result.endDate;
+%     % input.acc_dir = "F:\test\result";
+%     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+
+%     result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+%     logL = -result_Main.logL; % 因为 ga 试图最小化函数，所以取负数
+% end
+
+
 %% functions
-function logL = fitnessFunction(params, external_params)
+function target = fitnessFunction(params, external_params)
     input.lambda = 10 ^ params(1);
     input.sigma_p = params(2);
     input.omega_0_variation = params(3);
@@ -611,7 +643,47 @@ function logL = fitnessFunction(params, external_params)
     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
     result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-    logL = -result_Main.logL; % 因为 ga 试图最小化函数，所以取负数
+
+    input.ncycle = 10;
+    [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+    amp_cell = result_Damping.amp_cell;
+
+    t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+    amp_temp =amp_cell{1}{1};
+    t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
+    m_cycle = input.ncycle; %cycles to be averaged
+    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+
+    for k1=1:length(t_cycle_mean_temp)
+        if k1 <= m_cycle/2 % Beginning boundary
+            start_idx = 1;
+            end_idx = start_idx + m_cycle;
+        elseif k1 > length(t_cycle_mean_temp) - m_cycle/2 % Ending boundary
+            end_idx = length(t_cycle_mean_temp);
+            start_idx = end_idx - m_cycle;
+        else % Middle
+            start_idx = k1 - floor(m_cycle/2);
+            end_idx = k1 + floor(m_cycle/2);
+        end
+        
+        deltam = log(amp_temp(start_idx)/amp_temp(end_idx));
+        
+        zetam(k1) = sqrt(deltam^2 / (4*m_cycle^2*pi^2 + deltam^2));
+        
+        if deltam > 0
+            zetam(k1) = abs(zetam(k1));
+        else
+            zetam(k1) = -abs(zetam(k1));
+        end
+    end
+
+    zeta_all_cell = result_Damping.zeta_all_cell;
+    zeta1 = zeta_all_cell{1}{1};
+    zeta2 = zetam - 0.3/100;
+
+    target = norm(zeta1 - zeta2);
+    logL = target;
+
 end
 
 function [amp, fre] = ee(data, dt)
