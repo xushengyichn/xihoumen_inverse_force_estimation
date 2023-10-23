@@ -41,10 +41,10 @@ input.start_time = startDate_global;
 input.end_time = endDate_global;
 % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-input.acc_dir = "F:\test\result";
-input.wind_dir = "F:\test\result_wind_10min";
-% input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-% input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+% input.acc_dir = "F:\test\result";
+% input.wind_dir = "F:\test\result_wind_10min";
+input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 
 
 % % 定义每个实验的参数
@@ -72,20 +72,20 @@ lambda_vals = combinations(:, 1);
 sigma_p_vals = combinations(:, 2);
 numIterations = size(combinations,1);
 
-if isempty(gcp('nocreate'))
-    parpool();
-end
+% if isempty(gcp('nocreate'))
+%     parpool();
+% end
+% 
+% b = ProgressBar(numIterations, ...
+%     'IsParallel', true, ...
+%     'WorkerDirectory', pwd(), ...
+%     'Title', 'Parallel 2' ...
+%     );
+% b.setup([], [], []);
 
-b = ProgressBar(numIterations, ...
-    'IsParallel', true, ...
-    'WorkerDirectory', pwd(), ...
-    'Title', 'Parallel 2' ...
-    );
-b.setup([], [], []);
 
-
-parfor i = 1:numIterations
-% for i = 1:numIterations
+% parfor i = 1:numIterations
+for i = 1:numIterations
     % 创建input的局部副本
     local_input = input;
     
@@ -111,7 +111,7 @@ parfor i = 1:numIterations
     u2dot = results_experiment.u2dot;
     invSk = results_experiment.invSk;
     u2dot_real = u2dot.*ones(2,1)*node_shape;
-    logek_new = [];
+    logek_new = 0;
     for k2 = 1:length(u2dot)
         ek_temp = u2dot_real(:,k2)- h_hat(1:2,k2);
         logek_temp = -0.5*ek_temp'*invSk*ek_temp;
@@ -120,12 +120,12 @@ parfor i = 1:numIterations
     logek(i) = logek_new;
     logL(i) = logSk(i) + logek(i);
     % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
-    updateParallel([], pwd);
+    % updateParallel([], pwd);
 end
 
 
 
-b.release();
+% b.release();
 
 Z_1 = reshape(logL, n2, n1);
 Z_2 = reshape(logSk, n2, n1);
