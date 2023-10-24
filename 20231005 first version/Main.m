@@ -43,12 +43,12 @@ input.start_time = startDate_global;
 input.end_time = endDate_global;
 % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
 % input.acc_dir = "D:\xihoumendata\acc";
-% input.acc_dir = "F:\test\result";
-input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+input.acc_dir = "F:\test\result";
+% input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 % input.wind_dir = "D:\xihoumendata\wind";
-% input.wind_dir = "F:\test\result_wind_10min";
-input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+input.wind_dir = "F:\test\result_wind_10min";
+% input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 
 % input.lambda = 10 ^ (-1);
 % input.sigma_p = 10000;
@@ -144,6 +144,14 @@ input.u=u;
 input.udot = udot;
 input.u2dot = u2dot;
 
+%% replace the force
+% yn = result_Main.yn;
+% disp_dir = acc2dsip(yn(1, :), 50);
+% F_direct = MM.*yn(1,:)/node_shape+CC.*disp_dir.vel/node_shape + KK.*disp_dir.disp/node_shape;
+% 
+% input.p_filt_m=F_direct;
+
+
 %% Caldamping ratio
 fields = fieldnames(result_Main);
 for i = 1:numel(fields)
@@ -200,7 +208,14 @@ for k2 = k1+1:length(ex)
 end
 
 
-
+%% direct calculate the aerodynamic force
+F_direct = MM.*yn(1,:)/node_shape+CC.*disp_dir.vel/node_shape + KK.*disp_dir.disp/node_shape;
+F_filter = p_filt_m;
+figure
+plot(t,F_direct)
+hold on
+plot(t,F_filter)
+legend("direct","filter")
 
 % figure
 % plot(t,epsx)
