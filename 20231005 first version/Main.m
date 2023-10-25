@@ -68,8 +68,8 @@ input.wind_dir = "F:\test\result_wind_10min";
 % input.Q_value =10 ^ (-9.633948257379021);
 % input.R_value = 10 ^ (-2.415076745081128);
 
-% % input.lambda = 10 ^ (-4.993486819657864);
-% input.lambda = 10 ^ (-1);
+% input.lambda = 10 ^ (-4.993486819657864);
+% % input.lambda = 10 ^ (-1);
 % input.sigma_p = 1.441514803767596e+04;
 % % input.sigma_p = 100;
 % input.omega_0_variation = 0.904969462898074;

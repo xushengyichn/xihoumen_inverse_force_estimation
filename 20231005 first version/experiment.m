@@ -47,7 +47,8 @@ parameters = {
     {10^(-1.001242541230301), 1.441514803767596e+04, 0.904969462898074, 10^(-9.901777612793937), 10^(-3.866588296864785)},
     {10^(-2.001242541230301), 1.441514803767596e+04, 0.904969462898074, 10^(-9.901777612793937), 10^(-3.866588296864785)},
     {10^(-3.001242541230301), 1.441514803767596e+04, 0.904969462898074, 10^(-9.901777612793937), 10^(-3.866588296864785)},
-    {10^(-4.001242541230301), 1.441514803767596e+04, 0.904969462898074, 10^(-9.901777612793937), 10^(-3.866588296864785)},
+    % {10 ^ (-2.748806418335396), 4.041540821465747e+04, 1.015685635145482, 10 ^ (-1.005545623474248), 10 ^ (-1.103266293300500)},
+    {10 ^ (-2.748806418335396), 4.041540821465747e+04, 1.015685635145482, 10^(-9.901777612793937), 10^(-3.866588296864785)},
     % {10 ^ (-1.001242541230301), 9.063096667830060e+04, 0.902647415472734, 10 ^ (-1.016211706804576), 10 ^ (-1.003148221125874)},
     % {10 ^ (-4.934808796013671), 6.895548550856822e+03, 1.097383030422062, 10 ^ (-9.633948257379021), 10 ^ (-2.415076745081128)},
     % {10 ^ (-4.993486819657864), 1.441514803767596e+04, 0.904969462898074, 10^(-9.901777612793937), 10^(-3.866588296864785)},
@@ -336,7 +337,7 @@ for t1 = 1:length(experiment_names)
     t_seconds = seconds(t - t(1));
     p_filt_m = results_experiment.(exp_name).p_filt_m;
     v= h_hat(3, :);
-    v= udot;
+    v= results_experiment.(exp_name).udot;
     f = p_filt_m(1, :);
 
     power = f.*v;
@@ -348,6 +349,237 @@ for t1 = 1:length(experiment_names)
     title("Power comparison")
     grid on;
 end
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    h_hat = results_experiment.(exp_name).h_hat;
+    udot = results_experiment.(exp_name).udot;
+    t = results_experiment.(exp_name).t;
+    t_seconds = seconds(t - t(1));
+    p_filt_m = results_experiment.(exp_name).p_filt_m;
+    nmodes = results_experiment.(exp_name).nmodes;
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+    mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+    eig_vec = Result.eig_vec;
+    Mapping_data = Result.Mapping;
+    loc_acc = [1403];
+    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+    node_shape = mean(eig_vec(acc_matrix_seq));
+
+
+    v1= h_hat(3, :)/node_shape;
+    v2= udot;
+    f = p_filt_m(1, :);
+
+    
+    plot(t, v1);
+    hold on
+    plot(t, v2);
+    xlabel("Time(s)")
+    ylabel("Power")
+    title("Time history comparison of velocity")
+    legend("filter","recalculate")
+    grid on;
+end
+
+
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    h_hat = results_experiment.(exp_name).h_hat;
+    udot = results_experiment.(exp_name).udot;
+    t = results_experiment.(exp_name).t;
+    t_seconds = seconds(t - t(1));
+    p_filt_m = results_experiment.(exp_name).p_filt_m;
+    nmodes = results_experiment.(exp_name).nmodes;
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+    mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+    eig_vec = Result.eig_vec;
+    Mapping_data = Result.Mapping;
+    loc_acc = [1403];
+    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+    node_shape = mean(eig_vec(acc_matrix_seq));
+
+
+    v1= h_hat(3, :)/node_shape;
+    v2= udot;
+    f = p_filt_m(1, :);
+
+    v1_normalize = normalize(v1);
+    v2_normalize = normalize(v2);
+    f_normalize = normalize(f);
+
+    [phaseDiff] = fft_phase_lag(50,v1_normalize,v2_normalize,0.33)
+    [phaseDiff] = fft_phase_lag(50,f_normalize,v1_normalize,0.33)
+    [phaseDiff] = fft_phase_lag(50,f_normalize,v2_normalize,0.33)
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(t,v1_normalize)
+    hold on
+    plot(t,v2_normalize)
+    plot(t,f_normalize)
+    xlabel("Time(s)")
+    ylabel("-")
+    title("Time history comparison of velocity and force")
+    grid on;
+end
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    h_hat = results_experiment.(exp_name).h_hat;
+    udot = results_experiment.(exp_name).udot;
+    t = results_experiment.(exp_name).t;
+    t_seconds = seconds(t - t(1));
+    p_filt_m = results_experiment.(exp_name).p_filt_m;
+    nmodes = results_experiment.(exp_name).nmodes;
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+    mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+    eig_vec = Result.eig_vec;
+    Mapping_data = Result.Mapping;
+    loc_acc = [1403];
+    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+    node_shape = mean(eig_vec(acc_matrix_seq));
+
+
+    v1= h_hat(3, :)/node_shape;
+    v2= udot;
+    f = p_filt_m(1, :);
+
+    v1_normalize = normalize(v1);
+    v2_normalize = normalize(v2);
+    f_normalize = normalize(f);
+
+    v1_collect(t1,:)=v1;
+
+
+
+    plot(t,v1)
+    hold on
+    xlabel("Time(s)")
+    ylabel("-")
+    title("Time history comparison of filtered velocity")
+    grid on;
+end
+    [phaseDiff] = fft_phase_lag(50,v1_collect(1,:),v1_collect(2,:),0.33)
+    [phaseDiff] = fft_phase_lag(50,v1_collect(1,:),v1_collect(3,:),0.33)
+    [phaseDiff] = fft_phase_lag(50,v1_collect(1,:),v1_collect(4,:),0.33)
+
+
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    h_hat = results_experiment.(exp_name).h_hat;
+    udot = results_experiment.(exp_name).udot;
+    t = results_experiment.(exp_name).t;
+    t_seconds = seconds(t - t(1));
+    p_filt_m = results_experiment.(exp_name).p_filt_m;
+    nmodes = results_experiment.(exp_name).nmodes;
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+    mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+    eig_vec = Result.eig_vec;
+    Mapping_data = Result.Mapping;
+    loc_acc = [1403];
+    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+    node_shape = mean(eig_vec(acc_matrix_seq));
+
+
+    v1= h_hat(3, :)/node_shape;
+    v2= udot;
+    f = p_filt_m(1, :);
+
+    v1_normalize = normalize(v1);
+    v2_normalize = normalize(v2);
+    f_normalize = normalize(f);
+
+
+    v2_collect(t1,:)=v2;
+
+    plot(t, v2);
+    hold on
+    xlabel("Time(s)")
+    ylabel("-")
+    title("Time history comparison of reconstructed velocity")
+    
+    grid on;
+end
+    [phaseDiff] = fft_phase_lag(50,v2_collect(1,:),v2_collect(2,:),0.33)
+    [phaseDiff] = fft_phase_lag(50,v2_collect(1,:),v2_collect(3,:),0.33)
+    [phaseDiff] = fft_phase_lag(50,v2_collect(1,:),v2_collect(4,:),0.33)
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+for t1 = 1:length(experiment_names)
+    exp_name = experiment_names{t1};
+    h_hat = results_experiment.(exp_name).h_hat;
+    udot = results_experiment.(exp_name).udot;
+    t = results_experiment.(exp_name).t;
+    t_seconds = seconds(t - t(1));
+    p_filt_m = results_experiment.(exp_name).p_filt_m;
+    nmodes = results_experiment.(exp_name).nmodes;
+    Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
+    mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+    eig_vec = Result.eig_vec;
+    Mapping_data = Result.Mapping;
+    loc_acc = [1403];
+    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
+    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
+    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
+    node_shape = mean(eig_vec(acc_matrix_seq));
+
+
+    v1= h_hat(3, :)/node_shape;
+    v2= udot;
+    f = p_filt_m(1, :);
+
+    v1_normalize = normalize(v1);
+    v2_normalize = normalize(v2);
+    f_normalize = normalize(f);
+
+    f_collect(t1,:) = f_normalize;
+
+    plot(t, f);
+    hold on
+    xlabel("Time(s)")
+    ylabel("-")
+    title("Time history comparison of filtered force")
+    
+    grid on;
+end
+
+    [phaseDiff] = fft_phase_lag(50,f_collect(1,:),f_collect(2,:),0.33)
+    [phaseDiff] = fft_phase_lag(50,f_collect(1,:),f_collect(3,:),0.33)
+    [phaseDiff] = fft_phase_lag(50,f_collect(1,:),f_collect(4,:),0.33)
+
+% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% for t1 = 1:length(experiment_names)
+%     exp_name = experiment_names{t1};
+%     h_hat = results_experiment.(exp_name).h_hat;
+%     t = results_experiment.(exp_name).t;
+%     t_seconds = seconds(t - t(1));
+%     p_filt_m = results_experiment.(exp_name).p_filt_m;
+%     v1= h_hat(3, :);
+%     v2= udot;
+%     f = p_filt_m(1, :);
+% 
+%     power = f.*v;
+% 
+%     plot(t, v);
+%     hold on
+%     xlabel("Time(s)")
+%     ylabel("Power")
+%     title("Power comparison")
+%     grid on;
+% end
 end
 % TODO: 为什么累计的功都是上升的，因为气动力在这里基本都做正功，阻尼力做负功
 save results_experiment

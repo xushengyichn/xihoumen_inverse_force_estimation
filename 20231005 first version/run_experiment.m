@@ -77,6 +77,7 @@ function [results_experiment] = run_experiment(input, varargin)
     addParameter(p, 'showtext', true, @islogical)
     addParameter(p, 'showplot', false, @islogical)
     addParameter(p, 'caldamp', true, @islogical)
+    addParameter(p, 'caldamp_recalculated_v', false, @islogical)
     addParameter(p, 'num_figs_in_row', 12, @isnumeric)
     addParameter(p, 'figPos', [100, 100, 400, 300], @isnumeric)
     addParameter(p, 'gap_between_images', [0, 0], @isnumeric)
@@ -89,6 +90,7 @@ function [results_experiment] = run_experiment(input, varargin)
     gap_between_images = p.Results.gap_between_images;
     figureIdx = p.Results.figureIdx;
     caldamp = p.Results.caldamp;
+    caldamp_recalculated_v = p.Results.caldamp_recalculated_v;
 
     [result_Main] = KalmanMain(input, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
     logL = result_Main.logL;
@@ -103,24 +105,7 @@ function [results_experiment] = run_experiment(input, varargin)
 
     mode_deck = result_Main.mode_deck;
 
-    if 0
-        %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
-        % 在调用 ga 函数之前，您可以这样设置 external_params：
-        % external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-        external_params.modesel = [23];
-        % 定义参数的范围
-        lb = [-5, 10, 0.9, -10, -10]; % 这里的值是假设的，请根据您的情况进行修改
-        ub = [-1, 1e5, 1.1, -1, -1]; % 这里的值也是假设的
 
-        % 定义整数和连续变量
-        IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
-
-        options = optimoptions('ga', 'MaxGenerations', 100, 'Display', 'iter', 'UseParallel', true);
-        [x, fval] = ga(@(params) fitnessFunction(params, external_params), 5, [], [], [], [], lb, ub, [], IntCon, options);
-        % 保存结果
-        save('optimization_results.mat', 'x', 'fval');
-
-    end
 
     %% Recalcualte the modal displacement
     nmodes = result_Main.nmodes;
@@ -227,6 +212,12 @@ function [results_experiment] = run_experiment(input, varargin)
 
     end
 
+    if caldamp_recalculated_v
+
+        [result_Damping_recalculated_v] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+        
+    end
+
     results_experiment = struct();
     results_experiment.result_Main = result_Main;
     
@@ -271,6 +262,11 @@ function [results_experiment] = run_experiment(input, varargin)
         results_experiment.yn = yn;
         results_experiment.t = t;
     end
+
+    if caldamp_recalculated_v
+        
+
+    end    
 
     %% plot
     if showplot
