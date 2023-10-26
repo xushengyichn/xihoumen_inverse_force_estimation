@@ -76,6 +76,7 @@ function [results_experiment] = run_experiment(input, varargin)
     p = inputParser;
     addParameter(p, 'showtext', true, @islogical)
     addParameter(p, 'showplot', false, @islogical)
+    addParameter(p, 'shouldCircShift', false, @islogical)
     addParameter(p, 'caldamp', true, @islogical)
     addParameter(p, 'caldamp_recalculated_v', false, @islogical)
     addParameter(p, 'num_figs_in_row', 12, @isnumeric)
@@ -91,8 +92,28 @@ function [results_experiment] = run_experiment(input, varargin)
     figureIdx = p.Results.figureIdx;
     caldamp = p.Results.caldamp;
     caldamp_recalculated_v = p.Results.caldamp_recalculated_v;
+    shouldCircShift = p.Results.shouldCircShift;
 
     [result_Main] = KalmanMain(input, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    
+    %% circshift
+    if shouldCircShift
+        % result_Main.p_filt_m=circshift(result_Main.p_filt_m,[0 -1]);
+        signal = result_Main.p_filt_m;
+        x = 1:length(signal); % 原始x坐标
+        shift_amount = -0.5; % 偏移量
+        
+        % 创建新的x坐标，包括偏移量
+        x_new = x - shift_amount; 
+
+        shifted_signal = interp1(x, signal, x_new, 'linear', 'extrap');
+
+        result_Main.p_filt_m=shifted_signal;
+
+    end
+
+    %%
+    
     logL = result_Main.logL;
     logSk = result_Main.logSk;
     logek = result_Main.logek;
@@ -214,7 +235,7 @@ function [results_experiment] = run_experiment(input, varargin)
 
     if caldamp_recalculated_v
 
-        [result_Damping_recalculated_v] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+        [result_Damping_recalculated_v] = Cal_aero_damping_ratio_with_recalculated_data(input, 'showplot', false, 'filterstyle', 'nofilter');
         
     end
 
@@ -264,7 +285,12 @@ function [results_experiment] = run_experiment(input, varargin)
     end
 
     if caldamp_recalculated_v
-        
+        results_experiment.result_Damping_recalculated_v = result_Damping_recalculated_v;
+        results_experiment.work_cell_recalculated_v = result_Damping_recalculated_v.work_cell;
+        results_experiment.amp_cell_recalculated_v = result_Damping_recalculated_v.amp_cell;
+        results_experiment.zeta_all_cell_recalculated_v = result_Damping_recalculated_v.zeta_all_cell;
+        results_experiment.top_freqs_recalculated_v = result_Damping_recalculated_v.top_freqs;
+        results_experiment.t_cycle_mean_cell_recalculated_v = result_Damping_recalculated_v.t_cycle_mean_cell;
 
     end    
 
