@@ -35,10 +35,10 @@ startDate_global = result.startDate;
 endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
-% input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-% input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-input.acc_dir = "F:\test\result";
-input.wind_dir = "F:\test\result_wind_10min";
+input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+% input.acc_dir = "F:\test\result";
+% input.wind_dir = "F:\test\result_wind_10min";
 
 
 % experiment_names = {'exp1', 'exp2', 'exp3','exp4'}; % 定义实验的名称
