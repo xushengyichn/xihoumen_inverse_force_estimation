@@ -10,7 +10,7 @@ elseif strcmp(computer_name,'mac')
     addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
     addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
     addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
-elseif strcmp(computer_name,'asus')
+elseif strcmp(computer_name,'ROG-SHENGYI')
     addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
     addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
@@ -44,7 +44,7 @@ figureIdx = 0;
 % input.figureIdx = 0;
 % n = 13;
 % n = 4;
-n=22;
+n=4;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
 endDate_global = result.endDate+hours(1);
@@ -59,7 +59,7 @@ if strcmp(computer_name,'SHENGYI_HP')
 elseif strcmp(computer_name,'mac')
     input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
     input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-elseif strcmp(computer_name,'asus')
+elseif strcmp(computer_name,'ROG-SHENGYI')
     input.acc_dir = "D:\xihoumendata\acc";
     input.wind_dir = "D:\xihoumendata\wind";
 elseif strcmp(computer_name,'ketizu')
