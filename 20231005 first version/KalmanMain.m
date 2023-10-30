@@ -183,9 +183,10 @@ function [result_Main] = KalmanMain(input,varargin)
     Freq = Result.Freq;
     MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
-       %%
+    %% Changing the frequency
     if 1
         Freq = 0.328240;
+        % Freq = 0.326;
         KK_eq = MM_eq * (2 * pi * Freq)^2;
         if showtext
             disp("Changing the frequency of the structure to "+num2str(Freq)+"Hz, which is the frequency from the field measurement.");
@@ -200,8 +201,8 @@ function [result_Main] = KalmanMain(input,varargin)
     nodeondeck = Result.nodeondeck;
     Mapping_data = Result.Mapping;
     
-    % zeta = ones(size(modesel)) * 0.3/100;
-    zeta = ones(size(modesel)) * 0.05/100;
+    zeta = ones(size(modesel)) * 0.3/100;
+    % zeta = ones(size(modesel)) * 0.0/100;
     if showtext
         disp("Damping ratio of the structure is set as "+num2str(zeta));
     end
@@ -363,6 +364,14 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.MM = MM_eq;
     result_Main.CC = CC_eq;
     result_Main.KK = KK_eq;
+    result_Main.A_d = A_d;
+    result_Main.B_d = B_d;
+    result_Main.G_d = G_d;
+    result_Main.J_d = J_d;
+    result_Main.N = N;
+    result_Main.x0 = x0;
+    result_Main.ns = ns;
+    result_Main.n_sensors = n_sensors;
 
 
     if fig_bool == ON

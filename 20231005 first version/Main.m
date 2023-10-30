@@ -1,17 +1,24 @@
 clc; clear; close all;
-addpath(genpath("F:\git\ssm_tools\"))
-addpath(genpath("F:\git\Function_shengyi_package\"))
-addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
-addpath(genpath("F:\git\HHT-Tutorial\"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
-addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
+computer_name = getenv('COMPUTERNAME');
+if strcmp(computer_name,'SHENGYI_HP')
+    addpath(genpath("F:\git\ssm_tools\"))
+    addpath(genpath("F:\git\Function_shengyi_package\"))
+    addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
+    addpath(genpath("F:\git\HHT-Tutorial\"))
+elseif strcmp(computer_name,'mac')
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
+elseif strcmp(computer_name,'asus')
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
+    addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
+else
+    error("Please add path first.")
+end
 
 
 
@@ -21,7 +28,7 @@ run("InitScript.m")
 
 %% 0 绘图参数
 fig_bool = ON;
-num_figs_in_row = 12; %每一行显示几个图
+num_figs_in_row = 4; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
 gap_between_images = [0, 0];
@@ -35,20 +42,33 @@ figureIdx = 0;
 % input.OFF =OFF;
 % input.gap_between_images = [0, 0];
 % input.figureIdx = 0;
-n = 13;
+% n = 13;
+% n = 4;
+n=22;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
 endDate_global = result.endDate+hours(1);
 input.start_time = startDate_global;
 input.end_time = endDate_global;
-% input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-% input.acc_dir = "D:\xihoumendata\acc";
-input.acc_dir = "F:\test\result";
-% input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-% input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-% input.wind_dir = "D:\xihoumendata\wind";
-input.wind_dir = "F:\test\result_wind_10min";
-% input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+
+
+computer_name = getenv('COMPUTERNAME');
+if strcmp(computer_name,'SHENGYI_HP')
+    input.acc_dir = "F:\test\result";
+    input.wind_dir = "F:\test\result_wind_10min";
+elseif strcmp(computer_name,'mac')
+    input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+    input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+elseif strcmp(computer_name,'asus')
+    input.acc_dir = "D:\xihoumendata\acc";
+    input.wind_dir = "D:\xihoumendata\wind";
+elseif strcmp(computer_name,'ketizu')
+    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+    input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+else
+    error("Please add data folder first.")
+end
+
 
 % input.lambda = 10 ^ (-1);
 % input.sigma_p = 10000;
@@ -174,41 +194,44 @@ wind_dir = input.wind_dir;
 [result_wind] = read_wind_data(start_time, end_time, wind_dir);
 
 %% compare with ee
-yn = result_Main.yn;
-fs = 50;
-t = result_Main.t;
-disp_dir = acc2dsip(yn(1, :), 50);
-[ex, frex] = ee(disp_dir.disp, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
-
-omgx = frex * 2 * pi;
-
-% for k1 = 1:length(ex) - 1
-%     epsx(k1) = log(ex(k1) / ex(k1 + 1)) / omgx(k1) * fs;
-% end
-
+% yn = result_Main.yn;
+% fs = 50;
+% t = result_Main.t;
+% disp_dir = acc2dsip(yn(1, :), 50);
+% [ex, frex] = ee(disp_dir.disp, 1 / fs); %经验包络法求瞬时频率和瞬时振幅 % empirical envelope method to find instantaneous frequency and instantaneous amplitude
+% 
+% omgx = frex * 2 * pi;
+% 
+% % for k1 = 1:length(ex) - 1
+% %     epsx(k1) = log(ex(k1) / ex(k1 + 1)) / omgx(k1) * fs;
+% % end
+% 
+% % npoints = 150;
+% % for k1 = 1:length(ex) - npoints
+% %     epsx(k1) = log(ex(k1) / ex(k1 + npoints)) / omgx(k1) * (fs/npoints);
+% % end
+% 
+% 
 % npoints = 150;
 % for k1 = 1:length(ex) - npoints
-%     epsx(k1) = log(ex(k1) / ex(k1 + npoints)) / omgx(k1) * (fs/npoints);
+%     for k2 = 1:npoints
+%         epsx_temp(k2) = log(ex(k1+k2-1) / ex(k1 + k2)) / omgx(k1) * fs;
+%     end
+%         epsx(k1) = mean(epsx_temp);
+%         clear epsx_temp
 % end
-
-
-npoints = 150;
-for k1 = 1:length(ex) - npoints
-    for k2 = 1:npoints
-        epsx_temp(k2) = log(ex(k1+k2-1) / ex(k1 + k2)) / omgx(k1) * fs;
-    end
-        epsx(k1) = mean(epsx_temp);
-        clear epsx_temp
-end
-
-% 填充 epsx 数组的其余部分。你可以根据需要选择不同的填充方法。
-% 在这里，我选择用最后一个计算值填充。
-for k2 = k1+1:length(ex)
-    epsx(k2) = epsx(k1);
-end
+% 
+% % 填充 epsx 数组的其余部分。你可以根据需要选择不同的填充方法。
+% % 在这里，我选择用最后一个计算值填充。
+% for k2 = k1+1:length(ex)
+%     epsx(k2) = epsx(k1);
+% end
 
 
 %% direct calculate the aerodynamic force
+t = result_Main.t;
+yn = result_Main.yn;
+disp_dir = acc2dsip(yn(1, :), 50);
 F_direct = MM.*yn(1,:)/node_shape+CC.*disp_dir.vel/node_shape + KK.*disp_dir.disp/node_shape;
 F_filter = p_filt_m;
 figure
@@ -217,9 +240,12 @@ hold on
 plot(t,F_filter)
 legend("direct","filter")
 
-% figure
-% plot(t,epsx)
-% grid
+[u_direct udot_direct u2dot_direct] = NewmarkInt(t_temp, MM, CC, KK, F_direct, 1/2, 1/4, 0, 0);
+
+input.p_filt_m = F_direct;
+[result_Damping_direct] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+
+
 
 %% compare with damping ratio calculated by acc
 
@@ -260,8 +286,48 @@ end
 
 x_filt_original = result_Main.x_filt_original;
 
+t = result_Main.t;
+yn = result_Main.yn;
+h_hat = result_Main.h_hat;
+nmodes = result_Main.nmodes;
+amp_cell = result_Damping.amp_cell;
+zeta_all_cell = result_Damping.zeta_all_cell;
+top_freqs = result_Damping.top_freqs;
+t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+yn_reconstruct = result_Main.yn_reconstruct;
+
+zeta_all_cell_direct = result_Damping_direct.zeta_all_cell;
+amp_cell_direct = result_Damping_direct.amp_cell;
 %% plot
 if fig_bool
+    %% reconstructed data comparison (direct integral and kalman filter)
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(t,u_direct)
+    hold on
+    plot(t,u)
+    plot(t,h_hat(5, :) / node_shape)
+    legend("direct integral reconstruct","filter reconstruct",'filtered')
+    title("reconstructed displacement")
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(t,udot_direct)
+    hold on
+    plot(t,udot)
+    plot(t,h_hat(3, :) / node_shape)
+    legend("direct integral reconstruct","filter reconstruct",'filtered')
+    title("reconstructed velocity")
+
+    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    plot(t,u2dot_direct)
+    hold on
+    plot(t,u2dot)
+    plot(t,h_hat(1, :) / node_shape)
+    legend("direct integral reconstruct","filter reconstruct",'filtered')
+    title("reconstructed acceleration")
+    
+
+
+
     %% filtered and recalcuated displacement
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
     plot(t_temp, x_filt_original(1, :))
@@ -286,15 +352,7 @@ if fig_bool
     legend("filtered", "recalculate")
     title("u2dot")
 
-    t = result_Main.t;
-    yn = result_Main.yn;
-    h_hat = result_Main.h_hat;
-    nmodes = result_Main.nmodes;
-    amp_cell = result_Damping.amp_cell;
-    zeta_all_cell = result_Damping.zeta_all_cell;
-    top_freqs = result_Damping.top_freqs;
-    t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
-    yn_reconstruct = result_Main.yn_reconstruct;
+
 
     %% filtered and recalcuated acceleration
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -304,9 +362,32 @@ if fig_bool
     title("filtered viv force")
     %% wind speed during the period
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    scatter(result_wind.resultsTable_UA6.Time_Start, result_wind.resultsTable_UA6.U);
+    beta_deg_mean_UA5 = result_wind.resultsTable_UA5.beta_deg_mean;
+    beta_deg_mean_UA6 = result_wind.resultsTable_UA6.beta_deg_mean;
+    % judge if the wind direction of both UA5 and UA6 is from 45°-225°
+    for k1 = 1:length(beta_deg_mean_UA5)
+        if and(beta_deg_mean_UA5(k1) > 45, beta_deg_mean_UA5(k1) < 225) && and(beta_deg_mean_UA6(k1) > 45, beta_deg_mean_UA6(k1) < 225)
+            U_sel(k1) = result_wind.resultsTable_UA5.U(k1);
+        % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
+        elseif or(and(beta_deg_mean_UA5(k1) > 225, beta_deg_mean_UA5(k1) < 360), and(beta_deg_mean_UA5(k1) > 0, beta_deg_mean_UA5(k1) < 45)) && or(and(beta_deg_mean_UA6(k1) > 225, beta_deg_mean_UA6(k1) < 360), and(beta_deg_mean_UA6(k1) > 0, beta_deg_mean_UA6(k1) < 45))
+            U_sel(k1) = result_wind.resultsTable_UA6.U(k1);
+        else
+            if abs(result_wind.resultsTable_UA5.alpha_deg_mean(k1))<abs(result_wind.resultsTable_UA6.alpha_deg_mean)
+                U_sel(k1) = result_wind.resultsTable_UA5.U(k1);
+            else
+                U_sel(k1) = result_wind.resultsTable_UA6.U(k1);
+            end
+            disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
+        end
+    end
+
+
+    scatter(result_wind.resultsTable_UA6.Time_Start, U_sel);
+    % scatter(result_wind.resultsTable_UA6.Time_Start, result_wind.resultsTable_UA6.U);
+    % hold on 
+    % scatter(result_wind.resultsTable_UA5.Time_Start, result_wind.resultsTable_UA5.U);
     xlabel('Time (s)')
-    ylabel('Wind speed (m/s^2)')
+    ylabel('Wind speed (m/s)')
     title("Wind speed vs. Time")
 
     %% measured, filtered and recalcuated acceleration
@@ -338,7 +419,7 @@ if fig_bool
     xlabel('Time (s)')
     ylabel('Displacement (m)')
     title("Displacement vs. Time")
-    legend("measure", "filtered")
+    legend("direct", "filtered")
 
     %% instant frequency of the filtered acceleration 
     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -401,6 +482,7 @@ if fig_bool
 
             [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
             scatter(datetimeArray, amp_cell{k1}{k2} * max(mode_deck(:, k1)), [], secondsFromReference, 'filled');
+            
             % 设置 colormap
             colormap('jet')
             % colorbar
@@ -508,65 +590,65 @@ if fig_bool
     end
 
     %% calculated by ee instant frequency
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    plot(t, frex)
-    xlabel('Time (s)')
-    ylabel('Frequency (Hz)')
-    title("Frequency vs. Time calculated by ee")
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % plot(t, frex)
+    % xlabel('Time (s)')
+    % ylabel('Frequency (Hz)')
+    % title("Frequency vs. Time calculated by ee")
 
     %% 
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    plot(t, ex)
-    xlabel('Time (s)')
-    ylabel('Amplitude (m)')
-    title("Amplitude vs. Time calculated by ee")
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % plot(t, ex)
+    % xlabel('Time (s)')
+    % ylabel('Amplitude (m)')
+    % title("Amplitude vs. Time calculated by ee")
 
     %%
-    [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-    scatter(ex, epsx, 'green')
-    xlim([0.05, 0.12])
-    ylim([-0.5, 0.5] / 100)
-    xlabel('Amplitude (m)')
-    ylabel('Damping ratio')
-    title("Damping ratio vs. Amplitude calculated by ee")
+    % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+    % scatter(ex, epsx, 'green')
+    % xlim([0.05, 0.12])
+    % ylim([-0.5, 0.5] / 100)
+    % xlabel('Amplitude (m)')
+    % ylabel('Damping ratio')
+    % title("Damping ratio vs. Amplitude calculated by ee")
 
     %%
-        for k1 = 1:nmodes
-
-        for k2 = 1:length(top_freqs{k1})
-            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
-            datetimeArray = t_cycle_mean_cell{k1}{k2};
-
-            % 提取第一个 datetime 对象作为参考点
-            referenceDatetime = datetimeArray(1);
-
-            % 计算每个 datetime 对象相对于参考点的秒数
-            secondsFromReference = seconds(datetimeArray - referenceDatetime);
-
-            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
-
-            [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-            % scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
-            scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)),zeta_all_cell{k1}{k2},'red');
-            % 设置 colormap
-            colormap('jet')
-            colorbar
-
-            hold on
-            % plot([0, 0.15], [-0.003, -0.003])
-            % scatter(ex,epsx,'green')
-            scatter(amp_temp* max(mode_deck(:, k1)),zetam-0.3/100,'blue')
-            scatter(ex, epsx-0.3/100, 'green')
-            str = "Mode : %d, Frequency : %.2f Hz";
-            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
-            xlim([0.05, 0.12])
-            ylim([-0.5, 0.5] / 100)
-            xlabel("Amplitude(m)")
-            ylabel("Damping ratio")
-            legend("use force","use acc","use ee")
-        end
-
-        end
+        % for k1 = 1:nmodes
+        % 
+        % for k2 = 1:length(top_freqs{k1})
+        %     % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+        %     datetimeArray = t_cycle_mean_cell{k1}{k2};
+        % 
+        %     % 提取第一个 datetime 对象作为参考点
+        %     referenceDatetime = datetimeArray(1);
+        % 
+        %     % 计算每个 datetime 对象相对于参考点的秒数
+        %     secondsFromReference = seconds(datetimeArray - referenceDatetime);
+        % 
+        %     % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+        % 
+        %     [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+        %     % scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
+        %     scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)),zeta_all_cell{k1}{k2},'red');
+        %     % 设置 colormap
+        %     colormap('jet')
+        %     colorbar
+        % 
+        %     hold on
+        %     % plot([0, 0.15], [-0.003, -0.003])
+        %     % scatter(ex,epsx,'green')
+        %     scatter(amp_temp* max(mode_deck(:, k1)),zetam-0.3/100,'blue')
+        %     scatter(ex, epsx-0.3/100, 'green')
+        %     str = "Mode : %d, Frequency : %.2f Hz";
+        %     title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+        %     xlim([0.05, 0.12])
+        %     ylim([-0.5, 0.5] / 100)
+        %     xlabel("Amplitude(m)")
+        %     ylabel("Damping ratio")
+        %     legend("use force","use acc","use ee")
+        % end
+        % 
+        % end
 
 
             %%
@@ -592,6 +674,8 @@ if fig_bool
             colorbar
 
             hold on
+            scatter(amp_cell_direct{k1}{k2} * max(mode_deck(:, k1)),zeta_all_cell_direct{k1}{k2},'green');
+            
             % plot([0, 0.15], [-0.003, -0.003])
             % scatter(ex,epsx,'green')
             scatter(amp_temp* max(mode_deck(:, k1)),zetam-0.3/100,'blue')
@@ -601,7 +685,7 @@ if fig_bool
             ylim([-0.5, 0.5] / 100)
             xlabel("Amplitude(m)")
             ylabel("Damping ratio")
-            legend("use force","use acc")
+            legend("use force kalman",'use force direct integral',"use acc")
         end
 
         end

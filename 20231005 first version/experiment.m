@@ -10,14 +10,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clc; clear; close all;
-addpath(genpath("F:\git\ssm_tools\"))
-addpath(genpath("F:\git\Function_shengyi_package\"))
-addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
-addpath(genpath("F:\git\HHT-Tutorial\"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
+computer_name = getenv('COMPUTERNAME');
+if strcmp(computer_name,'SHENGYI_HP')
+    addpath(genpath("F:\git\ssm_tools\"))
+    addpath(genpath("F:\git\Function_shengyi_package\"))
+    addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
+    addpath(genpath("F:\git\HHT-Tutorial\"))
+elseif strcmp(computer_name,'mac')
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
+    addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
+elseif strcmp(computer_name,'asus')
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
+    addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
+else
+    error("Please add path first.")
+end
+
 subStreamNumberDefault = 2132;
 
 run("InitScript.m")
@@ -35,10 +48,22 @@ startDate_global = result.startDate;
 endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
-input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-% input.acc_dir = "F:\test\result";
-% input.wind_dir = "F:\test\result_wind_10min";
+computer_name = getenv('COMPUTERNAME');
+if strcmp(computer_name,'SHENGYI_HP')
+    input.acc_dir = "F:\test\result";
+    input.wind_dir = "F:\test\result_wind_10min";
+elseif strcmp(computer_name,'mac')
+    input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+    input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+elseif strcmp(computer_name,'asus')
+    input.acc_dir = "D:\xihoumendata\acc";
+    input.wind_dir = "D:\xihoumendata\wind";
+elseif strcmp(computer_name,'ketizu')
+    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+    input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+else
+    error("Please add data folder first.")
+end
 
 
 % experiment_names = {'exp1', 'exp2', 'exp3','exp4'}; % 定义实验的名称
@@ -57,8 +82,8 @@ experiment_names = {'exp1', 'exp2'}; % 定义实验的名称
 % };
 
 parameters = {
-    {10^(-3.001242541230301), 1.441514803767596e+04, 0.904969462898074, 10^(-9.901777612793937), 10^(-3.866588296864785)},
     {10 ^ (-2.748806418335396), 4.041540821465747e+04, 1.015685635145482, 10^(-9.901777612793937), 10^(-3.866588296864785)},
+    {10^(-5.001242541230301), 1.441514803767596e+04, 0.904969462898074, 10^(-9.901777612793937), 10^(-3.866588296864785)},
 };
 
 
@@ -115,9 +140,9 @@ for i = 1:length(experiment_names)
 
     % % 运行实验并保存结果
     % if i ==1
-    %     results_experiment.(exp_name) = run_experiment(input, 'showtext', false, 'showplot', false,'caldamp_recalculated_v',true,'shouldCircShift',true);
-    % else
     %     results_experiment.(exp_name) = run_experiment(input, 'showtext', false, 'showplot', false,'caldamp_recalculated_v',true,'shouldCircShift',false);
+    % else
+    %     results_experiment.(exp_name) = run_experiment(input, 'showtext', false, 'showplot', false,'caldamp_recalculated_v',true,'shouldCircShift',true);
     % end
 end
 
@@ -479,6 +504,7 @@ for t1 = 1:length(experiment_names)
     ylabel("-")
     title("Time history comparison of velocity and force")
     grid on;
+    legend("filtered velocity","recalculated velocity","force")
 end
 
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
@@ -520,6 +546,7 @@ for t1 = 1:length(experiment_names)
     title("Time history comparison of filtered velocity")
     grid on;
 end
+legend("\lambda 1","\lambda 2")
     [phaseDiff] = fft_phase_lag(50,v1_collect(1,:),v1_collect(2,:),0.33)
     % [phaseDiff] = fft_phase_lag(50,v1_collect(1,:),v1_collect(3,:),0.33)
     % [phaseDiff] = fft_phase_lag(50,v1_collect(1,:),v1_collect(4,:),0.33)
@@ -566,6 +593,7 @@ for t1 = 1:length(experiment_names)
     
     grid on;
 end
+legend("\lambda 1","\lambda 2")
     [phaseDiff] = fft_phase_lag(50,v2_collect(1,:),v2_collect(2,:),0.33)
     % [phaseDiff] = fft_phase_lag(50,v2_collect(1,:),v2_collect(3,:),0.33)
     % [phaseDiff] = fft_phase_lag(50,v2_collect(1,:),v2_collect(4,:),0.33)

@@ -88,11 +88,36 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         ylabel("Value")
         legend("Kalman Filter","Bandpass")
     end
+
+    if showplot
+        figure
+        plot(t,vel(1,:))
+        hold on
+        plot(t,vel_filtered(1,:))
+        xlabel('Time(s)')
+        ylabel("Velocity")
+        legend("Kalman Filter","Bandpass")
+        [f2, magnitude2] = fft_transform(fs,vel(1,:));
+        % [f2, magnitude2] = fft_transform(fs,Fa_filtered(1,:));
+        [f1, magnitude1] = fft_transform(fs,vel_filtered(1,:));
+        
+        figure
+        plot(f1, magnitude1)
+        hold on
+        plot(f2, magnitude2)
+        % plot(f3, magnitude3)
+        xlim([0, max(Freq) * 1.1])
+        xlabel('Frequency(Hz)')
+        ylabel("Value")
+        legend("Kalman Filter","Bandpass")
+        end
+
     % 找到峰值设定保存频率成分的变量
 
     top_freqs = cell(1, nmodes);
     for k1 = 1:nmodes
-        [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, Fa_filtered(k1, :), 'showplot', showplot);
+        [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, vel_filtered(k1, :), 'showplot', showplot);
+        % [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, Fa_filtered(k1, :), 'showplot', showplot);
         [top_freqs_vel{k1}, ~, ~] = extractSignificantFrequencies(fs, vel_filtered(k1, :),'showplot', showplot);
     end
 

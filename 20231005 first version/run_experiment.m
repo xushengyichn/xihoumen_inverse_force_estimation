@@ -113,7 +113,7 @@ function [results_experiment] = run_experiment(input, varargin)
         % result_Main.p_filt_m=circshift(result_Main.p_filt_m,[0 -1]);
         signal = result_Main.p_filt_m;
         x = 1:length(signal); % 原始x坐标
-        shift_amount = -0.5; % 偏移量
+        shift_amount = -2.4; % 偏移量
         
         % 创建新的x坐标，包括偏移量
         x_new = x - shift_amount; 
