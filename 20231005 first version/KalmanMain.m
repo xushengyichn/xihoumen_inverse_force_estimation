@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
-%LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-17 11:05:15
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\KalmanMain.m
+%LastEditors: xushengyichn xushengyichn@outlook.com
+%LastEditTime: 2023-10-30 10:51:13
+%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/20231005 first version/KalmanMain.m
 %Description: TODO:加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -181,10 +181,12 @@ function [result_Main] = KalmanMain(input,varargin)
     Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',showtext);
     mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc;
     Freq = Result.Freq;
+    MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
        %%
     if 1
-        Freq = 0.328;
+        Freq = 0.328240;
+        KK_eq = MM_eq * (2 * pi * Freq)^2;
         if showtext
             disp("Changing the frequency of the structure to "+num2str(Freq)+"Hz, which is the frequency from the field measurement.");
         end
@@ -192,14 +194,14 @@ function [result_Main] = KalmanMain(input,varargin)
     %%
 
 
-    MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
+    
 
     mode_vec = Result.mode_vec;
     nodeondeck = Result.nodeondeck;
     Mapping_data = Result.Mapping;
     
-    zeta = ones(size(modesel)) * 0.3/100;
-    % zeta = ones(size(modesel)) * 0/100;
+    % zeta = ones(size(modesel)) * 0.3/100;
+    zeta = ones(size(modesel)) * 0.05/100;
     if showtext
         disp("Damping ratio of the structure is set as "+num2str(zeta));
     end

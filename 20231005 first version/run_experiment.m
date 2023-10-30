@@ -99,9 +99,13 @@ function [results_experiment] = run_experiment(input, varargin)
     %% calculate the frequency of the signal
     x_filt_original = result_Main.x_filt_original;
     p_filt_m = result_Main.p_filt_m;
+    h_hat = result_Main.h_hat;
     [~, ~] = fft_transform(50,x_filt_original(1,:), 'showplot', true, 'showtext', true);
     [~, ~] = fft_transform(50,x_filt_original(2,:), 'showplot', true, 'showtext', true);
     [~, ~] = fft_transform(50,p_filt_m, 'showplot', true, 'showtext', true);
+    [~, ~] = fft_transform(50,h_hat(1,:), 'showplot', true, 'showtext', true);
+    [~, ~] = fft_transform(50,h_hat(2,:), 'showplot', true, 'showtext', true);
+    [~, ~] = fft_transform(50,h_hat(3,:), 'showplot', true, 'showtext', true);
 
     
     %% circshift
