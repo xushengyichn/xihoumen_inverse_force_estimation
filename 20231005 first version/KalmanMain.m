@@ -181,6 +181,17 @@ function [result_Main] = KalmanMain(input,varargin)
     Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',showtext);
     mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc;
     Freq = Result.Freq;
+
+       %%
+    if 1
+        Freq = 0.328;
+        if showtext
+            disp("Changing the frequency of the structure to "+num2str(Freq)+"Hz, which is the frequency from the field measurement.");
+        end
+    end
+    %%
+
+
     MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
     mode_vec = Result.mode_vec;

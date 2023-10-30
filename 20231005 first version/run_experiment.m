@@ -95,6 +95,14 @@ function [results_experiment] = run_experiment(input, varargin)
     shouldCircShift = p.Results.shouldCircShift;
 
     [result_Main] = KalmanMain(input, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+
+    %% calculate the frequency of the signal
+    x_filt_original = result_Main.x_filt_original;
+    p_filt_m = result_Main.p_filt_m;
+    [~, ~] = fft_transform(50,x_filt_original(1,:), 'showplot', true, 'showtext', true);
+    [~, ~] = fft_transform(50,x_filt_original(2,:), 'showplot', true, 'showtext', true);
+    [~, ~] = fft_transform(50,p_filt_m, 'showplot', true, 'showtext', true);
+
     
     %% circshift
     if shouldCircShift

@@ -109,7 +109,7 @@ for i = 1:length(experiment_names)
     modesel = 23;
     input.modesel = modesel;
     
-    results_experiment.(exp_name) = run_experiment(input, 'showtext', false, 'showplot', false,'caldamp_recalculated_v',true,'shouldCircShift',false);
+    results_experiment.(exp_name) = run_experiment(input, 'showtext', true, 'showplot', false,'caldamp_recalculated_v',true,'shouldCircShift',false);
 
     % % 运行实验并保存结果
     % if i ==1
