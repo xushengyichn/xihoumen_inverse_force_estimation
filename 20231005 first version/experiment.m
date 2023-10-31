@@ -27,6 +27,11 @@ elseif strcmp(computer_name,'ROG-SHENGYI')
     addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
+elseif strcmp(computer_name,'NTNU08916')
+    addpath(genpath("C:\Users\shengyix\Documents\GitHub\Function_shengyi_package"))
+    addpath(genpath("C:\Users\shengyix\Documents\GitHub\ssm_tools_sy"))
+    addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_inverse_force_estimation\FEM_model"))
+    addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_data_extract"))
 else
     error("Please add path first.")
 end
@@ -61,9 +66,13 @@ elseif strcmp(computer_name,'ROG-SHENGYI')
 elseif strcmp(computer_name,'ketizu')
     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+elseif strcmp(computer_name,'NTNU08916')
+     input.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
+    input.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";
 else
     error("Please add data folder first.")
 end
+
 
 
 % experiment_names = {'exp1', 'exp2', 'exp3','exp4'}; % 定义实验的名称
