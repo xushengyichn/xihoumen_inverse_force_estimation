@@ -144,13 +144,12 @@ function [results_experiment] = run_experiment(input, varargin)
     nmodes = result_Main.nmodes;
     Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23], 'showtext', showtext);
     mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
-    eig_vec = Result.eig_vec;
-    Mapping_data = Result.Mapping;
+    KMmapping = Result.Mapping;
+    nodegap = Result.nodegap;
+    mode_vec = Result.mode_vec;
     loc_acc = [1403];
-    acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
-    acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
-    acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
-    node_shape = mean(eig_vec(acc_matrix_seq));
+    node_shape = FindModeShapewithLocation(loc_acc,node_loc,nodeondeck,KMmapping,nodegap,mode_vec);
+
 
     h_hat = result_Main.h_hat;
     MM = result_Main.MM;
@@ -269,13 +268,13 @@ function [results_experiment] = run_experiment(input, varargin)
     results_experiment.MM = MM;
     results_experiment.CC = CC;
     results_experiment.KK = KK;
-    results_experiment.acc_matrix_seq = acc_matrix_seq;
-    results_experiment.acc_node_list = acc_node_list;
-    results_experiment.acc_node = acc_node;
+    % results_experiment.acc_matrix_seq = acc_matrix_seq;
+    % results_experiment.acc_node_list = acc_node_list;
+    % results_experiment.acc_node = acc_node;
     results_experiment.node_loc = node_loc;
     results_experiment.nodeondeck = nodeondeck;
-    results_experiment.eig_vec = eig_vec;
-    results_experiment.Mapping_data = Mapping_data;
+    % results_experiment.eig_vec = eig_vec;
+    % results_experiment.Mapping_data = Mapping_data;
     results_experiment.loc_acc = loc_acc;
     results_experiment.mode_deck = mode_deck;
     results_experiment.mode_deck_re = mode_deck_re;

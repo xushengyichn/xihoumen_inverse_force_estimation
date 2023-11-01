@@ -217,8 +217,8 @@ function [result_Main] = KalmanMain(input,varargin)
 
     %% 3 传感器布置
     % accelerometer location
-    loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
-    % loc_acc = [1403];
+    % loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
+    loc_acc = [1403];
 
     % loc_acc = [990.5; 1403; 1815.5];
     loc_vel = [];
@@ -228,15 +228,15 @@ function [result_Main] = KalmanMain(input,varargin)
     dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
     fs = 1 / dt;
     acc_names = ["Main span 1/4", "Main span 1/2", "Main span 3/4"];
-    yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
-    yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
-    yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
-    yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
-    yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
-    yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+    % yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
+    % yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
+    % yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
+    % yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
+    % yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
+    % yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
 
-    % yn(1, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
-    % yn(2, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
+    yn(1, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
+    yn(2, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
 
     if shouldFilterYn == true
         [f, magnitude] = fft_transform(fs, yn(3,:));
