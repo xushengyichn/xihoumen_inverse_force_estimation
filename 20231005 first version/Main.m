@@ -12,7 +12,7 @@ elseif strcmp(computer_name,'mac')
     addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
 elseif strcmp(computer_name,'ROG-SHENGYI')
     addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-    addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
+    addpath(genpath("D:\Users\xush6e\Documents\GitHub\ssm_tools"))
     addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
@@ -150,13 +150,13 @@ end
 nmodes = result_Main.nmodes;
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', [23]);
 mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
-eig_vec = Result.eig_vec;
-Mapping_data = Result.Mapping;
+KMmapping = Result.Mapping;
+nodegap = Result.nodegap;
+mode_vec = Result.mode_vec;
 loc_acc = [1403];
-acc_node = FindNodewithLocation(loc_acc, node_loc, nodeondeck);
-acc_node_list = reshape(permute(acc_node, [2 1]), [], 1); % 交错重塑
-acc_matrix_seq = node2matrixseq(acc_node_list, Mapping_data);
-node_shape = mean(eig_vec(acc_matrix_seq));
+node_shape = FindModeShapewithLocation(loc_acc,node_loc,nodeondeck,KMmapping,nodegap,mode_vec);
+
+
 
 h_hat = result_Main.h_hat;
 MM = result_Main.MM;
