@@ -235,8 +235,11 @@ function [result_Main] = KalmanMain(input,varargin)
     % yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
     % yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
 
-    yn(1, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
-    yn(2, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
+    % yn(1, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
+    % yn(2, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
+
+    yn(1, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
+    yn(2, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
 
     if shouldFilterYn == true
         [f, magnitude] = fft_transform(fs, yn(3,:));

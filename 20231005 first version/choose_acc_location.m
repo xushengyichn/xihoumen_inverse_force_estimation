@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-11-01 11:06:32
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-11-01 11:09:14
+%LastEditTime: 2023-11-01 22:08:51
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\choose_acc_location.m
 %Description: 由于加速度传感器的布置位置可能会有一定的偏移，现在希望通过调整加速度计的位置，使不同位置的加速度计满足振型的规律
 %
@@ -80,14 +80,14 @@ weight = acc_node.weights;
 mode_deck_loc_two = [Nodeondeck_Info_left.mode_deck,Nodeondeck_Info_right.mode_deck];
 mode_deck_loc = diag(mode_deck_loc_two *weight);
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(node_loc,mode_deck)
-hold on
-scatter(loc_acc,mode_deck_loc)
+
+mode_deck_norm = mode_deck/mode_deck_loc(2);
+
+mode_deck_loc_norm  = mode_deck_loc/mode_deck_loc(2);
 
 
 
-n=4;
+n=13;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
 endDate_global = result.endDate+hours(1);
@@ -121,3 +121,52 @@ end_time = input.end_time;
 acc_dir = input.acc_dir;
 
 [Acc_Data] = read_acceleration_data(start_time, end_time, acc_dir);
+
+
+f_keep =  0.33 * [0.9, 1.1];
+
+
+timeDifferences = diff(Acc_Data.mergedData.Time); % Returns a duration array
+dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
+fs = 1 / dt;
+Acc_Data.mergedData.AC2_1 = fft_filter(fs, Acc_Data.mergedData.AC2_1, f_keep)';
+Acc_Data.mergedData.AC2_2 = fft_filter(fs, Acc_Data.mergedData.AC2_2, f_keep)'; 
+Acc_Data.mergedData.AC2_3 = fft_filter(fs, Acc_Data.mergedData.AC2_3, f_keep)';
+Acc_Data.mergedData.AC3_1 = fft_filter(fs, Acc_Data.mergedData.AC3_1, f_keep)';
+Acc_Data.mergedData.AC3_2 = fft_filter(fs, Acc_Data.mergedData.AC3_2, f_keep)';
+Acc_Data.mergedData.AC3_3 = fft_filter(fs, Acc_Data.mergedData.AC3_3, f_keep)';
+Acc_Data.mergedData.AC4_1 = fft_filter(fs, Acc_Data.mergedData.AC4_1, f_keep)';
+Acc_Data.mergedData.AC4_2 = fft_filter(fs, Acc_Data.mergedData.AC4_2, f_keep)';
+Acc_Data.mergedData.AC4_3 = fft_filter(fs, Acc_Data.mergedData.AC4_3, f_keep)';
+
+yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
+yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
+yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
+yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
+yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
+yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+
+AC2 =( yn(1, :) +yn(2, :) )/2;
+AC3 =( yn(3, :) +yn(4, :) )/2;
+AC4 =( yn(5, :) +yn(6, :) )/2;
+
+AC2_rms = rms(AC2-mean(AC2));
+AC3_rms = rms(AC3-mean(AC3));
+AC4_rms = rms(AC4-mean(AC4));
+
+AC2_norm = AC2_rms/AC3_rms;
+AC3_norm = AC3_rms/AC3_rms;
+AC4_norm = AC4_rms/AC3_rms;
+
+ACplot = [AC2_norm,AC3_norm,AC4_norm];
+
+
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+plot(node_loc,mode_deck_norm)
+hold on
+scatter(loc_acc,mode_deck_loc_norm)
+scatter(loc_acc,ACplot)
+
+
+
+[f, magnitude] = fft_transform(50,yn(3, :),'showtext',true);
