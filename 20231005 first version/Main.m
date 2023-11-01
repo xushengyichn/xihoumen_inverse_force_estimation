@@ -12,7 +12,7 @@ elseif strcmp(computer_name,'mac')
     addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
 elseif strcmp(computer_name,'ROG-SHENGYI')
     addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-    addpath(genpath("D:\Users\xush6e\Documents\GitHub\ssm_tools"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
     addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
@@ -33,7 +33,7 @@ run("InitScript.m")
 
 %% 0 绘图参数
 fig_bool = ON;
-num_figs_in_row = 4; %每一行显示几个图
+num_figs_in_row = 6; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
 gap_between_images = [0, 0];
