@@ -82,12 +82,14 @@ nodeshape = FindModeShapewithLocation(loc_acc, node_loc, nodeondeck, Mapping_dat
 
 %% fft
 N = length(yn(1, :)); % 信号长度
-yw(1, :) = fftshift(fft(yn(1, :)));
-yw(2, :) = fftshift(fft(yn(2, :)));
-yw(3, :) = fftshift(fft(yn(3, :)));
-yw(4, :) = fftshift(fft(yn(4, :)));
-yw(5, :) = fftshift(fft(yn(5, :)));
-yw(6, :) = fftshift(fft(yn(6, :)));
+% yw(1, :) = fftshift(fft(yn(1, :)));
+% yw(2, :) = fftshift(fft(yn(2, :)));
+% yw(3, :) = fftshift(fft(yn(3, :)));
+% yw(4, :) = fftshift(fft(yn(4, :)));
+% yw(5, :) = fftshift(fft(yn(5, :)));
+% yw(6, :) = fftshift(fft(yn(6, :)));
+
+yw = fftshift(fft(yn, [], 2), 2);
 
 freq = linspace(-0.5, 0.5, length(t)) * Fs;
 omega = 2 * pi * freq;

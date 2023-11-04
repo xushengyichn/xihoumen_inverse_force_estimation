@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
-%LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2023-10-30 10:51:13
-%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/20231005 first version/KalmanMain.m
+%LastEditors: ShengyiXu xushengyichn@outlook.com
+%LastEditTime: 2023-11-03 12:23:41
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\KalmanMain.m
 %Description: TODO:加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -376,6 +376,8 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.x0 = x0;
     result_Main.ns = ns;
     result_Main.n_sensors = n_sensors;
+    result_Main.S_a = S_a;
+    result_Main.phi = phi;
 
 
     if fig_bool == ON

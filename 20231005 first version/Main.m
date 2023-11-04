@@ -231,16 +231,44 @@ wind_dir = input.wind_dir;
 % end
 
 %% direct calculate the aerodynamic force
+% t = result_Main.t;
+% yn = result_Main.yn;
+% disp_dir = acc2dsip(yn(1, :), 50);
+% F_direct = MM .* yn(1, :) / node_shape + CC .* disp_dir.vel / node_shape + KK .* disp_dir.disp / node_shape;
+% F_filter = p_filt_m;
+% [u_direct udot_direct u2dot_direct] = NewmarkInt(t_temp, MM, CC, KK, F_direct, 1/2, 1/4, 0, 0);
+% input.p_filt_m = F_direct;
+% [result_Damping_direct] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
+
+S_a = result_Main.S_a;
+phi = result_Main.phi;
+xi = CC/(2*sqrt(KK*MM));
+Omega = sqrt(KK/MM);
 t = result_Main.t;
+fs = result_Main.fs;
 yn = result_Main.yn;
-disp_dir = acc2dsip(yn(1, :), 50);
-F_direct = MM .* yn(1, :) / node_shape + CC .* disp_dir.vel / node_shape + KK .* disp_dir.disp / node_shape;
+yw = fftshift(fft(yn, [], 2), 2);
+freq = linspace(-0.5, 0.5, length(t)) * fs;
+omega = 2 * pi * freq;
+Hw = 1 ./ (-omega .^ 2 + 2 * 1i * xi * Omega * omega + Omega ^ 2);
+fw = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw);
+fw(abs(freq) < 0.3) = 0;
+ft = ifft(ifftshift(fw));
+ft_real = real(ft);
+F_direct = ft_real;
+input_direct = input;
+input_direct.p_filt_m = F_direct;
+[result_Damping_direct] = Cal_aero_damping_ratio(input_direct, 'showplot', false, 'filterstyle', 'nofilter');
+[u_direct udot_direct u2dot_direct] = NewmarkInt(t_temp, MM, CC, KK, F_direct, 1/2, 1/4, 0, 0);
 F_filter = p_filt_m;
 
-[u_direct udot_direct u2dot_direct] = NewmarkInt(t_temp, MM, CC, KK, F_direct, 1/2, 1/4, 0, 0);
+xdotw = yw./(1i * Omega);
+xtw =  yw./(-Omega .^ 2);
+xdot = ifft(ifftshift(xdotw(1,:)));
+xt = ifft(ifftshift(xtw(1,:)));
+disp_dir.vel = real(xdot);
+disp_dir.disp = real(xt);
 
-input.p_filt_m = F_direct;
-[result_Damping_direct] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
 
 %% compare with damping ratio calculated by acc
 
@@ -523,7 +551,7 @@ if fig_bool
     normalizedData = 2 * ((data - minData) / (maxData - minData)) - 1;
     create_subplot(@plot, total_plots, current_plot, {t, normalizedData}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
 
-    plot(t, normalizedData);
+    % plot(t, normalizedData);
 
     xlabel('Time (s)')
     ylabel('Displacement (m)')
