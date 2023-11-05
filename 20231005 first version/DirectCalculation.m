@@ -79,15 +79,8 @@ nodeshape = FindModeShapewithLocation(loc_acc, node_loc, nodeondeck, Mapping_dat
 % yn(1, :) = u2dot_sim*nodeshape;
 % yn(2, :) = u2dot_sim*nodeshape;
 
-
 %% fft
 N = length(yn(1, :)); % 信号长度
-% yw(1, :) = fftshift(fft(yn(1, :)));
-% yw(2, :) = fftshift(fft(yn(2, :)));
-% yw(3, :) = fftshift(fft(yn(3, :)));
-% yw(4, :) = fftshift(fft(yn(4, :)));
-% yw(5, :) = fftshift(fft(yn(5, :)));
-% yw(6, :) = fftshift(fft(yn(6, :)));
 
 yw = fftshift(fft(yn, [], 2), 2);
 
@@ -102,21 +95,7 @@ Hw = 1 ./ (-omega .^ 2 + 2 * 1i * xi * Omega * omega + Omega ^ 2);
 
 fw = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw);
 
-% for k1 = 1:length(omega)
-%     fw(k1)= pinv(S_a*phi)*yw(:,k1).*1./(-omega(k1).^2.*Hw(k1));
-% end
-
 fw(abs(freq) < 0.3) = 0;
-
-% figure
-% plot(freq, fw)
-% 
-% figure
-% plot(freq, pinv(S_a * phi) * yw)
-
-% figure
-% plot(freq, Hw)
-
 
 ft = ifft(ifftshift(fw));
 ft_real = real(ft);
@@ -135,97 +114,79 @@ if 0
 
 end
 
+%% 误差分析
+delta_Omega = 0.01 * Omega;
+Hw_err = 1 ./ (-omega .^ 2 + 2 * 1i * xi * (Omega + delta_Omega) * omega + (Omega + delta_Omega) ^ 2);
+
+fw_err = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw_err);
+
+fw_err(abs(freq) < 0.3) = 0;
+ft_err = ifft(ifftshift(fw_err));
+
+delta_fw = fw - fw_err;
+
+%% 误差信号在真实信号上的投影
+
+[reconstructed_sig1, projection_same_phase, projection_orthogonal] = reconstruct_signal(ft_err, ft, 'showplot', false);
+
 %% plot
 
-% 定义总子图数量
-total_plots = 7; % 或任何你需要的子图数量
+% 误差分析绘图
+total_plots = 10; % 或任何你需要的子图数量
 current_plot = 1;
-num_figs_in_row=5;
-% 画第一个子图
-create_subplot(@plot, total_plots, current_plot, {t, u2dot_re},'num_figs_in_row',num_figs_in_row);
+num_figs_in_row = [];
 
-legend("use ft_real to reclaculate the acceleration");
-title("reconstructed displacement");
+create_subplot(@plot, total_plots, current_plot, {freq, Hw, freq, Hw_err}, 'num_figs_in_row', num_figs_in_row);
+legend("Hw", "Hw_err");
+title("frequency response function comparision no error vs. with error");
 current_plot = current_plot + 1;
 
-create_subplot(@plot, total_plots, current_plot, {freq, yw(1, :)},'num_figs_in_row',num_figs_in_row);
-legend("yw(1, :)");
-title("frequency domian of y");
+create_subplot(@plot, total_plots, current_plot, {freq, fw, freq, fw_err}, 'num_figs_in_row', num_figs_in_row);
+legend("fw", "fw_err");
+title("force comparision in the frequency domain");
+xlim([0, 0.5])
 current_plot = current_plot + 1;
 
-create_subplot(@plot, total_plots, current_plot, {freq, fw},'num_figs_in_row',num_figs_in_row);
-legend("fw");
-title("frequency domian of f");
+create_subplot(@plot, total_plots, current_plot, {freq, fw}, 'num_figs_in_row', num_figs_in_row);
+title("fw");
+xlim([0, 0.5])
 current_plot = current_plot + 1;
 
-create_subplot(@plot, total_plots, current_plot, {freq, Hw},'num_figs_in_row',num_figs_in_row);
-legend("Hw");
-title("frequency response function");
+create_subplot(@plot, total_plots, current_plot, {freq, fw_err}, 'num_figs_in_row', num_figs_in_row);
+title("fw_err");
+xlim([0, 0.5])
 current_plot = current_plot + 1;
 
-create_subplot(@plot, total_plots, current_plot,  {t, ft},'num_figs_in_row',num_figs_in_row);
-legend("ft");
-title("time domian of f");
+create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row);
+title("ft");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, ft_err}, 'num_figs_in_row', num_figs_in_row);
+title("ft_err");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, ft, t, ft_err}, 'num_figs_in_row', num_figs_in_row);
+title("force comparision in the time domain");
+legend("ft", "ft_err")
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, projection_same_phase, t, ft}, 'num_figs_in_row', num_figs_in_row);
+title("compare the part of ft_err which is in the same phase of ft");
+legend("projection_same_phase", "ft")
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, projection_same_phase}, 'num_figs_in_row', num_figs_in_row);
+title("plot the part of ft_err which is in the same phase of ft");
+legend("projection_same_phase")
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, projection_orthogonal}, 'num_figs_in_row', num_figs_in_row);
+title("plot the part of ft_err which is in the 90 phase of ft");
+legend("projection_orthogonal")
 current_plot = current_plot + 1;
 
 
-create_subplot(@plot, total_plots, current_plot,  {t, ft_real},'num_figs_in_row',num_figs_in_row);
-legend("ft_real");
-title("time domian of ft real part");
+create_subplot(@plot, total_plots, current_plot, {t, reconstructed_sig1}, 'num_figs_in_row', num_figs_in_row);
+title("reconstructed_sig1");
+legend("reconstructed_sig1")
 current_plot = current_plot + 1;
-
-create_subplot(@plot, total_plots, current_plot,{ t, ft_imag},'num_figs_in_row',num_figs_in_row);
-legend("ft_imag");
-title("time domian of ft imagin part");
-current_plot = current_plot + 1;
-
-
-create_subplot(@plot, total_plots, current_plot,{t, ft_real, t, ft_imag},'num_figs_in_row',num_figs_in_row);
-legend("ft_real","ft_imag");
-title("time domian of ft imagin part");
-ylim([-100, 100])
-current_plot = current_plot + 1;
-
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% % plot(t,yn(1,:)/nodeshape)
-% hold on
-% % plot(t,u2dot_direct)
-% plot(t, u2dot_re)
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% plot(freq, yw(1, :))
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% plot(freq, fw)
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% plot(t, ft)
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% plot(t, ft_real)
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% plot(t, ft_imag)
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% plot(t, ft_real)
-% hold on
-% plot(t, ft_imag)
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% % plot(t,f_sim)
-% hold on
-% % plot(t,F_direct)
-% plot(t, ft_real)
-% ylim([-100, 100])
-
-%% 3 Reconstruct displacement from acceleration Ole's method frequency domain integration
-% X_u2dot = fftshift(fft(u2dot_measure));
-% freq = linspace(-0.5, 0.5, length(t)) * fs;
-% X_u = X_u2dot ./ (- (freq * 2 * pi) .^ 2);
-% X_u(abs(freq) > 5) = 0;
-%
-% X_u(abs(freq) < 0.5) = 0;
-% u_int3 = ifft(ifftshift(X_u));
-
