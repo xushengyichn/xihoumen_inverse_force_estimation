@@ -22,6 +22,11 @@ elseif strcmp(computer_name, 'NTNU08916')
     addpath(genpath("C:\Users\shengyix\Documents\GitHub\ssm_tools_sy"))
     addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_inverse_force_estimation\FEM_model"))
     addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_data_extract"))
+elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model"))
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_data_extract"))
 else
     error("Please add path first.")
 end
@@ -72,6 +77,9 @@ elseif strcmp(computer_name, 'ketizu')
 elseif strcmp(computer_name, 'NTNU08916')
     input.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
     input.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";
+elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
+    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+    input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 else
     error("Please add data folder first.")
 end
@@ -132,7 +140,7 @@ disp(dispstr)
 
 mode_deck = result_Main.mode_deck;
 
-if 0
+if 1
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
     % external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
