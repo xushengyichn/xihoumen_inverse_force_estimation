@@ -131,8 +131,8 @@ input.R_value = 10 ^ (-0.024119070121255);
 modesel = 23;
 input.modesel = modesel;
 
-% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
+[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
@@ -344,9 +344,9 @@ amp_cell_direct = result_Damping_direct.amp_cell;
 if fig_bool
 
     % 定义总子图数量
-    total_plots = 20; % 或任何你需要的子图数量
+    total_plots = 16; % 或任何你需要的子图数量
     current_plot = 1;
-    num_figs_in_row = num_figs_in_row;
+    num_figs_in_row = [];
     figWidthFactor = 1.5;
     %% modal force comparison
     create_subplot(@plot, total_plots, current_plot, {t, F_direct, t, F_filter}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);

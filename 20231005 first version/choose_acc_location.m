@@ -87,10 +87,10 @@ mode_deck_loc_norm  = mode_deck_loc/mode_deck_loc(2);
 
 
 
-n=13;
+n=18;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
-endDate_global = result.endDate+hours(1);
+endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
 
@@ -170,3 +170,8 @@ scatter(loc_acc,ACplot)
 
 
 [f, magnitude] = fft_transform(50,yn(3, :),'showtext',true);
+
+[~, index] = max(magnitude);
+peak_freq = f(index);
+
+title("Frequency is "+num2str(peak_freq)+".Date:"+string(startDate_global) )

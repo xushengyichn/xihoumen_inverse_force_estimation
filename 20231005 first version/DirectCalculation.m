@@ -29,16 +29,16 @@ Acc_Data.mergedData.AC4_1 = fft_filter(fs, Acc_Data.mergedData.AC4_1, f_keep)';
 Acc_Data.mergedData.AC4_2 = fft_filter(fs, Acc_Data.mergedData.AC4_2, f_keep)';
 Acc_Data.mergedData.AC4_3 = fft_filter(fs, Acc_Data.mergedData.AC4_3, f_keep)';
 
-% yn(1, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
-% yn(2, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
-%
+yn(1, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
+yn(2, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
 
-yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
-yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
-yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
-yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
-yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
-yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+
+% yn(1, :) = Acc_Data.mergedData.AC2_1 / 1000 * 9.8;
+% yn(2, :) = Acc_Data.mergedData.AC2_3 / 1000 * 9.8;
+% yn(3, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
+% yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
+% yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
+% yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
 
 %%
 
@@ -63,8 +63,8 @@ CC = 2 * MM * Omega * xi;
 N = length(yn(1, :));
 t = (0:N - 1) / Fs;
 
-% loc_acc = [1403];
-loc_acc = [990.5; 1403; 1815.5];
+loc_acc = [1403];
+% loc_acc = [990.5; 1403; 1815.5];
 loc_vel = [];
 loc_dis = [];
 [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi, nodeondeck, Mapping_data);
@@ -116,7 +116,10 @@ end
 
 %% 误差分析
 delta_Omega = 0.01 * Omega;
+delta_xi = 0.002;
 Hw_err = 1 ./ (-omega .^ 2 + 2 * 1i * xi * (Omega + delta_Omega) * omega + (Omega + delta_Omega) ^ 2);
+
+% Hw_err = 1 ./ (-omega .^ 2 + 2 * 1i * (xi+delta_xi) * Omega * omega + Omega ^ 2);
 
 fw_err = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw_err);
 
@@ -139,6 +142,8 @@ num_figs_in_row = [];
 create_subplot(@plot, total_plots, current_plot, {freq, Hw, freq, Hw_err}, 'num_figs_in_row', num_figs_in_row);
 legend("Hw", "Hw_err");
 title("frequency response function comparision no error vs. with error");
+xlim([0.325, 0.33])
+ylim([0,20])
 current_plot = current_plot + 1;
 figure_handle = gcf;
 
@@ -146,18 +151,27 @@ figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {freq, fw, freq, fw_err}, 'num_figs_in_row', num_figs_in_row);
 legend("fw", "fw_err");
 title("force comparision in the frequency domain");
-xlim([0, 0.5])
+xlim([0.325, 0.33])
+ylim([0, 1.5*10e5])
 current_plot = current_plot + 1;
 
 create_subplot(@plot, total_plots, current_plot, {freq, fw}, 'num_figs_in_row', num_figs_in_row);
 title("fw");
-xlim([0, 0.5])
+xlim([0.325, 0.33])
+ylim([0, 1.5*10e5])
 current_plot = current_plot + 1;
 
 figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {freq, fw_err}, 'num_figs_in_row', num_figs_in_row);
 title("fw_err");
-xlim([0, 0.5])
+xlim([0.325, 0.33])
+ylim([0, 1.5*10e5])
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {freq, delta_fw}, 'num_figs_in_row', num_figs_in_row);
+title("ferrw-fw");
+xlim([0.325, 0.33])
+ylim([0, 1.5*10e5])
 current_plot = current_plot + 1;
 
 figure(figure_handle)

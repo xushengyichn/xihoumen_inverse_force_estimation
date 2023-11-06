@@ -77,3 +77,17 @@ figure
 plot(t_cycle_mean_temp, zetam)
 ylim([-0.5,0]/100)
 
+
+%%
+% clc;clear;close all
+% test1 = importdata("test1.mat");
+% test2 = importdata("test2.mat");
+% 
+% t = test1.t;
+% f1 = test1.F_filter;
+% f2 = test2.F_filter;
+% figure
+% plot(t,f1)
+% hold on 
+% plot(t,f2)
+
