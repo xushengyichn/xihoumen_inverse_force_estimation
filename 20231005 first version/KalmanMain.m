@@ -184,7 +184,7 @@ function [result_Main] = KalmanMain(input,varargin)
     MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
     %% Changing the frequency
-    if 0
+    if 1
         Freq = 0.328240;
         % Freq = 0.326;
         KK_eq = MM_eq * (2 * pi * Freq)^2;
