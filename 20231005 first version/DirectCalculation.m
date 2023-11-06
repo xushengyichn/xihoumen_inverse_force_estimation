@@ -127,7 +127,7 @@ delta_fw = fw - fw_err;
 
 %% 误差信号在真实信号上的投影
 
-[reconstructed_sig1, projection_same_phase, projection_orthogonal] = reconstruct_signal(ft_err, ft, 'showplot', false);
+[reconstructed_sig1, projection_same_phase, projection_orthogonal] = reconstruct_signal(ft_err, ft,50, 'showplot', false);
 
 %% plot
 
