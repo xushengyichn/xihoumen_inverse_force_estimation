@@ -118,12 +118,12 @@ end
 % input.R_value = 10 ^ (-1.103266293300500);
 
 
-input.lambda = 10 ^ (-2.748806418335396);
-input.sigma_p = 4.041540821465747e+04;
+input.lambda = 10 ^ (-4.987547778158018);
+input.sigma_p = 1.411528858719115e+04;
 % input.sigma_p = 100;
-input.omega_0_variation = 1.015685635145482;
-input.Q_value = 10 ^ (-1);
-input.R_value = 10 ^ (0);
+input.omega_0_variation = 1.007344423131069;
+input.Q_value = 10 ^ (0.772837115804315);
+input.R_value = 10 ^ (-0.024119070121255);
 
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
 modesel = 23;
@@ -140,7 +140,7 @@ disp(dispstr)
 
 mode_deck = result_Main.mode_deck;
 
-if 1
+if 0
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
     % external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
