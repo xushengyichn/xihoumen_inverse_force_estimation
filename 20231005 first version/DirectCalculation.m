@@ -127,7 +127,7 @@ delta_fw = fw - fw_err;
 
 %% 误差信号在真实信号上的投影
 
-[reconstructed_sig1, projection_same_phase, projection_orthogonal] = reconstruct_signal(ft_err, ft,50, 'showplot', false);
+[reconstructed_ft, projection_same_phase, projection_orthogonal] = reconstruct_signal(ft_err, ft,50, 'showplot', false);
 
 %% plot
 
@@ -140,7 +140,9 @@ create_subplot(@plot, total_plots, current_plot, {freq, Hw, freq, Hw_err}, 'num_
 legend("Hw", "Hw_err");
 title("frequency response function comparision no error vs. with error");
 current_plot = current_plot + 1;
+figure_handle = gcf;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {freq, fw, freq, fw_err}, 'num_figs_in_row', num_figs_in_row);
 legend("fw", "fw_err");
 title("force comparision in the frequency domain");
@@ -152,41 +154,59 @@ title("fw");
 xlim([0, 0.5])
 current_plot = current_plot + 1;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {freq, fw_err}, 'num_figs_in_row', num_figs_in_row);
 title("fw_err");
 xlim([0, 0.5])
 current_plot = current_plot + 1;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row);
 title("ft");
 current_plot = current_plot + 1;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {t, ft_err}, 'num_figs_in_row', num_figs_in_row);
 title("ft_err");
 current_plot = current_plot + 1;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {t, ft, t, ft_err}, 'num_figs_in_row', num_figs_in_row);
 title("force comparision in the time domain");
 legend("ft", "ft_err")
 current_plot = current_plot + 1;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {t, projection_same_phase, t, ft}, 'num_figs_in_row', num_figs_in_row);
 title("compare the part of ft_err which is in the same phase of ft");
 legend("projection_same_phase", "ft")
 current_plot = current_plot + 1;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {t, projection_same_phase}, 'num_figs_in_row', num_figs_in_row);
 title("plot the part of ft_err which is in the same phase of ft");
 legend("projection_same_phase")
 current_plot = current_plot + 1;
 
+figure(figure_handle)
 create_subplot(@plot, total_plots, current_plot, {t, projection_orthogonal}, 'num_figs_in_row', num_figs_in_row);
 title("plot the part of ft_err which is in the 90 phase of ft");
 legend("projection_orthogonal")
 current_plot = current_plot + 1;
 
+create_subplot(@plot, total_plots, current_plot, {t, reconstructed_ft,t,ft_err}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
+title("reconstructed_ft",'ft_err');
+legend("comparison of the reconstructed ft and the ft with error")
 
-create_subplot(@plot, total_plots, current_plot, {t, reconstructed_sig1}, 'num_figs_in_row', num_figs_in_row);
-title("reconstructed_sig1");
-legend("reconstructed_sig1")
+figure(figure_handle)
+create_subplot(@plot, total_plots, current_plot, {t, reconstructed_ft,t,ft_err}, 'num_figs_in_row', num_figs_in_row);
+title("reconstructed_ft",'ft_err');
+legend("comparison of the reconstructed ft and the ft with error")
 current_plot = current_plot + 1;
+
+
+
+create_subplot(@plot, total_plots, current_plot, {t, projection_same_phase, t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
+title("compare the part of ft_err which is in the same phase of ft");
+legend("projection_same_phase", "ft")
+
