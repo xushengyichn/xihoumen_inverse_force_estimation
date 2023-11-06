@@ -102,19 +102,27 @@ end
 % input.Q_value = 10 ^ (-9.901777612793937);
 % input.R_value = 10 ^ (-3.866588296864785);
 
+% input.lambda = 10 ^ (-2.748806418335396);
+% input.sigma_p = 4.041540821465747e+04;
+% % input.sigma_p = 100;
+% input.omega_0_variation = 1.015685635145482;
+% input.Q_value = 10 ^ (-1.005545623474248);
+% input.R_value = 10 ^ (-1.103266293300500);
+
+
 input.lambda = 10 ^ (-2.748806418335396);
 input.sigma_p = 4.041540821465747e+04;
 % input.sigma_p = 100;
 input.omega_0_variation = 1.015685635145482;
-input.Q_value = 10 ^ (-1.005545623474248);
-input.R_value = 10 ^ (-1.103266293300500);
+input.Q_value = 10 ^ (-1);
+input.R_value = 10 ^ (0);
 
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
 modesel = 23;
 input.modesel = modesel;
 
-[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
+% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
@@ -131,7 +139,7 @@ if 0
     external_params.modesel = [23];
     % 定义参数的范围
     lb = [-5, 10, 0.9, -10, -10]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [-1, 1e5, 1.1, -1, -1]; % 这里的值也是假设的
+    ub = [-1, 1e5, 1.1, 1, 1]; % 这里的值也是假设的
 
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
@@ -252,7 +260,8 @@ freq = linspace(-0.5, 0.5, length(t)) * fs;
 omega = 2 * pi * freq;
 Hw = 1 ./ (-omega .^ 2 + 2 * 1i * xi * Omega * omega + Omega ^ 2);
 fw = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw);
-fw(abs(freq) < 0.3) = 0;
+fw(abs(freq) < 0.01) = 0;
+% fw(abs(freq) < 0.3) = 0;
 ft = ifft(ifftshift(fw));
 ft_real = real(ft);
 F_direct = ft_real;
@@ -331,54 +340,49 @@ if fig_bool
     figWidthFactor = 1.5;
     %% modal force comparison
     create_subplot(@plot, total_plots, current_plot, {t, F_direct, t, F_filter}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
-    legend("direct", "filter")
+    legend("Force from direct integration", "Force from Kalman Filter")
     title("modal force comparison");
     current_plot = current_plot + 1;
 
     %% reconstructed data comparison (direct integral and kalman filter)
     create_subplot(@plot, total_plots, current_plot, {t, u_direct, t, u, t, h_hat(5, :) / node_shape}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
-    legend("direct integral reconstruct", "filter reconstruct", 'filtered')
+    legend("direct integral reconstruct", "Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed displacement")
     current_plot = current_plot + 1;
 
     create_subplot(@plot, total_plots, current_plot, {t, udot_direct, t, udot, t, h_hat(3, :) / node_shape}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
-    legend("direct integral reconstruct", "filter reconstruct", 'filtered')
+    legend("direct integral reconstruct", "Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed velocity")
     current_plot = current_plot + 1;
 
     create_subplot(@plot, total_plots, current_plot, {t, u2dot_direct, t, u2dot, t, h_hat(1, :) / node_shape}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
-    legend("direct integral reconstruct", "filter reconstruct", 'filtered')
+    legend("direct integral reconstruct", "Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed acceleration")
     current_plot = current_plot + 1;
 
-    create_subplot(@plot, total_plots, current_plot, {t, u2dot_direct, t, u2dot, t, h_hat(1, :) / node_shape}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
-    legend("direct integral reconstruct", "filter reconstruct", 'filtered')
-    title("reconstructed acceleration")
-    current_plot = current_plot + 1;
-
-    %% filtered and recalcuated displacement
-    create_subplot(@plot, total_plots, current_plot, {t_temp, x_filt_original(1, :), t_temp, u}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
+    %% kalman filter and recalcuated displacement
+    create_subplot(@plot, total_plots, current_plot, {t, x_filt_original(1, :), t, u}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
     legend("filtered", "recalculate")
-    title("u")
+    title("u using the kalman filter vs reconstructed by the force from Kalman filter")
     current_plot = current_plot + 1;
 
     %% filtered and recalcuated velocity
-    create_subplot(@plot, total_plots, current_plot, {t_temp, x_filt_original(2, :), t_temp, udot}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, x_filt_original(2, :), t, udot}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
     legend("filtered", "recalculate")
-    title("udot")
+    title("udot using the kalman filter vs reconstructed by the force from Kalman filter")
     current_plot = current_plot + 1;
 
     %% filtered and recalcuated acceleration
-    create_subplot(@plot, total_plots, current_plot, {t_temp, h_hat(1, :) / node_shape, t_temp, u2dot}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, h_hat(1, :) / node_shape, t, u2dot}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
     legend("filtered", "recalculate")
-    title("u2dot")
+    title("u2dot using the kalman filter vs reconstructed by the force from Kalman filter")
     current_plot = current_plot + 1;
 
     %% filtered force
-    create_subplot(@plot, total_plots, current_plot, {t_temp, p_filt_m}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
-    legend("filtered")
-    title("filtered viv force")
-    current_plot = current_plot + 1;
+    % create_subplot(@plot, total_plots, current_plot, {t, p_filt_m}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
+    % legend("filtered")
+    % title("filtered viv force")
+    % current_plot = current_plot + 1;
 
     %% wind speed during the period
     beta_deg_mean_UA5 = result_wind.resultsTable_UA5.beta_deg_mean;
@@ -405,20 +409,17 @@ if fig_bool
     end
 
     create_subplot(@scatter, total_plots, current_plot, {result_wind.resultsTable_UA6.Time_Start, U_sel}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
-    legend("filtered")
-    title("filtered viv force")
-    current_plot = current_plot + 1;
-
     xlabel('Time (s)')
     ylabel('Wind speed (m/s)')
     title("Wind speed vs. Time")
+    current_plot = current_plot + 1;
 
     %% measured, filtered and recalcuated acceleration
     create_subplot(@plot, total_plots, current_plot, {t, yn(1, :), t, h_hat(1, :), t, yn_reconstruct(1, :)}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor);
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     title("Acceleration vs. Time")
-    legend("measure", "filtered", "reconstruct")
+    legend("measure", "kalman filter", "reconstruct using force from kalman filter")
     current_plot = current_plot + 1;
 
     %% measured(direct intergal), filtered displacement
@@ -426,7 +427,7 @@ if fig_bool
     xlabel('Time (s)')
     ylabel('Displacement (m)')
     title("Displacement vs. Time")
-    legend("direct", "filtered")
+    legend("direct integration", "kalman filter")
     current_plot = current_plot + 1;
 
     %% instant frequency of the filtered acceleration
