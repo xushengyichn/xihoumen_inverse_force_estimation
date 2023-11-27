@@ -4,7 +4,7 @@
         L_c_array = zeros(2, 2, np);
         H_c_array = zeros(1, 2, np);
         sigma_w = zeros(np, 1);
-
+        
         for k1 = 1:np
             [F_c_array(:, :, k1), L_c_array(:, :, k1), H_c_array(:, :, k1), sigma_w(k1)] = ssmod_quasiperiod(lambdas(k1), sigma_ps(k1), omega_0(k1));
         end

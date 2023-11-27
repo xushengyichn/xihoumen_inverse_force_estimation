@@ -128,7 +128,8 @@ input.R_value = 10 ^ (-0.024119070121255);
 
 
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-modesel = 23;
+modesel= [2,23];
+% modesel = 23;
 input.modesel = modesel;
 
 [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
@@ -179,7 +180,9 @@ t_temp = result_Main.t;
 t_temp = (datenum(t_temp) - datenum('1970-01-01 00:00:00')) * 86400; % Convert to seconds since epocht = result_Main.t;
 t_temp = t_temp - t_temp(1); % Subtract the first element of t from all elements of t
 p_filt_m = result_Main.p_filt_m;
-[u udot u2dot] = NewmarkInt(t_temp, MM, CC, KK, p_filt_m, 1/2, 1/4, 0, 0);
+u0 = zeros(length(modesel),1);
+udot0 = zeros(length(modesel),1);
+[u udot u2dot] = NewmarkInt(t_temp, MM, CC, KK, p_filt_m, 1/2, 1/4, u0, udot0);
 
 input.u = u;
 input.udot = udot;
@@ -258,38 +261,42 @@ wind_dir = input.wind_dir;
 % input.p_filt_m = F_direct;
 % [result_Damping_direct] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
 
-S_a = result_Main.S_a;
-phi = result_Main.phi;
-xi = CC/(2*sqrt(KK*MM));
-Omega = sqrt(KK/MM);
-t = result_Main.t;
-fs = result_Main.fs;
-yn = result_Main.yn;
-yw = fftshift(fft(yn, [], 2), 2);
-freq = linspace(-0.5, 0.5, length(t)) * fs;
-omega = 2 * pi * freq;
-Hw = 1 ./ (-omega .^ 2 + 2 * 1i * xi * Omega * omega + Omega ^ 2);
-fw = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw);
-fw(abs(freq) < 0.01) = 0;
-% fw(abs(freq) < 0.3) = 0;
-ft = ifft(ifftshift(fw));
-ft_real = real(ft);
-F_direct = ft_real;
-input_direct = input;
-input_direct.p_filt_m = F_direct;
-[result_Damping_direct] = Cal_aero_damping_ratio(input_direct, 'showplot', false, 'filterstyle', 'nofilter');
-[u_direct udot_direct u2dot_direct] = NewmarkInt(t_temp, MM, CC, KK, F_direct, 1/2, 1/4, 0, 0);
-F_filter = p_filt_m;
+if length(modesel)==1 %只在但模态时可以使用这种方法
+    S_a = result_Main.S_a;
+    phi = result_Main.phi;
+    xi = CC/(2*sqrt(KK*MM));
+    Omega = sqrt(KK/MM);
+    t = result_Main.t;
+    fs = result_Main.fs;
+    yn = result_Main.yn;
+    yw = fftshift(fft(yn, [], 2), 2);
+    freq = linspace(-0.5, 0.5, length(t)) * fs;
+    omega = 2 * pi * freq;
+    Hw = 1 ./ (-omega .^ 2 + 2 * 1i * xi * Omega * omega + Omega ^ 2);
+    fw = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw);
+    fw(abs(freq) < 0.01) = 0;
+    % fw(abs(freq) < 0.3) = 0;
+    ft = ifft(ifftshift(fw));
+    ft_real = real(ft);
+    F_direct = ft_real;
+    input_direct = input;
+    input_direct.p_filt_m = F_direct;
+    [result_Damping_direct] = Cal_aero_damping_ratio(input_direct, 'showplot', false, 'filterstyle', 'nofilter');
+    [u_direct udot_direct u2dot_direct] = NewmarkInt(t_temp, MM, CC, KK, F_direct, 1/2, 1/4, 0, 0);
+    F_filter = p_filt_m;
+    
+    xdotw = yw./(1i * Omega);
+    xtw =  yw./(-Omega .^ 2);
+    xdot = ifft(ifftshift(xdotw(1,:)));
+    xt = ifft(ifftshift(xtw(1,:)));
+    disp_dir.vel = real(xdot);
+    disp_dir.disp = real(xt);
 
-xdotw = yw./(1i * Omega);
-xtw =  yw./(-Omega .^ 2);
-xdot = ifft(ifftshift(xdotw(1,:)));
-xt = ifft(ifftshift(xtw(1,:)));
-disp_dir.vel = real(xdot);
-disp_dir.disp = real(xt);
-
+end
 
 %% compare with damping ratio calculated by acc
+
+if length(modesel)==1 
 
 amp_cell = result_Damping.amp_cell;
 t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
@@ -328,7 +335,7 @@ end
 
 x_filt_original = result_Main.x_filt_original;
 
-t = result_Main.t;
+
 yn = result_Main.yn;
 h_hat = result_Main.h_hat;
 nmodes = result_Main.nmodes;
@@ -340,6 +347,10 @@ yn_reconstruct = result_Main.yn_reconstruct;
 
 zeta_all_cell_direct = result_Damping_direct.zeta_all_cell;
 amp_cell_direct = result_Damping_direct.amp_cell;
+end
+
+t = result_Main.t;
+
 %% plot
 if fig_bool
 

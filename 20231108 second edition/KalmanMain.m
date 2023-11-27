@@ -184,7 +184,7 @@ function [result_Main] = KalmanMain(input,varargin)
     MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
     %% Changing the frequency
-    if 1
+    if 0
         Freq = 0.328240;
         % Freq = 0.326;
         KK_eq = MM_eq * (2 * pi * Freq)^2;
@@ -276,7 +276,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
     lambdas_m = [lambda] * ones(1, np_m);
     sigma_ps_m = [sigma_p] * ones(1, np_m);
-    omega_0 = 2 * pi * Freq*omega_0_variation;
+    omega_0 = 2 * pi * Freq*omega_0_variation* ones(1, np_m);
 
 
     [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
