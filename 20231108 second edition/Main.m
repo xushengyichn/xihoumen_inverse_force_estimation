@@ -231,12 +231,13 @@ if fig_bool
     current_plot = 1;
     num_figs_in_row = [];
     figWidthFactor = 1.5;
+    figPosition = [1080*2.5,100];
 
 
     
     %% modal force
     for k1 = 1:nmodes
-        create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+        create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition);
         legend("Force from direct integration")
         title("modal force for "+"mode"+modesel(k1));
         current_plot = current_plot + 1;
@@ -257,27 +258,28 @@ if fig_bool
     hold on
     create_subplot(@scatter, total_plots, current_plot, {loc_acc,  loc_acc_shape(:,VIV_mode_seq) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
     create_subplot(@scatter, total_plots, current_plot, {loc_acc,  yn_rms_scaled([1,3,5],:) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    legend("modal shape","modal shape at the sensors location","scaled rms value of the sensors")
     title("Mode shape and the locaiton of the sensors")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
     ylabel('Dimensionless displacement')
 
     %% reconstructed data comparison (reconstructed vs kalman filter vitural sensoring)
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u, t, h_hat(5, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u, t, h_hat(15, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
     legend("Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed displacement vs kalman filter vitural sensoring")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
     ylabel('Displacement (m)')
 
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape*udot, t, h_hat(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, node_shape*udot, t, h_hat(9, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
     legend("Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed velocity vs kalman filter vitural sensoring")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
     ylabel('Velocity (m/s)')
     
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u2dot, t, h_hat(1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u2dot, t, h_hat(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
     legend("Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed acceleration vs kalman filter vitural sensoring")
     current_plot = current_plot + 1;
