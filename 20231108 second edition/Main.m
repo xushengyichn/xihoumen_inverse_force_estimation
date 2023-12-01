@@ -243,16 +243,24 @@ if fig_bool
         ylim([-100,100])
     end
 
-    %% installation of the sensors
+    %% installation of the sensors and the rms of the sensors
+    % 三个传感器位置的振型大小
     loc_acc = result_Main.loc_acc;
     loc_acc_shape = FindModeShapewithLocation(loc_acc, node_loc, nodeondeck, KMmapping, nodegap, mode_vec);
+    max_loc_acc_shape = max(abs(loc_acc_shape(:,VIV_mode_seq)));
+    % 三个传感器位置的振动rms大小，并基于振型大小进行缩放
+    yn_rms = rms(yn, 2);
+    max_acc = max(yn_rms);
+    scale_factor = max_acc / max_loc_acc_shape;
+    yn_rms_scaled = yn_rms / scale_factor;
     create_subplot(@plot, total_plots, current_plot, {node_loc, mode_deck(:,VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
     hold on
     create_subplot(@scatter, total_plots, current_plot, {loc_acc,  loc_acc_shape(:,VIV_mode_seq) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@scatter, total_plots, current_plot, {loc_acc,  yn_rms_scaled([1,3,5],:) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
     title("Mode shape and the locaiton of the sensors")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
-    ylabel('Displacement (m)')
+    ylabel('Dimensionless displacement')
 
     %% reconstructed data comparison (reconstructed vs kalman filter vitural sensoring)
     create_subplot(@plot, total_plots, current_plot, {t, node_shape*u, t, h_hat(5, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
