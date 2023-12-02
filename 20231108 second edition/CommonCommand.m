@@ -1,10 +1,31 @@
-computer_name = getenv('COMPUTERNAME');
+% 获取操作系统类型
+[osType, ~] = computer;
+switch osType
+    case 'PCWIN' % 对于 Windows 32位系统
+        % 执行 Windows 专用命令
+        computer_name = getenv('COMPUTERNAME');
+    case 'PCWIN64' % 对于 Windows 64位系统
+        % 执行 Windows 专用命令
+        computer_name = getenv('COMPUTERNAME');
+    case 'GLNXA64' % 对于 Linux 系统
+        % 执行 Linux 专用命令
+        [status, result] = system('hostname');
+    case 'MACA64' % 对于 Mac 系统
+        % 执行 Mac 专用命令
+        computer_name = getenv('LOGNAME');% mac获取登录名
+    otherwise
+        % 对于其他或未知系统
+        disp('Unknown operating system');
+        result = '';
+end
+
+
 if strcmp(computer_name,'SHENGYI_HP')
     addpath(genpath("F:\git\ssm_tools\"))
     addpath(genpath("F:\git\Function_shengyi_package\"))
     addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
     addpath(genpath("F:\git\HHT-Tutorial\"))
-elseif strcmp(computer_name,'mac')
+elseif strcmp(computer_name,'xushengyi')
     addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
     addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
     addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
@@ -38,11 +59,29 @@ gap_between_images = [0, 0];
 figureIdx = 0;
 
 
-computer_name = getenv('COMPUTERNAME');
+[osType, ~] = computer;
+switch osType
+    case 'PCWIN' % 对于 Windows 32位系统
+        % 执行 Windows 专用命令
+        computer_name = getenv('COMPUTERNAME');
+    case 'PCWIN64' % 对于 Windows 64位系统
+        % 执行 Windows 专用命令
+        computer_name = getenv('COMPUTERNAME');
+    case 'GLNXA64' % 对于 Linux 系统
+        % 执行 Linux 专用命令
+        [status, result] = system('hostname');
+    case 'MACA64' % 对于 Mac 系统
+        % 执行 Mac 专用命令
+        computer_name = getenv('LOGNAME');% mac获取登录名
+    otherwise
+        % 对于其他或未知系统
+        disp('Unknown operating system');
+        result = '';
+end
 if strcmp(computer_name,'SHENGYI_HP')
     input.acc_dir = "F:\test\result";
     input.wind_dir = "F:\test\result_wind_10min";
-elseif strcmp(computer_name,'mac')
+elseif strcmp(computer_name,'xushengyi')
     input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
     input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 elseif strcmp(computer_name,'ROG-SHENGYI')
