@@ -125,7 +125,7 @@ input.Q_value = 10 ^ (0.772837115804315);
 input.R_value = 10 ^ (-0.024119070121255);
 
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-modesel = [2, 23];
+modesel = [2,3,23];
 VIV_mode_seq = find(modesel ==23);
 % modesel = 23;
 input.modesel = modesel;
