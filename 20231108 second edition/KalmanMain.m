@@ -4,7 +4,7 @@
 %LastEditors: ShengyiXu xushengyichn@outlook.com
 %LastEditTime: 2023-11-03 12:23:41
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\KalmanMain.m
-%Description: TODO:加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
+%Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
