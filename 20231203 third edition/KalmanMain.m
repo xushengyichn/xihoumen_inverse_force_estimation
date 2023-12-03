@@ -2,8 +2,8 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2023-12-03 11:45:04
-%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/20231108 second edition/KalmanMain.m
+%LastEditTime: 2023-12-03 23:07:00
+%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/20231203 third edition/KalmanMain.m
 %Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -54,8 +54,16 @@ function [result_Main] = KalmanMain(input,varargin)
         input.Q_value =10 ^ (-8);
         input.R_value = 10 ^ (-6);
         
+        input.lambda_VIV = 1e-1;
+        input.sigma_p_VIV = 10000;
+        input.omega_0_variation_VIV =1;
+
+        input.lambda_matern = 1e-1;
+        input.sigma_p_matern = 10000;
+
         % input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
         input.modesel= [2,23];
+        input.VIV_mode_seq = find(input.modesel ==23);
         % KalmanMain(input,'showtext', false,'showplot',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
         KalmanMain(input,'showtext', false,'showplot',false)
         return;
@@ -89,8 +97,15 @@ function [result_Main] = KalmanMain(input,varargin)
     
     acc_dir = input.acc_dir;
 
+    lambda_VIV = input.lambda_VIV;
+    sigma_p_VIV = input.sigma_p_VIV;
+    omega_0_variation_VIV = input.omega_0_variation_VIV;
+    
+    lambda_matern = input.lambda_matern;
+    sigma_p_matern = input.sigma_p_matern;
 
     modesel= input.modesel;
+    VIV_mode_seq = input.VIV_mode_seq;
 
     lambda = input.lambda;
     sigma_p = input.sigma_p;
@@ -284,13 +299,42 @@ function [result_Main] = KalmanMain(input,varargin)
     J_c_m = [S_a * phi];
     B_d_m = A_c \ (A_d - eye(size(A_d))) * B_c_m;
     J_d_m = J_c_m;
+    % TODO: Here the B_c_m, J_c_m, B_d_m, J_d_m are equal to B_c, J_c, B_d, J_d, which is can be revised in the future
 
-    lambdas_m = [lambda] * ones(1, np_m);
-    sigma_ps_m = [sigma_p] * ones(1, np_m);
-    omega_0 = 2 * pi * Freq*omega_0_variation* ones(1, np_m);
+    % set the kernal parameters for the latent force model
+    % quasiperiodic kernel
+    for k1 = 1:np_m
+        if k1 == VIV_mode_seq
+            lambda_quasi_periodic(k1) = lambda_VIV;
+            sigma_ps_quasi_periodic(k1) = sigma_p_VIV;
+            omega_0_quasi_periodic(k1) = 2 * pi * Freq(VIV_mode_seq)*omega_0_variation;
+        else
+            lambda_quasi_periodic(k1) = 0;
+            sigma_ps_quasi_periodic(k1) = 0;
+            omega_0_quasi_periodic(k1) = 0;
+        end
+    end
 
+    % matern kernel
+    for k1 = 1:np_m
+        if k1 == VIV_mode_seq
+            lambda_matern(k1) = 0;
+            sigma_ps_matern(k1) = 0;
+        else
+            lambda_matern(k1) = lambda_matern;
+            sigma_ps_matern(k1) = sigma_p_matern;
+        end
+    end
 
-    [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambdas_m, sigma_ps_m, omega_0, np_m);
+    
+    % lambdas_m = [lambda] * ones(1, np_m);
+    % sigma_ps_m = [sigma_p] * ones(1, np_m);
+    % omega_0 = 2 * pi * Freq*omega_0_variation* ones(1, np_m);
+    
+
+    [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambda_quasi_periodic, sigma_ps_quasi_periodic, omega_0_quasi_periodic, np_m,VIV_mode_seq);
+    
+    [E_c_m,K_c_m,T_c_m,sigma_z_m12] = ssmod_matern_coninue(lambda_matern, sigma_ps_matern, np_m,VIV_mode_seq);
 
     [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
     A_a_m = Fad_m;
