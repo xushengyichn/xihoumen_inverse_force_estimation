@@ -59,7 +59,7 @@ CC = 2 * MM * Omega * xi;
 N = length(yn(1, :));
 t = (0:N - 1) / Fs;
 
-loc_acc = [989; 1403; 1783];
+loc_acc = [987.5; 1403; 1782.5];
 
 loc_vel = [];
 loc_dis = [];
@@ -88,7 +88,7 @@ ft_imag = imag(ft);
 
 
 
-total_plots = 10; % 或任何你需要的子图数量
+total_plots = 2; % 或任何你需要的子图数量
 current_plot = 1;
 num_figs_in_row = [];
 
@@ -98,4 +98,10 @@ title("ft");
 current_plot = current_plot + 1;
 
 
+load test.mat
+create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row);
+hold on
+create_subplot(@plot, total_plots, current_plot, {t, F_filter(3,:)}, 'num_figs_in_row', num_figs_in_row);
+legend("direct integration","Kalman Filter")
+current_plot = current_plot + 1;
 

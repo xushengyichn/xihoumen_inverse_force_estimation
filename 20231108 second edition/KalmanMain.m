@@ -188,9 +188,9 @@ function [result_Main] = KalmanMain(input,varargin)
 
     %% Changing the frequency
     if 0
-        Freq = 0.328240;
+        Freq(3) = 0.328240;
         % Freq = 0.326;
-        KK_eq = MM_eq * (2 * pi * Freq)^2;
+        KK_eq(3) = MM_eq(3) * (2 * pi * Freq(3)).^2;
         if showtext
             disp("Changing the frequency of the structure to "+num2str(Freq)+"Hz, which is the frequency from the field measurement.");
         end
@@ -223,7 +223,7 @@ function [result_Main] = KalmanMain(input,varargin)
     % loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
     % loc_acc = [1403];
 
-    loc_acc = [989; 1403; 1783];
+    loc_acc = [987.5; 1403; 1782.5];
     % loc_acc = [990.5; 1403; 1815.5];
     loc_vel = [];
     loc_dis = [];

@@ -126,7 +126,7 @@ input.Q_value = 10 ^ (0.772837115804315);
 input.R_value = 10 ^ (-0.024119070121255);
 
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-modesel = [2,3,23];
+modesel = [15,21,23];
 VIV_mode_seq = find(modesel ==23);
 % modesel = 23;
 input.modesel = modesel;
@@ -232,20 +232,21 @@ if fig_bool
     current_plot = 1;
     num_figs_in_row = [];
     figWidthFactor = 1.5;
-    figPosition = [1080*2.5,100];
-    figPosition = [100,100];
+    figPosition = [1080*2,100];
+    newfigure_bool =false;
+    % figPosition = [100,100];
 
 
     
     %% modal force
     for k1 = 1:nmodes
-        create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition);
-        legend("Force from direct integration")
+        create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool,'figPosition',figPosition);
+        % legend("Force from direct integration")
         title("modal force for "+"mode"+modesel(k1));
         current_plot = current_plot + 1;
         ylim([-100,100])
     end
-
+    save test.mat t F_filter
     %% installation of the sensors and the rms of the sensors
     % 三个传感器位置的振型大小
     loc_acc = result_Main.loc_acc;
@@ -256,32 +257,32 @@ if fig_bool
     max_acc = max(yn_rms);
     scale_factor = max_acc / max_loc_acc_shape;
     yn_rms_scaled = yn_rms / scale_factor;
-    create_subplot(@plot, total_plots, current_plot, {node_loc, mode_deck(:,VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {node_loc, mode_deck(:,VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     hold on
-    create_subplot(@scatter, total_plots, current_plot, {loc_acc,  loc_acc_shape(:,VIV_mode_seq) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
-    create_subplot(@scatter, total_plots, current_plot, {loc_acc,  yn_rms_scaled([1,3,5],:) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@scatter, total_plots, current_plot, {loc_acc,  loc_acc_shape(:,VIV_mode_seq) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
+    create_subplot(@scatter, total_plots, current_plot, {loc_acc,  yn_rms_scaled([1,3,5],:) }, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     legend("modal shape","modal shape at the sensors location","scaled rms value of the sensors")
     title("Mode shape and the locaiton of the sensors")
     current_plot = current_plot + 1;
-    xlabel('Time (s)')
+    xlabel('Locaiton (m)')
     ylabel('Dimensionless displacement')
 
     %% reconstructed data comparison (reconstructed vs kalman filter vitural sensoring)
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u, t, h_hat(15, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u, t, h_hat(15, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     legend("Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed displacement vs kalman filter vitural sensoring")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
     ylabel('Displacement (m)')
 
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape*udot, t, h_hat(9, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, node_shape*udot, t, h_hat(9, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     legend("Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed velocity vs kalman filter vitural sensoring")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
     ylabel('Velocity (m/s)')
     
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u2dot, t, h_hat(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, node_shape*u2dot, t, h_hat(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     legend("Kalman filter reconstruct", 'filtered from kalman filter')
     title("reconstructed acceleration vs kalman filter vitural sensoring")
     current_plot = current_plot + 1;
@@ -312,28 +313,28 @@ if fig_bool
 
     end
 
-    create_subplot(@scatter, total_plots, current_plot, {result_wind.resultsTable_UA6.Time_Start, U_sel}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@scatter, total_plots, current_plot, {result_wind.resultsTable_UA6.Time_Start, U_sel}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     xlabel('Time (s)')
     ylabel('Wind speed (m/s)')
     title("Wind speed vs. Time")
     current_plot = current_plot + 1;
 
     %% measured, filtered and recalcuated acceleration
-    create_subplot(@plot, total_plots, current_plot, {t, yn(1, :), t, h_hat(1, :), t, yn_reconstruct(1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, yn(1, :), t, h_hat(1, :), t, yn_reconstruct(1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     title("Acceleration vs. Time")
     legend("measure", "kalman filter", "reconstruct using force from kalman filter")
     current_plot = current_plot + 1;
 
-    create_subplot(@plot, total_plots, current_plot, {t, yn(3, :), t, h_hat(3, :), t, yn_reconstruct(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, yn(3, :), t, h_hat(3, :), t, yn_reconstruct(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     title("Acceleration vs. Time")
     legend("measure", "kalman filter", "reconstruct using force from kalman filter")
     current_plot = current_plot + 1;
 
-    create_subplot(@plot, total_plots, current_plot, {t, yn(5, :), t, h_hat(5, :), t, yn_reconstruct(5, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, yn(5, :), t, h_hat(5, :), t, yn_reconstruct(5, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     title("Acceleration vs. Time")
@@ -355,7 +356,7 @@ if fig_bool
     
                 % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
     
-                create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+                create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
                 current_plot = current_plot + 1;
                 % scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
                 % 设置 colormap
@@ -377,7 +378,9 @@ if fig_bool
 
 end
 
-
+newfigure_bool =false;
+total_plots = 2; % 或任何你需要的子图数量
+current_plot = 2;
 if 0
 
 
@@ -389,7 +392,7 @@ if 0
 
     %% instant frequency of the filtered acceleration
     [p, fd, td] = pspectrum(h_hat(1, :), t, 'spectrogram', 'FrequencyResolution', 0.005);
-    create_subplot(@instfreq, total_plots, current_plot, {p, fd, td}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@instfreq, total_plots, current_plot, {p, fd, td}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
     ylim([0.1, 0.5])
     current_plot = current_plot + 1;
     %% amplitude dependent damping ratio
@@ -408,7 +411,7 @@ if 0
 
             % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
-            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
             current_plot = current_plot + 1;
             % scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
             % 设置 colormap
@@ -443,7 +446,7 @@ if 0
 
             % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
-            create_subplot(@scatter, total_plots, current_plot, {datetimeArray, amp_cell{k1}{k2} * max(mode_deck(:, k1)), [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+            create_subplot(@scatter, total_plots, current_plot, {datetimeArray, amp_cell{k1}{k2} * max(mode_deck(:, k1)), [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
             current_plot = current_plot + 1;
 
             % 设置 colormap
@@ -478,7 +481,7 @@ if 0
 
             % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
-            create_subplot(@scatter, total_plots, current_plot, {datetimeArray, zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+            create_subplot(@scatter, total_plots, current_plot, {datetimeArray, zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
             current_plot = current_plot + 1;
             % 设置 colormap
             colormap('jet')
@@ -507,7 +510,7 @@ if 0
     minData = min(data);
     maxData = max(data);
     normalizedData = 2 * ((data - minData) / (maxData - minData)) - 1;
-    create_subplot(@plot, total_plots, current_plot, {t, normalizedData}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+    create_subplot(@plot, total_plots, current_plot, {t, normalizedData}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
 
     % plot(t, normalizedData);
 
@@ -535,7 +538,7 @@ if 0
             maxData = max(data);
             normalizedData = 2 * ((data - minData) / (maxData - minData)) - 1;
 
-            create_subplot(@scatter, total_plots, current_plot, {datetimeArray, (normalizedData - mean(normalizedData(end / 4:end * 3/4))) * 1000, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+            create_subplot(@scatter, total_plots, current_plot, {datetimeArray, (normalizedData - mean(normalizedData(end / 4:end * 3/4))) * 1000, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
 
             % 设置 colormap
             colormap('jet')
@@ -572,7 +575,7 @@ if 0
 
             % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
 
-            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, 'red'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, 'red'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
 
             % 设置 colormap
             colormap('jet')
@@ -580,12 +583,12 @@ if 0
 
             hold on
 
-            create_subplot(@scatter, total_plots, current_plot, {amp_cell_direct{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell_direct{k1}{k2}, 'green'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+            create_subplot(@scatter, total_plots, current_plot, {amp_cell_direct{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell_direct{k1}{k2}, 'green'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
 
             % plot([0, 0.15], [-0.003, -0.003])
             % scatter(ex,epsx,'green')
 
-            create_subplot(@scatter, total_plots, current_plot, {amp_temp * max(mode_deck(:, k1)), zetam - 0.3/100, 'blue'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor);
+            create_subplot(@scatter, total_plots, current_plot, {amp_temp * max(mode_deck(:, k1)), zetam - 0.3/100, 'blue'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure_bool);
 
             str = "Mode : %d, Frequency : %.2f Hz";
             title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
