@@ -40,7 +40,7 @@
         sigma_w12 = [];
 
         for k1 = 1:np
-            sigma_w12 = blkdiag(sigma_w12, sigma_w(k1) * eye(2));
+            sigma_w12 = blkdiag(sigma_w12, sigma_w(k1) * eye(1));
         end
 
     end

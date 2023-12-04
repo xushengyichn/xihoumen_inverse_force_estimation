@@ -48,14 +48,14 @@ function [result_Main] = KalmanMain(input,varargin)
         % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
 
-        input.lambda = 1e-1;
-        input.sigma_p = 10000;
+        input.lambda = 10 ^ (-4.987547778158018);
+        input.sigma_p = 1.411528858719115e+04;
         input.omega_0_variation =1;
         input.Q_value =10 ^ (-8);
         input.R_value = 10 ^ (-6);
         
         % input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-        input.modesel= [2,23];
+        input.modesel= [23];
         % KalmanMain(input,'showtext', false,'showplot',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
         KalmanMain(input,'showtext', false,'showplot',false)
         return;

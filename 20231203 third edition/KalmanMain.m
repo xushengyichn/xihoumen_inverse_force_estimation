@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2023-12-03 23:07:00
+%LastEditTime: 2023-12-04 10:21:28
 %FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/20231203 third edition/KalmanMain.m
 %Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
@@ -48,21 +48,21 @@ function [result_Main] = KalmanMain(input,varargin)
         % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
 
-        input.lambda = 1e-1;
-        input.sigma_p = 10000;
+        input.lambda = 10 ^ (-4.987547778158018);
+        input.sigma_p = 1.411528858719115e+04;
         input.omega_0_variation =1;
         input.Q_value =10 ^ (-8);
         input.R_value = 10 ^ (-6);
         
-        input.lambda_VIV = 1e-1;
-        input.sigma_p_VIV = 10000;
+        input.lambda_VIV = 10 ^ (-4.987547778158018);
+        input.sigma_p_VIV = 1.411528858719115e+04;
         input.omega_0_variation_VIV =1;
 
-        input.lambda_matern = 1e-1;
-        input.sigma_p_matern = 10000;
+        input.lambda_matern = 10 ^ (-4.987547778158018);
+        input.sigma_p_matern = 1.411528858719115e+04;
 
         % input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-        input.modesel= [2,23];
+        input.modesel= [23];
         input.VIV_mode_seq = find(input.modesel ==23);
         % KalmanMain(input,'showtext', false,'showplot',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
         KalmanMain(input,'showtext', false,'showplot',false)
@@ -336,9 +336,10 @@ function [result_Main] = KalmanMain(input,varargin)
     
     [E_c_m,K_c_m,T_c_m,sigma_z_m12] = ssmod_matern_coninue(lambda_matern, sigma_ps_matern, np_m,VIV_mode_seq);
 
-    [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
+    [~, ~, ~, ~, Fad_m, ~, Gad_m, ~, Qad_m]=ssmod_lfm_aug_matern_and_quasiperiod(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m,E_c_m,T_c_m,K_c_m, Q_xd, sigma_w_m12,sigma_z_m12, dt);
+    % [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
     A_a_m = Fad_m;
-    G_a_m = Had_m;
+    G_a_m = Gad_m;
     Q_a_m = Qad_m;
     R_a_m = R;
     yn_a = yn;
