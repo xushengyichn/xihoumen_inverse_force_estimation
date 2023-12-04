@@ -62,7 +62,7 @@ function [result_Main] = KalmanMain(input,varargin)
         input.sigma_p_matern = 1.411528858719115e+04;
 
         % input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-        input.modesel= [23];
+        input.modesel= [23,45];
         input.VIV_mode_seq = find(input.modesel ==23);
         % KalmanMain(input,'showtext', false,'showplot',true,'shouldFilterYn', true,'shouldFilterp_filt_m', true);
         KalmanMain(input,'showtext', false,'showplot',false)
@@ -101,8 +101,8 @@ function [result_Main] = KalmanMain(input,varargin)
     sigma_p_VIV = input.sigma_p_VIV;
     omega_0_variation_VIV = input.omega_0_variation_VIV;
     
-    lambda_matern = input.lambda_matern;
-    sigma_p_matern = input.sigma_p_matern;
+    lambda_matern_noVIV = input.lambda_matern;
+    sigma_p_matern_noVIV = input.sigma_p_matern;
 
     modesel= input.modesel;
     VIV_mode_seq = input.VIV_mode_seq;
@@ -321,8 +321,8 @@ function [result_Main] = KalmanMain(input,varargin)
             lambda_matern(k1) = 0;
             sigma_ps_matern(k1) = 0;
         else
-            lambda_matern(k1) = lambda_matern;
-            sigma_ps_matern(k1) = sigma_p_matern;
+            lambda_matern(k1) = lambda_matern_noVIV;
+            sigma_ps_matern(k1) = sigma_p_matern_noVIV;
         end
     end
 
