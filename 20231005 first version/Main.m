@@ -1,39 +1,40 @@
 clc; clear; close all;
 computer_name = getenv('COMPUTERNAME');
 
-if strcmp(computer_name, 'SHENGYI_HP')
-    addpath(genpath("F:\git\ssm_tools\"))
-    addpath(genpath("F:\git\Function_shengyi_package\"))
-    addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
-    addpath(genpath("F:\git\HHT-Tutorial\"))
-elseif strcmp(computer_name, 'mac')
-    addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
-    addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
-    addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
-    addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
-elseif strcmp(computer_name, 'ROG-SHENGYI')
-    addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-    addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
-    addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
-    addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
-    addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
-elseif strcmp(computer_name, 'NTNU08916')
-    addpath(genpath("C:\Users\shengyix\Documents\GitHub\Function_shengyi_package"))
-    addpath(genpath("C:\Users\shengyix\Documents\GitHub\ssm_tools_sy"))
-    addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_inverse_force_estimation\FEM_model"))
-    addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_data_extract"))
-elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
-    addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
-    addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
-    addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model"))
-    addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_data_extract"))
-else
-    error("Please add path first.")
-end
-
-subStreamNumberDefault = 2132;
-
-run("InitScript.m")
+% if strcmp(computer_name, 'SHENGYI_HP')
+%     addpath(genpath("F:\git\ssm_tools\"))
+%     addpath(genpath("F:\git\Function_shengyi_package\"))
+%     addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
+%     addpath(genpath("F:\git\HHT-Tutorial\"))
+% elseif strcmp(computer_name, 'mac')
+%     addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
+%     addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
+%     addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
+%     addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
+% elseif strcmp(computer_name, 'ROG-SHENGYI')
+%     addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
+%     addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
+%     addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
+%     addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
+%     addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
+% elseif strcmp(computer_name, 'NTNU08916')
+%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\Function_shengyi_package"))
+%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\ssm_tools_sy"))
+%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_inverse_force_estimation\FEM_model"))
+%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_data_extract"))
+% elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
+%     addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
+%     addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
+%     addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model"))
+%     addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_data_extract"))
+% else
+%     error("Please add path first.")
+% end
+% 
+% subStreamNumberDefault = 2132;
+% 
+run("CommonCommand.m")
+% run("InitScript.m")
 
 %% 0 绘图参数
 fig_bool = ON;
@@ -60,29 +61,29 @@ endDate_global = result.endDate + hours(1);
 input.start_time = startDate_global;
 input.end_time = endDate_global;
 
-computer_name = getenv('COMPUTERNAME');
-
-if strcmp(computer_name, 'SHENGYI_HP')
-    input.acc_dir = "F:\test\result";
-    input.wind_dir = "F:\test\result_wind_10min";
-elseif strcmp(computer_name, 'mac')
-    input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-    input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-elseif strcmp(computer_name, 'ROG-SHENGYI')
-    input.acc_dir = "D:\xihoumendata\acc";
-    input.wind_dir = "D:\xihoumendata\wind";
-elseif strcmp(computer_name, 'ketizu')
-    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-    input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
-elseif strcmp(computer_name, 'NTNU08916')
-    input.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
-    input.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";
-elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
-    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-    input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
-else
-    error("Please add data folder first.")
-end
+% computer_name = getenv('COMPUTERNAME');
+% 
+% if strcmp(computer_name, 'SHENGYI_HP')
+%     input.acc_dir = "F:\test\result";
+%     input.wind_dir = "F:\test\result_wind_10min";
+% elseif strcmp(computer_name, 'mac')
+%     input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+%     input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+% elseif strcmp(computer_name, 'ROG-SHENGYI')
+%     input.acc_dir = "D:\xihoumendata\acc";
+%     input.wind_dir = "D:\xihoumendata\wind";
+% elseif strcmp(computer_name, 'ketizu')
+%     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+%     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+% elseif strcmp(computer_name, 'NTNU08916')
+%     input.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
+%     input.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";
+% elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
+%     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+%     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+% else
+%     error("Please add data folder first.")
+% end
 
 % input.lambda = 10 ^ (-1);
 % input.sigma_p = 10000;
@@ -131,8 +132,8 @@ input.R_value = 10 ^ (-0.024119070121255);
 modesel = 23;
 input.modesel = modesel;
 
-[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
+% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
@@ -652,6 +653,59 @@ if fig_bool
     end
 
     current_plot = current_plot + 1;
+end
+
+
+create_subplot(@plot, total_plots, current_plot, {t,yn(1,:)}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor,'newfigure',true);
+% hold on 
+% create_subplot(@plot, total_plots, current_plot, {t,h_hat(1,:)}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor,'holdon',true);
+xlabel("Time")
+ylabel("Acceleration(m/s^2)")
+
+%% modal force comparison
+create_subplot(@plot, total_plots, current_plot, {t, F_direct, t, F_filter}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor,'newfigure',true);
+legend("Direct integration", "Kalman Filter")
+title("Online inverse estimation for VIV force");
+xlabel("Time")
+ylabel("Modal force")
+ylim([-1000,1000])
+
+%% damping ratio vs time
+for k1 = 1:nmodes
+
+    for k2 = 1:length(top_freqs{k1})
+        % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+        datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+        % 提取第一个 datetime 对象作为参考点
+        referenceDatetime = datetimeArray(1);
+
+        % 计算每个 datetime 对象相对于参考点的秒数
+        secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+        % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+        create_subplot(@scatter, total_plots, current_plot, {datetimeArray, zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor,'newfigure',true);
+        current_plot = current_plot + 1;
+        % 设置 colormap
+        colormap('jet')
+        % colorbar
+
+        % hold on
+        % plot([datetimeArray(1),datetimeArray(end)],[-0.003,-0.003])
+
+        str = "Damping ratio tracking";
+        title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+        % xlim([0.05,0.12])
+        hold on
+        plot([datetimeArray(1), datetimeArray(end)], [-0.003, -0.003])
+
+        ylim([-0.5, 0] / 100)
+        xlabel("Time")
+        ylabel("Modal damping ratio")
+
+    end
+
 end
 
 if 0
