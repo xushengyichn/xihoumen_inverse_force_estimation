@@ -14,6 +14,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     nmodes = input.nmodes;
     Freq = input.Freq;
     fs = input.fs;
+    nVIV = input.nVIV;
 
     p = inputParser;
     addParameter(p,'showtext',true,@islogical);
@@ -121,8 +122,8 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         [top_freqs_vel{k1}, ~, ~] = extractSignificantFrequencies(fs, vel_filtered(k1, :),'showplot', showplot);
     end
 
-    ifq_interpolated_allmodes = cell(1, nmodes);
-    for k1=1:nmodes
+    ifq_interpolated_allmodes = cell(1, nVIV);
+    for k1=1:nVIV
         for k2 = 1:length(top_freqs{k1})
             f_keep_temp = [top_freqs{k1}(k2) * 0.9, top_freqs{k1}(k2) * 1.1];
             [ifq_interpolated_allmodes{k1}{k2}] = instfreq_samelength(fs, Fa(k1,:), f_keep_temp, t, 'showplot', showplot, 'showtext', showtext);
@@ -130,8 +131,8 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     end
 
     bandwidth = 0.01; %根据需要调整带宽
-    filtered_Fa = cell(1,nmodes);
-    for k1 = 1:nmodes
+    filtered_Fa = cell(1,nVIV);
+    for k1 = 1:nVIV
         frequencies = top_freqs{k1};
         Fa_current = Fa_filtered(k1, :);
         filtered_Fa{k1} =filterSignals(Fa_current, frequencies, fs, bandwidth,'filterstyle','fft','showplot', showplot);
@@ -156,7 +157,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
 
 
     % 寻找不同模态不同频率力信号的周期
-    for k1 = 1:nmodes
+    for k1 = 1:nVIV
         filtered_Fa_current = filtered_Fa{k1}; % 获取当前模态的滤波数据
         peaks_locs_struct = struct(); % 初始化一个结构体以保存peaks和locs       
         for k2 = 1:length(top_freqs{k1})

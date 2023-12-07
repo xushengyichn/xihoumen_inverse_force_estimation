@@ -125,11 +125,22 @@ input.omega_0_variation = 1.007344423131069;
 input.Q_value = 10 ^ (0.772837115804315);
 input.R_value = 10 ^ (-0.024119070121255);
 
+input.sigma_buff = 1e+02;
+input.sigma_noise = 1e+03;
+
+input.lambda_VIV = 10 ^ (-4.987547778158018);
+input.sigma_p_VIV = 1.411528858719115e+04;
+input.omega_0_variation_VIV =1;
+
 % modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
 modesel = [2,3,23];
+
 VIV_mode_seq = find(modesel ==23);
 % modesel = 23;
 input.modesel = modesel;
+input.VIV_mode_seq = VIV_mode_seq;
+nVIV = length(VIV_mode_seq);
+input.nVIV = nVIV ;
 
 %% Apply Kalman Filter
 [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
@@ -233,13 +244,18 @@ if fig_bool
     num_figs_in_row = [];
     figWidthFactor = 1.5;
     figPosition = [1080*2.5,100];
-    figPosition = [100,100];
-
-
+    % figPosition = [100,100];
+    newfigure = false;
+    holdon = true;
     
     %% modal force
-    for k1 = 1:nmodes
-        create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition);
+    for k1 = 1:nVIV
+        if k1 == 1
+            create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',true);
+            hold on
+        else
+            create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'holdon',holdon);
+        end
         legend("Force from direct integration")
         title("modal force for "+"mode"+modesel(k1));
         current_plot = current_plot + 1;
@@ -341,7 +357,7 @@ if fig_bool
     current_plot = current_plot + 1;
 
     %% Damping ratio calculation
-     for k1 = 1:nmodes
+     for k1 = 1:nVIV
     
             for k2 = 1:length(top_freqs{k1})
                 % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组

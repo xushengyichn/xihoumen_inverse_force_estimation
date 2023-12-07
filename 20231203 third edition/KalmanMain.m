@@ -53,13 +53,16 @@ function [result_Main] = KalmanMain(input,varargin)
         input.omega_0_variation =1;
         input.Q_value =10 ^ (-8);
         input.R_value = 10 ^ (-6);
+
+        input.sigma_buff = 1e+02;
+        input.sigma_noise = 1e+03;
         
         input.lambda_VIV = 10 ^ (-4.987547778158018);
         input.sigma_p_VIV = 1.411528858719115e+04;
         input.omega_0_variation_VIV =1;
 
-        input.lambda_matern = 10 ^ (-4.987547778158018);
-        input.sigma_p_matern = 1.411528858719115e+04;
+        % input.lambda_matern = 10 ^ (-4.987547778158018);
+        % input.sigma_p_matern = 1.411528858719115e+04;
 
         % input.modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
         input.modesel= [23,45];
@@ -101,17 +104,20 @@ function [result_Main] = KalmanMain(input,varargin)
     sigma_p_VIV = input.sigma_p_VIV;
     omega_0_variation_VIV = input.omega_0_variation_VIV;
     
-    lambda_matern_noVIV = input.lambda_matern;
-    sigma_p_matern_noVIV = input.sigma_p_matern;
+    % lambda_matern_noVIV = input.lambda_matern;
+    % sigma_p_matern_noVIV = input.sigma_p_matern;
 
     modesel= input.modesel;
     VIV_mode_seq = input.VIV_mode_seq;
 
-    lambda = input.lambda;
-    sigma_p = input.sigma_p;
-    omega_0_variation = input.omega_0_variation;
+    % lambda = input.lambda;
+    % sigma_p = input.sigma_p;
+    % omega_0_variation = input.omega_0_variation;
     Q_value = input.Q_value;
     R_value = input.R_value;
+
+    sigma_buff = input.sigma_buff;
+    sigma_noise = input.sigma_noise;
 
     fig_bool = showplot;
     ON = true;
@@ -277,16 +283,22 @@ function [result_Main] = KalmanMain(input,varargin)
 
     [S_a, S_v, S_d, n_sensors] = sensor_selection(loc_acc, loc_vel, loc_dis, node_loc, phi, nodeondeck, Mapping_data);
     % establish continuous time matrices
-    [A_c, B_c, G_c, J_c] = ssmod_c_mode(nmodes, omega2, Gamma, phi, S_a, S_v, S_d);
-
+    [A_c, B_c_buff, G_c, J_c_buff] = ssmod_c_mode(nmodes, omega2, Gamma, phi, S_a, S_v, S_d);
+    
+    [B_c_VIV, J_c_VIV] = ssmod_c_mode_VIV(nmodes,  phi, S_a, VIV_mode_seq);
     
     maxvalue = max(max(abs(yn)));
     
     % establish discrete time matrices
     
-    [A_d, B_d, G_d, J_d, ~] = ssmod_c2d(A_c, B_c, G_c, J_c, dt);
+    [A_d, B_d_buff, G_d, J_d_buff, ~] = ssmod_c2d(A_c, B_c_buff, G_c, J_c_buff, dt);
+    [~, B_d_VIV, ~, J_d_VIV, ~] = ssmod_c2d(A_c, B_c_VIV, G_c, J_c_VIV, dt);
 
     %% 4 反算模态力
+    C_buff = sigma_buff^2*eye(nmodes);
+    Q_buff_d = B_d_buff *C_buff*B_d_buff';
+
+
     Q = Q_value * eye(ns);
     R = R_value * eye(n_sensors);
     S = zeros(ns, n_sensors);
@@ -294,11 +306,12 @@ function [result_Main] = KalmanMain(input,varargin)
 
     Q_xd = Q;
     np_m = nmodes;
-    B_c_m = [zeros(nmodes, np_m); ...
-                 eye(np_m, np_m)];
-    J_c_m = [S_a * phi];
-    B_d_m = A_c \ (A_d - eye(size(A_d))) * B_c_m;
-    J_d_m = J_c_m;
+    % B_c_m = [zeros(nmodes, np_m); ...
+    %              eye(np_m, np_m)];
+    B_c_m = B_c_VIV;
+    J_c_m = J_c_VIV;
+    B_d_m = B_d_VIV;
+    J_d_m = J_d_VIV;
     % TODO: Here the B_c_m, J_c_m, B_d_m, J_d_m are equal to B_c, J_c, B_d, J_d, which is can be revised in the future
 
     % set the kernal parameters for the latent force model
@@ -307,7 +320,7 @@ function [result_Main] = KalmanMain(input,varargin)
         if k1 == VIV_mode_seq
             lambda_quasi_periodic(k1) = lambda_VIV;
             sigma_ps_quasi_periodic(k1) = sigma_p_VIV;
-            omega_0_quasi_periodic(k1) = 2 * pi * Freq(VIV_mode_seq)*omega_0_variation;
+            omega_0_quasi_periodic(k1) = 2 * pi * Freq(VIV_mode_seq)*omega_0_variation_VIV;
         else
             lambda_quasi_periodic(k1) = 0;
             sigma_ps_quasi_periodic(k1) = 0;
@@ -315,41 +328,42 @@ function [result_Main] = KalmanMain(input,varargin)
         end
     end
 
-    % matern kernel
-    for k1 = 1:np_m
-        if k1 == VIV_mode_seq
-            lambda_matern(k1) = 0;
-            sigma_ps_matern(k1) = 0;
-        else
-            lambda_matern(k1) = lambda_matern_noVIV;
-            sigma_ps_matern(k1) = sigma_p_matern_noVIV;
-        end
-    end
+    % % matern kernel
+    % for k1 = 1:np_m
+    %     if k1 == VIV_mode_seq
+    %         lambda_matern(k1) = 0;
+    %         sigma_ps_matern(k1) = 0;
+    %     else
+    %         lambda_matern(k1) = lambda_matern_noVIV;
+    %         sigma_ps_matern(k1) = sigma_p_matern_noVIV;
+    %     end
+    % end
 
     
     % lambdas_m = [lambda] * ones(1, np_m);
     % sigma_ps_m = [sigma_p] * ones(1, np_m);
     % omega_0 = 2 * pi * Freq*omega_0_variation* ones(1, np_m);
     
-
+    nVIV = length(VIV_mode_seq);
     [F_c_m, L_c_m, H_c_m, sigma_w_m12] = ssmod_quasiperiod_coninue(lambda_quasi_periodic, sigma_ps_quasi_periodic, omega_0_quasi_periodic, np_m,VIV_mode_seq);
     
-    [E_c_m,K_c_m,T_c_m,sigma_z_m12] = ssmod_matern_coninue(lambda_matern, sigma_ps_matern, np_m,VIV_mode_seq);
+    % [E_c_m,K_c_m,T_c_m,sigma_z_m12] = ssmod_matern_coninue(lambda_matern, sigma_ps_matern, np_m,VIV_mode_seq);
 
-    [~, ~, ~, ~, Fad_m, ~, Gad_m, ~, Qad_m]=ssmod_lfm_aug_matern_and_quasiperiod(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m,E_c_m,T_c_m,K_c_m, Q_xd, sigma_w_m12,sigma_z_m12, dt);
-    % [~, ~, ~, ~, Fad_m, ~, Had_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
+    % [~, ~, ~, ~, Fad_m, ~, Gad_m, ~, Qad_m]=ssmod_lfm_aug_matern_and_quasiperiod(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m,E_c_m,T_c_m,K_c_m, Q_xd, sigma_w_m12,sigma_z_m12, dt);
+    [~, ~, ~, ~, Fad_m, ~, Gad_m, ~, Qad_m] = ssmod_lfm_aug(A_c, B_c_m, G_c, J_c_m, F_c_m, H_c_m, L_c_m, Q_xd, sigma_w_m12, dt);
     A_a_m = Fad_m;
     G_a_m = Gad_m;
     Q_a_m = Qad_m;
-    R_a_m = R;
+    Q_a_m(1:ns,1:ns)=Q_a_m(1:ns,1:ns)+Q_buff_d;
+    R_a_m = J_d_buff*C_buff*J_d_buff'+ R;
     yn_a = yn;
     N = length(Acc_Data.mergedData.Time);
     NN = N;
     xa_history = zeros(ns + np_m * (2), NN);
     pa_history = zeros(ns + np_m * (2), NN);
 
-    x_ak = zeros(ns + np_m * (2), 1);
-    P_ak = 10 ^ (1) * eye(ns + np_m * (2));
+    x_ak = zeros(ns + nVIV * (2), 1);
+    P_ak = 10 ^ (1) * eye(ns + nVIV * (2));
 
 
     [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
@@ -364,7 +378,7 @@ function [result_Main] = KalmanMain(input,varargin)
     Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
     % [f, magnitude] = fft_transform(fs, x_k_k(1, :));
     %% 5 fft and bandpass filter for the estimated modal force
-    for k1 = 1:nmodes
+    for k1 = 1:length(VIV_mode_seq)
             if shouldFilterp_filt_m == true
                 [f, magnitude] = fft_transform(fs, x_k_k(k1,:));
                 [~, idx] = max(magnitude);
@@ -388,15 +402,18 @@ function [result_Main] = KalmanMain(input,varargin)
     % loc_dis_v = [];
     [S_a_v, S_v_v, S_d_v, n_sensors_v] = sensor_selection(loc_acc_v, loc_vel_v, loc_dis_v, node_loc, phi, nodeondeck, Mapping_data);
 
-    G_c_v = [S_d_v * phi - S_a_v * phi * omega2, S_v_v * phi - S_a_v * phi * Gamma];
-    J_c_v = [S_a_v * phi];
+    [B_c_v_VIV, J_c_v_VIV] = ssmod_c_mode_VIV(nmodes,  phi, S_a_v, VIV_mode_seq);
 
-    h_hat = G_c_v * x_filt_original + J_c_v * p_filt_m;
+    G_c_v = [S_d_v * phi - S_a_v * phi * omega2, S_v_v * phi - S_a_v * phi * Gamma];
+    % J_c_v = [S_a_v * phi];
+
+    % h_hat = G_c_v * x_filt_original + J_c_v * p_filt_m;
+    h_hat = G_c_v * x_filt_original + J_c_v_VIV * p_filt_m;
 
     %% 7 重构涡振响应
     p_reconstruct = p_filt_m;
     % p_reconstruct([1 2 3 ],:)=0;
-    [~, yn_reconstruct, ~] = CalResponse(A_d, B_d, G_d, J_d, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
+    [~, yn_reconstruct, ~] = CalResponse(A_d, B_d_VIV, G_d, J_d_VIV, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
 
     % fft
     % [f_origin, magnitude_origin] = fft_transform(1 / dt, yn(3, :));
@@ -430,9 +447,9 @@ function [result_Main] = KalmanMain(input,varargin)
     result_Main.CC = CC_eq;
     result_Main.KK = KK_eq;
     result_Main.A_d = A_d;
-    result_Main.B_d = B_d;
+    % result_Main.B_d = B_d;
     result_Main.G_d = G_d;
-    result_Main.J_d = J_d;
+    % result_Main.J_d = J_d;
     result_Main.N = N;
     result_Main.x0 = x0;
     result_Main.ns = ns;

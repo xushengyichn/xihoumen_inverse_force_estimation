@@ -19,17 +19,29 @@
         F_c = [];
         L_c = [];
         H_c = [];
+        
+        nVIV = length(VIV_mode_seq);
+        H_c = zeros(nVIV, nVIV*2); % 2 is the kernel size for quasi periodic
+        F_c = zeros(nVIV*2, nVIV*2);
+        L_c = zeros(nVIV*2, nVIV*2);
 
         for k1 = 1:np
-            F_c = blkdiag(F_c, F_c_array(:, :, k1));
-            L_c = blkdiag(L_c, L_c_array(:, :, k1));
-            H_c = blkdiag(H_c, H_c_array(:, :, k1));
+            idx = find(VIV_mode_seq == k1);
+            if ~isempty(idx)
+                F_c(idx*2-1:idx*2,idx*2-1:idx*2) = F_c_array(:, :, k1);
+                L_c(idx*2-1:idx*2,idx*2-1:idx*2) = L_c_array(:, :, k1);
+                H_c(idx,idx*2-1:idx*2) = H_c_array(:, :, k1);
+            end
         end
 
-        sigma_w12 = [];
+        sigma_w12 = zeros(nVIV*2, nVIV*2);
 
         for k1 = 1:np
-            sigma_w12 = blkdiag(sigma_w12, sigma_w(k1) * eye(2));
+            idx = find(VIV_mode_seq == k1);
+            if ~isempty(idx)
+                sigma_w12(idx*2-1:idx*2,idx*2-1:idx*2) = sigma_w(k1) * eye(2);
+            end
+            
         end
 
     end
