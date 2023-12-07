@@ -665,7 +665,7 @@ ylabel("Acceleration(m/s^2)")
 %% modal force comparison
 create_subplot(@plot, total_plots, current_plot, {t, F_direct, t, F_filter}, 'num_figs_in_row', num_figs_in_row,'figWidthFactor', figWidthFactor,'newfigure',true);
 legend("Direct integration", "Kalman Filter")
-title("Online inverse estimation for VIV force");
+title("Online inverse force estimation for VIV");
 xlabel("Time")
 ylabel("Modal force")
 ylim([-1000,1000])
