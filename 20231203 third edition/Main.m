@@ -132,8 +132,8 @@ input.lambda_VIV = 10 ^ (-4.987547778158018);
 input.sigma_p_VIV = 1.411528858719115e+04;
 input.omega_0_variation_VIV =1;
 
-% modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-modesel = [2,3,23];
+modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+% modesel = [2,3,23];
 
 VIV_mode_seq = find(modesel ==23);
 % modesel = 23;
@@ -251,17 +251,18 @@ if fig_bool
     %% modal force
     for k1 = 1:nVIV
         if k1 == 1
-            create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',true);
+            create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',true,'firstfigure',true);
             hold on
         else
             create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'holdon',holdon);
         end
         legend("Force from direct integration")
-        title("modal force for "+"mode"+modesel(k1));
+        title("modal force for "+"mode"+modesel(VIV_mode_seq(k1)));
         current_plot = current_plot + 1;
         ylim([-100,100])
     end
-
+    
+    save temp.mat t F_filter
     %% installation of the sensors and the rms of the sensors
     % 三个传感器位置的振型大小
     loc_acc = result_Main.loc_acc;

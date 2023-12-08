@@ -92,10 +92,14 @@ total_plots = 10; % 或任何你需要的子图数量
 current_plot = 1;
 num_figs_in_row = [];
 
+load temp.mat
 
-create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row);
+
+create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
 title("ft");
 current_plot = current_plot + 1;
 
 
+hold on
+plot(t,F_filter)
 
