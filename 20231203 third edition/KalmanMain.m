@@ -208,12 +208,12 @@ function [result_Main] = KalmanMain(input,varargin)
     MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
     %% Changing the frequency
-    if 0
-        Freq = 0.328240;
+    if 1
+        Freq(VIV_mode_seq) = 0.328240;
         % Freq = 0.326;
-        KK_eq = MM_eq * (2 * pi * Freq)^2;
+        KK_eq(VIV_mode_seq) = MM_eq(VIV_mode_seq) * (2 * pi * Freq(VIV_mode_seq))^2;
         if showtext
-            disp("Changing the frequency of the structure to "+num2str(Freq)+"Hz, which is the frequency from the field measurement.");
+            disp("Changing the frequency of the structure to "+num2str(Freq(VIV_mode_seq))+"Hz, which is the frequency from the field measurement.");
         end
     end
     %%
@@ -296,7 +296,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
     %% 4 反算模态力
     C_buff = sigma_buff^2*eye(nmodes);
-    Q_buff_d = B_d_buff *C_buff*B_d_buff';
+    Q_buff_d = B_d_buff *C_buff*B_d_buff'*dt;
 
 
     Q = Q_value * eye(ns);
@@ -356,6 +356,9 @@ function [result_Main] = KalmanMain(input,varargin)
     Q_a_m = Qad_m;
     Q_a_m(1:ns,1:ns)=Q_a_m(1:ns,1:ns)+Q_buff_d;
     R_a_m = J_d_buff*C_buff*J_d_buff'+ R;
+    %TODO:S matirx
+    % S_a_m = blkdiag(B_c_buff*C_buff*J_c_buff',zeros(size(L_c_m)))*dt;
+    S_a_m = [B_c_buff*C_buff*J_c_buff'*dt;zeros(size(L_c_m,1),size(B_c_buff*C_buff*J_c_buff'*dt,2))];
     yn_a = yn;
     N = length(Acc_Data.mergedData.Time);
     NN = N;
@@ -366,7 +369,9 @@ function [result_Main] = KalmanMain(input,varargin)
     P_ak = 10 ^ (1) * eye(ns + nVIV * (2));
 
 
-    [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
+    % [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
+    % [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'steadystate','no');
+    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak);
     % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
     xa_history = x_k_k;
     pa_history = P_k_k;

@@ -125,8 +125,8 @@ input.omega_0_variation = 1.007344423131069;
 input.Q_value = 10 ^ (0.772837115804315);
 input.R_value = 10 ^ (-0.024119070121255);
 
-input.sigma_buff = 1e+02;
-input.sigma_noise = 1e+03;
+input.sigma_buff = 10;
+input.sigma_noise = 10e-4;
 
 input.lambda_VIV = 10 ^ (-4.987547778158018);
 input.sigma_p_VIV = 1.411528858719115e+04;
@@ -143,8 +143,8 @@ nVIV = length(VIV_mode_seq);
 input.nVIV = nVIV ;
 
 %% Apply Kalman Filter
-[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
+% [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
