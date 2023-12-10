@@ -51,11 +51,13 @@ function [result_Main] = KalmanMain(input,varargin)
         input.lambda = 10 ^ (-4.987547778158018);
         input.sigma_p = 1.411528858719115e+04;
         input.omega_0_variation =1;
-        input.Q_value =10 ^ (-8);
-        input.R_value = 10 ^ (-6);
+        % input.Q_value = 10 ^ (-8);
+        % input.R_value = 10 ^ (-6);
+        input.Q_value = 10 ^ (-1);
+        input.R_value = 10 ^ (-8);
 
-        input.sigma_buff = 1e+02;
-        input.sigma_noise = 1e+03;
+        input.sigma_buff = 10;
+        input.sigma_noise = 10e-4;
         
         input.lambda_VIV = 10 ^ (-4.987547778158018);
         input.sigma_p_VIV = 1.411528858719115e+04;
@@ -371,7 +373,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
     % [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
     % [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'steadystate','no');
-    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak);
+    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', true);
     % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
     xa_history = x_k_k;
     pa_history = P_k_k;

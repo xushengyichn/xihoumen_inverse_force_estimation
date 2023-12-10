@@ -15,6 +15,7 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     Freq = input.Freq;
     fs = input.fs;
     nVIV = input.nVIV;
+    VIV_mode_seq = input.VIV_mode_seq;
 
     p = inputParser;
     addParameter(p,'showtext',true,@islogical);
@@ -25,13 +26,13 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     showplot = p.Results.showplot;
     filterstyle = p.Results.filterstyle;
 
-    f_keep = [Freq * 0.9, Freq * 1.1];
+    f_keep = [Freq(VIV_mode_seq) * 0.9, Freq(VIV_mode_seq) * 1.1];
 
 
 
     Fa = p_filt_m;
-    dis = x_k_k(1:nmodes, :);
-    vel = x_k_k(nmodes + 1:2*nmodes, :);
+    dis = x_k_k(VIV_mode_seq, :);
+    vel = x_k_k(nmodes + VIV_mode_seq, :);
 
     % dis = input.u;
     % vel = input.udot;
@@ -111,12 +112,12 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         xlabel('Frequency(Hz)')
         ylabel("Value")
         legend("Kalman Filter","Bandpass")
-        end
+    end
 
     % 找到峰值设定保存频率成分的变量
 
-    top_freqs = cell(1, nmodes);
-    for k1 = 1:nmodes
+    top_freqs = cell(1, nVIV);
+    for k1 = 1:nVIV
         [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, vel_filtered(k1, :), 'showplot', showplot);
         % [top_freqs{k1}, ~, ~] = extractSignificantFrequencies(fs, Fa_filtered(k1, :), 'showplot', showplot);
         [top_freqs_vel{k1}, ~, ~] = extractSignificantFrequencies(fs, vel_filtered(k1, :),'showplot', showplot);
@@ -138,22 +139,22 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
         filtered_Fa{k1} =filterSignals(Fa_current, frequencies, fs, bandwidth,'filterstyle','fft','showplot', showplot);
     end
 
-    filtered_vel = cell(1,nmodes);
-    for k1 = 1:nmodes
+    filtered_vel = cell(1,nVIV);
+    for k1 = 1:nVIV
         frequencies = top_freqs{k1};
         vel_current = vel_filtered(k1, :);
         filtered_vel{k1} =filterSignals(vel_current, frequencies, fs, bandwidth,'filterstyle','fft','showplot', showplot);
     end
 
-    filtered_dis = cell(1,nmodes);
-    for k1 = 1:nmodes
+    filtered_dis = cell(1,nVIV);
+    for k1 = 1:nVIV
         frequencies = top_freqs{k1};
         dis_current = dis_filtered(k1, :);
         filtered_dis{k1} =filterSignals(dis_current, frequencies, fs, bandwidth,'filterstyle','fft','showplot', showplot);
     end
 
 
-    peaks_locs_cell = cell(nmodes, 1); % 初始化一个cell数组以保存peaks和locs的结构
+    peaks_locs_cell = cell(nVIV, 1); % 初始化一个cell数组以保存peaks和locs的结构
 
 
     % 寻找不同模态不同频率力信号的周期
