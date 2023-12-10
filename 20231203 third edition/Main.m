@@ -85,51 +85,16 @@ input.end_time = endDate_global;
 %     error("Please add data folder first.")
 % end
 
-% input.lambda = 10 ^ (-1);
-% input.sigma_p = 10000;
-% input.omega_0_variation =1;
-% input.Q_value =10 ^ (-8);
-% input.R_value = 10 ^ (-6);
 
-% input.lambda = 10 ^ (-1.001242541230301);
-% input.sigma_p = 9.063096667830060e+04;
-% input.omega_0_variation =0.902647415472734;
-% input.Q_value =10 ^ (-1.016211706804576);
-% input.R_value = 10 ^ (-1.003148221125874);
+input.omega_0_variation = 1;
+input.Q_value = 10 ^ (-4);
 
-% input.lambda = 10 ^ (-4.934808796013671);
-% input.sigma_p = 6.895548550856822e+03;
-% input.omega_0_variation =1.097383030422062;
-% input.Q_value =10 ^ (-9.633948257379021);
-% input.R_value = 10 ^ (-2.415076745081128);
 
-% input.lambda = 10 ^ (-4.993486819657864);
-% % input.lambda = 10 ^ (-1);
-% input.sigma_p = 1.441514803767596e+04;
-% % input.sigma_p = 100;
-% input.omega_0_variation = 0.904969462898074;
-% input.Q_value = 10 ^ (-9.901777612793937);
-% input.R_value = 10 ^ (-3.866588296864785);
-
-% input.lambda = 10 ^ (-2.748806418335396);
-% input.sigma_p = 4.041540821465747e+04;
-% % input.sigma_p = 100;
-% input.omega_0_variation = 1.015685635145482;
-% input.Q_value = 10 ^ (-1.005545623474248);
-% input.R_value = 10 ^ (-1.103266293300500);
-
-input.lambda = 10 ^ (-4.987547778158018);
-input.sigma_p = 1.411528858719115e+04;
-% input.sigma_p = 100;
-input.omega_0_variation = 1.007344423131069;
-input.Q_value = 10 ^ (0.772837115804315);
-input.R_value = 10 ^ (-0.024119070121255);
-
-input.sigma_buff = 10;
-input.sigma_noise = 10e-4;
+input.sigma_buff = 100;
+input.sigma_noise = 1.0000e-04;
 
 input.lambda_VIV = 10 ^ (-4.987547778158018);
-input.sigma_p_VIV = 1.411528858719115e+04;
+input.sigma_p_VIV = 1e+04;
 input.omega_0_variation_VIV =1;
 
 modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
@@ -144,7 +109,7 @@ input.nVIV = nVIV ;
 
 %% Apply Kalman Filter
 % [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'nofilter');
+[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
@@ -157,8 +122,8 @@ mode_deck = result_Main.mode_deck;
 if 0
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    % external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
-    external_params.modesel = [23];
+    external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+    % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-5, 10, 0.9, -10, -10]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [-1, 1e5, 1.1, 1, 1]; % 这里的值也是假设的
@@ -372,7 +337,7 @@ if fig_bool
     
                 % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
     
-                create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure);
+                create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, VIV_mode_seq(k1))), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure);
                 current_plot = current_plot + 1;
                 % scatter(amp_cell{k1}{k2} * max(mode_deck(:, k1)), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled');
                 % 设置 colormap

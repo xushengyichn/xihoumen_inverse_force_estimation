@@ -54,7 +54,7 @@ function [result_Main] = KalmanMain(input,varargin)
         % input.Q_value = 10 ^ (-8);
         % input.R_value = 10 ^ (-6);
         input.Q_value = 10 ^ (-1);
-        input.R_value = 10 ^ (-8);
+        % input.R_value = 10 ^ (-8);
 
         input.sigma_buff = 10;
         input.sigma_noise = 10e-4;
@@ -96,6 +96,12 @@ function [result_Main] = KalmanMain(input,varargin)
     gap_between_images = p.Results.gap_between_images;
     figureIdx = p.Results.figureIdx;
 
+    if showtext
+        showtext_char = 'yes';
+    else
+        showtext_char = 'no';
+    end
+
     %% 1 读取数据
     start_time = input.start_time;
     end_time = input.end_time;
@@ -112,14 +118,18 @@ function [result_Main] = KalmanMain(input,varargin)
     modesel= input.modesel;
     VIV_mode_seq = input.VIV_mode_seq;
 
+    sigma_buff = input.sigma_buff;
+    sigma_noise = input.sigma_noise;
+
     % lambda = input.lambda;
     % sigma_p = input.sigma_p;
     % omega_0_variation = input.omega_0_variation;
     Q_value = input.Q_value;
-    R_value = input.R_value;
+    % R_value = input.R_value;
+    R_value = sigma_noise^2;
 
-    sigma_buff = input.sigma_buff;
-    sigma_noise = input.sigma_noise;
+
+    
 
     fig_bool = showplot;
     ON = true;
@@ -298,12 +308,14 @@ function [result_Main] = KalmanMain(input,varargin)
 
     %% 4 反算模态力
     C_buff = sigma_buff^2*eye(nmodes);
-    Q_buff_d = B_d_buff *C_buff*B_d_buff'*dt;
+    Q_buff_c= B_c_buff * C_buff * B_c_buff';
+
+    Q_buff_d = Q_buff_c*dt;
 
 
     Q = Q_value * eye(ns);
     R = R_value * eye(n_sensors);
-    S = zeros(ns, n_sensors);
+
     x0 = zeros(ns, 1);
 
     Q_xd = Q;
@@ -373,7 +385,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
     % [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
     % [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'steadystate','no');
-    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', true);
+    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', true,'showtext',showtext_char);
     % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
     xa_history = x_k_k;
     pa_history = P_k_k;

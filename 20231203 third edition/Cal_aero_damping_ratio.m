@@ -160,6 +160,8 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
     % 寻找不同模态不同频率力信号的周期
     for k1 = 1:nVIV
         filtered_Fa_current = filtered_Fa{k1}; % 获取当前模态的滤波数据
+        % filtered_dis_current = filtered_dis{k1}; % 获取当前模态的滤波数据
+        
         peaks_locs_struct = struct(); % 初始化一个结构体以保存peaks和locs       
         for k2 = 1:length(top_freqs{k1})
             f_temp = top_freqs{k1}(k2);
@@ -169,16 +171,23 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
             [peaks, locs] = findpeaks(filtered_Fa_current{k2}, ...
                                       'MinPeakDistance', d, ...
                                       'MinPeakProminence', pp);
+            % [peaks, locs] = findpeaks(filtered_dis_current{k2}, ...
+            %               'MinPeakDistance', d, ...
+            %               'MinPeakProminence', pp);
             % 将peaks和locs保存为结构体的字段
             peaks_locs_struct(k2).peaks = peaks;
             peaks_locs_struct(k2).locs = locs;
-            % [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-            % plot(t,filtered_Fa_current{k2})
-            % hold on 
-            % scatter(t(locs),peaks)
-            % hold off
-            % str = sprintf('mode freq %.2f Hz, mode sel %d',Freq(k1),modesel(k1));
-            % title(str)
+            
+            if showplot
+            figure
+            plot(t,filtered_Fa_current{k2})
+            % plot(t,filtered_dis_current{k2})
+            hold on 
+            scatter(t(locs),peaks)
+            hold off
+            str = sprintf('mode freq %.2f Hz',Freq(VIV_mode_seq(k1)));
+            title(str)
+            end
         end 
         peaks_locs_cell{k1} = peaks_locs_struct; % 将结构体保存在cell数组中
     end
