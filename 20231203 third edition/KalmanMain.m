@@ -50,7 +50,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
         input.lambda = 10 ^ (-4.987547778158018);
         input.sigma_p = 1.411528858719115e+04;
-        input.omega_0_variation =1;
+        % input.omega_0_variation =1;
         % input.Q_value = 10 ^ (-8);
         % input.R_value = 10 ^ (-6);
         input.Q_value = 10 ^ (-1);

@@ -86,7 +86,7 @@ input.end_time = endDate_global;
 % end
 
 
-input.omega_0_variation = 1;
+% input.omega_0_variation = 1;
 input.Q_value = 10 ^ (-4);
 
 
@@ -107,26 +107,33 @@ input.VIV_mode_seq = VIV_mode_seq;
 nVIV = length(VIV_mode_seq);
 input.nVIV = nVIV ;
 
+showtext = false;
+showplot = false;
+
 %% Apply Kalman Filter
 % [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+[result_Main] = KalmanMain(input, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
 % display logL logSk logek
 dispstr = sprintf("logL = %f, logSk = %f, logek = %f", logL, logSk, logek);
-disp(dispstr)
+
+if showtext
+    disp(dispstr)
+end
 
 mode_deck = result_Main.mode_deck;
 
-if 0
+if 1
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
     external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
+    external_params.acc_dir = input.acc_dir;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-5, 10, 0.9, -10, -10]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [-1, 1e5, 1.1, 1, 1]; % 这里的值也是假设的
+    lb = [-5, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
+    ub = [-1, 1e5, 1.1, 1, -1, 5]; % 这里的值也是假设的
 
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
@@ -1002,11 +1009,13 @@ end
 
 %% functions
 function target = fitnessFunction(params, external_params)
-    input.lambda = 10 ^ params(1);
-    input.sigma_p = params(2);
-    input.omega_0_variation = params(3);
+    input.lambda_VIV = 10 ^ params(1);
+    input.sigma_p_VIV = params(2);
+    input.omega_0_variation_VIV = params(3);
     input.Q_value = 10 ^ params(4);
-    input.R_value = 10 ^ params(5);
+    input.sigma_noise = 10 ^ params(5);
+    input.sigma_buff = 10 ^ params(6);
+
 
     input.modesel = external_params.modesel;
     %  figPos = external_params.figPos;
@@ -1024,11 +1033,13 @@ function target = fitnessFunction(params, external_params)
     [result] = viv2013(n, false);
     input.start_time = result.startDate;
     input.end_time = result.endDate;
-    % input.acc_dir = "F:\test\result";
-    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+    input.acc_dir = external_params.acc_dir;
+    % input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
 
-    result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    % result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    [result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
     fields = fieldnames(result_Main);
+    
 
     for i = 1:numel(fields)
         input.(fields{i}) = result_Main.(fields{i});
@@ -1078,11 +1089,4 @@ function target = fitnessFunction(params, external_params)
 
 end
 
-function [amp, fre] = ee(data, dt)
-    %EE Summary of this function goes here
-    %   Detailed explanation goes here
-    [normalizeddata, amp] = splinenormalizeep(data);
-    frecarrier = gradient(normalizeddata, dt);
-    [normalizedfrecarrier, ampfrecarrier] = splinenormalizeep(frecarrier);
-    fre = ampfrecarrier / 2 / pi;
-end
+
