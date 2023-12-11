@@ -4,7 +4,7 @@ run('CommonCommand.m');
 n = 4;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
-endDate_global = result.endDate + hours(1);
+endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
 
@@ -92,8 +92,10 @@ total_plots = 10; % 或任何你需要的子图数量
 current_plot = 1;
 num_figs_in_row = [];
 
-load temp.mat
 
+data = importdata("temp.mat");
+t= data.t;
+F_filter = data.F_filter;
 
 create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
 title("ft");

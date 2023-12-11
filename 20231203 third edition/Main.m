@@ -92,12 +92,13 @@ input.end_time = endDate_global;
 
 
 
-input.lambda_VIV = 10 ^ (-1.354492187500000);
-input.sigma_p_VIV = 100;
-input.omega_0_variation_VIV =0.970101311198769;
-input.Q_value = 10^(-1.147193469879355);
-input.sigma_noise = 10^(-6.091538132834797);
-input.sigma_buff = 10^(2);
+input.lambda_VIV = 10 ^ (-8);
+input.sigma_p_VIV = 2.351118683501255e+03;
+input.omega_0_variation_VIV =1.001824979670519;
+% input.Q_value = 10^(0.353349363040930);
+input.Q_value = 10^(-2);
+input.sigma_noise = 10^(-4.997600275200348);
+input.sigma_buff = 10^(1.006063949951578);
 
 
 modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
@@ -531,7 +532,7 @@ function target = fitnessFunction(params, external_params)
     % logL = target;
 
     logL = result_Main.logL;
-    target = logL;
+    target = -logL;
 
 end
 
