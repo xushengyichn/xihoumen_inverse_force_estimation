@@ -106,3 +106,9 @@ hold on
 plot(t,F_filter)
 
 save DirectIntegration.mat ft
+
+
+%% frequency domian analysis
+
+
+

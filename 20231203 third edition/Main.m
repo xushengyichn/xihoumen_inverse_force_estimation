@@ -91,14 +91,34 @@ input.end_time = endDate_global;
 
 
 
+% 
+% input.lambda_VIV = 10 ^ (-8);
+% input.sigma_p_VIV = 2.351118683501255e+03;
+% input.omega_0_variation_VIV =1.001824979670519;
+% % input.Q_value = 10^(0.353349363040930);
+% input.Q_value = 10^(-2);
+% input.sigma_noise = 10^(-4.997600275200348);
+% input.sigma_buff = 10^(1.006063949951578);
 
-input.lambda_VIV = 10 ^ (-8);
-input.sigma_p_VIV = 2.351118683501255e+03;
-input.omega_0_variation_VIV =1.001824979670519;
+input.lambda_VIV = 10 ^ (-3.205807066435641);
+input.sigma_p_VIV = 2.364213410063755e+03;
+input.omega_0_variation_VIV =0.997084192068784;
 % input.Q_value = 10^(0.353349363040930);
-input.Q_value = 10^(-2);
-input.sigma_noise = 10^(-4.997600275200348);
-input.sigma_buff = 10^(1.006063949951578);
+% input.Q_value = 10^(0.999859620626994);
+input.Q_value = 10^(-4);
+input.sigma_noise = 10^(-1.001828754582245);
+input.sigma_buff = 10^(2.999801566796520);
+
+%% logL优化参数
+%     lb = [-10, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
+%     ub = [-1, 1e5, 1.1, -4, -3, 3]; % 这里的值也是假设的
+% input.lambda_VIV = 10 ^ (-4.576838602030042);
+% input.sigma_p_VIV = 1.124242751066664e+04;
+% input.omega_0_variation_VIV =0.911128465864995;
+% % input.Q_value = 10^(0.353349363040930);
+% input.Q_value = 10^(-4.006418300840594);
+% input.sigma_noise = 10^(-4.987443706270114);
+% input.sigma_buff = 10^(1.179949155983191);
 
 
 modesel= [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
@@ -141,8 +161,8 @@ if 0
     external_params.ft_directint = ft_directint;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-5, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [-1, 1e5, 1.1, 1, -1, 3]; % 这里的值也是假设的
+    lb = [-10, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
+    ub = [-1, 1e5, 1.1, -4, -3, 3]; % 这里的值也是假设的
 
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
@@ -535,12 +555,12 @@ function target = fitnessFunction(params, external_params)
 
 
 
-    ft_directint = external_params.ft_directint;
-    p_filt_m = result_Main.p_filt_m;
-    target = norm (ft_directint-p_filt_m);
+%     ft_directint = external_params.ft_directint;
+%     p_filt_m = result_Main.p_filt_m;
+%     target = norm (ft_directint-p_filt_m);
 
-    % logL = result_Main.logL;
-    % target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    logL = result_Main.logL;
+    target = -logL;% 因为 ga 试图最小化函数，所以取负数
 
 end
 

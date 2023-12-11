@@ -256,8 +256,8 @@ function [result_Main] = KalmanMain(input,varargin)
     % loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
     % loc_acc = [1403];
 
-    loc_acc = [989; 1403; 1783];
-    % loc_acc = [990.5; 1403; 1815.5];
+%     loc_acc = [989; 1403; 1783];
+    loc_acc = [990.5; 1403; 1815.5];
     loc_vel = [];
     loc_dis = [];
 
