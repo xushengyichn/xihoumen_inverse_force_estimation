@@ -59,7 +59,8 @@ CC = 2 * MM * Omega * xi;
 N = length(yn(1, :));
 t = (0:N - 1) / Fs;
 
-loc_acc = [989; 1403; 1783];
+% loc_acc = [989; 1403; 1783];
+loc_acc = [990.5; 1403; 1815.5];
 
 loc_vel = [];
 loc_dis = [];
@@ -81,6 +82,7 @@ Hw = 1 ./ (-omega .^ 2 + 2 * 1i * xi * Omega * omega + Omega ^ 2);
 fw = pinv(S_a * phi) * yw .* 1 ./ (-omega .^ 2 .* Hw);
 
 fw(abs(freq) < 0.3) = 0;
+% fw(abs(freq) < 0.03) = 0;
 
 ft = ifft(ifftshift(fw));
 ft_real = real(ft);
@@ -88,27 +90,34 @@ ft_imag = imag(ft);
 
 
 
-total_plots = 10; % 或任何你需要的子图数量
+total_plots = 2; % 或任何你需要的子图数量
 current_plot = 1;
 num_figs_in_row = [];
-
+newfigure = false;
+firstfigure=true;
 
 data = importdata("temp.mat");
 t= data.t;
 F_filter = data.F_filter;
 
-create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
+create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',firstfigure);
+hold on
+create_subplot(@plot, total_plots, current_plot, {t,F_filter}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure);
 title("ft");
 current_plot = current_plot + 1;
 
-
-hold on
-plot(t,F_filter)
 
 save DirectIntegration.mat ft
 
 
 %% frequency domian analysis
+fs = 50;
+[f1, magnitude_ft] =fft_transform(fs,ft);
+[f2, magnitude_F_filter] =fft_transform(fs,F_filter);
 
-
+create_subplot(@plot, total_plots, current_plot, {f1, magnitude_ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure);
+title("magnitude_ft");
+hold on
+create_subplot(@plot, total_plots, current_plot, {f2, magnitude_F_filter}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure);
+xlim([0,0.5])
 

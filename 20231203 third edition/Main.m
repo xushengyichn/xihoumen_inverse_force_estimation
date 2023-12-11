@@ -106,7 +106,8 @@ input.omega_0_variation_VIV =0.997084192068784;
 % input.Q_value = 10^(0.353349363040930);
 % input.Q_value = 10^(0.999859620626994);
 input.Q_value = 10^(-4);
-input.sigma_noise = 10^(-1.001828754582245);
+% input.sigma_noise = 10^(-1.001828754582245);
+input.sigma_noise = 10^(-4);
 input.sigma_buff = 10^(2.999801566796520);
 
 %% logL优化参数
