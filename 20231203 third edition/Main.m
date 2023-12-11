@@ -130,12 +130,15 @@ end
 mode_deck = result_Main.mode_deck;
 
 if 0
+    %% 导入直接积分获得的涡激力
+    ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
     external_params.modesel = [2,3,5,6,7,9,15,21,23,29,33,39,44,45];
     external_params.acc_dir = input.acc_dir;
     external_params.VIV_mode_seq =VIV_mode_seq;
     external_params.nVIV = nVIV;
+    external_params.ft_directint = ft_directint;
     % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-5, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
@@ -529,10 +532,15 @@ function target = fitnessFunction(params, external_params)
     % zeta2 = zetam - 0.3/100;
 
     % target = norm(zeta1 - zeta2);
-    % logL = target;
 
-    logL = result_Main.logL;
-    target = -logL;
+
+
+    ft_directint = external_params.ft_directint;
+    p_filt_m = result_Main.p_filt_m;
+    target = norm (ft_directint-p_filt_m);
+
+    % logL = result_Main.logL;
+    % target = -logL;% 因为 ga 试图最小化函数，所以取负数
 
 end
 

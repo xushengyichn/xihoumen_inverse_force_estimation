@@ -105,3 +105,4 @@ current_plot = current_plot + 1;
 hold on
 plot(t,F_filter)
 
+save DirectIntegration.mat ft
