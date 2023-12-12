@@ -33,15 +33,15 @@ input.end_time = endDate_global;
 % input.sigma_noise = 10^(-3.002040883214257);
 % input.sigma_buff = 10^(0.995376815359536);
 
-input.lambda_VIV = 10 ^ (-9.987604828668433);
-input.sigma_p_VIV = 1e2;
-input.omega_0_variation_VIV =1;
+input.lambda_VIV = 10 ^ (-5.541799085306928);
+input.sigma_p_VIV = 5.007796028376493e+04;
+input.omega_0_variation_VIV =0.999096403843444;
 % input.Q_value = 10^(0.353349363040930);
 % input.Q_value = 10^(0.999859620626994);
-input.Q_value = 10^(-6);
+input.Q_value = 10^(-6.489412332381146);
 % input.sigma_noise = 10^(-1.001828754582245);
-input.sigma_noise = 10^(-8);
-input.sigma_buff = 10^(2);
+input.sigma_noise = 10^(-1);
+input.sigma_buff = 10^(1);
 
 %% logL优化参数
 %     lb = [-10, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
@@ -96,7 +96,7 @@ if 1
     % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-12, 1e2, 0.98, -10, -8, 0]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [-4, 1e5, 1.02, -5, -3, 3]; % 这里的值也是假设的
+    ub = [-4, 1e5, 1.02, -5, -1, 2]; % 这里的值也是假设的
 
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
@@ -178,8 +178,8 @@ if fig_bool
     current_plot = 1;
     num_figs_in_row = [];
     figWidthFactor = 1.5;
-    figPosition = [1080*2.5,100];
-    % figPosition = [100,100];
+%     figPosition = [1080*2.5,100];
+    figPosition = [100,100];
     newfigure = false;
     holdon = true;
     
