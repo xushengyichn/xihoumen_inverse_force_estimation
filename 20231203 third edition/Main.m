@@ -34,7 +34,7 @@ input.end_time = endDate_global;
 % input.sigma_buff = 10^(0.995376815359536);
 
 input.lambda_VIV = 10 ^ (-9.987604828668433);
-input.sigma_p_VIV = 7.263593737260318e+04;
+input.sigma_p_VIV = 1e2;
 input.omega_0_variation_VIV =1;
 % input.Q_value = 10^(0.353349363040930);
 % input.Q_value = 10^(0.999859620626994);
@@ -96,7 +96,7 @@ if 1
     % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-12, 1e2, 0.98, -10, -8, 0]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [-1, 1e5, 1.02, -5, -3, 3]; % 这里的值也是假设的
+    ub = [-4, 1e5, 1.02, -5, -3, 3]; % 这里的值也是假设的
 
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
@@ -494,7 +494,9 @@ function target = fitnessFunction(params, external_params)
 %     target = norm (ft_directint-p_filt_m);
 
     logL = result_Main.logL;
-    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    logek = result_Main.logek;
+%     target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    target = abs(logek);% 因为 ga 试图最小化函数，所以取负数
 
 end
 
