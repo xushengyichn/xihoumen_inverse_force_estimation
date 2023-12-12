@@ -21,21 +21,24 @@ input.end_time = endDate_global;
 
 
 
-% 
-% input.lambda_VIV = 10 ^ (-8);
-% input.sigma_p_VIV = 2.351118683501255e+03;
-% input.omega_0_variation_VIV =1.001824979670519;
-% % input.Q_value = 10^(0.353349363040930);
-% input.Q_value = 10^(-2);
-% input.sigma_noise = 10^(-4.997600275200348);
-% input.sigma_buff = 10^(1.006063949951578);
 
-input.lambda_VIV = 10 ^ (-8);
-input.sigma_p_VIV = 100;
+
+% input.lambda_VIV = 10 ^ (-9.987604828668433);
+% input.sigma_p_VIV = 7.263593737260318e+04;
+% input.omega_0_variation_VIV =1;
+% % input.Q_value = 10^(0.353349363040930);
+% % input.Q_value = 10^(0.999859620626994);
+% input.Q_value = 10^(-2.007600120359328);
+% % input.sigma_noise = 10^(-1.001828754582245);
+% input.sigma_noise = 10^(-3.002040883214257);
+% input.sigma_buff = 10^(0.995376815359536);
+
+input.lambda_VIV = 10 ^ (-9.987604828668433);
+input.sigma_p_VIV = 7.263593737260318e+04;
 input.omega_0_variation_VIV =1;
 % input.Q_value = 10^(0.353349363040930);
 % input.Q_value = 10^(0.999859620626994);
-input.Q_value = 10^(-2);
+input.Q_value = 10^(-6);
 % input.sigma_noise = 10^(-1.001828754582245);
 input.sigma_noise = 10^(-8);
 input.sigma_buff = 10^(2);
@@ -80,7 +83,7 @@ end
 
 mode_deck = result_Main.mode_deck;
 
-if 0
+if 1
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
@@ -92,8 +95,8 @@ if 0
     external_params.ft_directint = ft_directint;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-10, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [-1, 1e5, 1.1, -4, -3, 3]; % 这里的值也是假设的
+    lb = [-12, 1e2, 0.98, -10, -8, 0]; % 这里的值是假设的，请根据您的情况进行修改
+    ub = [-1, 1e5, 1.02, -5, -3, 3]; % 这里的值也是假设的
 
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引

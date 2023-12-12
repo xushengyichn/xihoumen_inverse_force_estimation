@@ -385,7 +385,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
     % [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
     % [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'steadystate','no');
-    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', false,'showtext',showtext_char);
+    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', true,'showtext',showtext_char);
     % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
     xa_history = x_k_k;
     pa_history = P_k_k;
