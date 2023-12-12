@@ -1,48 +1,5 @@
 clc; clear; close all;
 run('CommonCommand.m');
-% computer_name = getenv('COMPUTERNAME');
-% 
-% if strcmp(computer_name, 'SHENGYI_HP')
-%     addpath(genpath("F:\git\ssm_tools\"))
-%     addpath(genpath("F:\git\Function_shengyi_package\"))
-%     addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
-%     addpath(genpath("F:\git\HHT-Tutorial\"))
-% elseif strcmp(computer_name, 'mac')
-%     addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
-%     addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
-%     addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
-%     addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
-% elseif strcmp(computer_name, 'ROG-SHENGYI')
-%     addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-%     addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
-%     addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
-%     addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
-%     addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
-% elseif strcmp(computer_name, 'NTNU08916')
-%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\Function_shengyi_package"))
-%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\ssm_tools_sy"))
-%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_inverse_force_estimation\FEM_model"))
-%     addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_data_extract"))
-% elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
-%     addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
-%     addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
-%     addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model"))
-%     addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_data_extract"))
-% else
-%     error("Please add path first.")
-% end
-% 
-% subStreamNumberDefault = 2132;
-% 
-% run("InitScript.m")
-% 
-% %% 0 绘图参数
-% fig_bool = ON;
-% num_figs_in_row = 6; %每一行显示几个图
-% figPos = figPosX3Large; %图的大小，参数基于InitScript.m中的设置
-% %设置图片间隔
-% gap_between_images = [0, 0];
-% figureIdx = 0;
 
 %% 输入参数
 % input.num_figs_in_row = 12; %每一行显示几个图
@@ -61,33 +18,6 @@ endDate_global = result.endDate;
 input.start_time = startDate_global;
 input.end_time = endDate_global;
 
-% computer_name = getenv('COMPUTERNAME');
-% 
-% if strcmp(computer_name, 'SHENGYI_HP')
-%     input.acc_dir = "F:\test\result";
-%     input.wind_dir = "F:\test\result_wind_10min";
-% elseif strcmp(computer_name, 'mac')
-%     input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-%     input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
-% elseif strcmp(computer_name, 'ROG-SHENGYI')
-%     input.acc_dir = "D:\xihoumendata\acc";
-%     input.wind_dir = "D:\xihoumendata\wind";
-% elseif strcmp(computer_name, 'ketizu')
-%     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-%     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
-% elseif strcmp(computer_name, 'NTNU08916')
-%     input.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
-%     input.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";
-% elseif strcmp(computer_name, 'WIN-IUMUERP66UT')
-%     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-%     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
-% else
-%     error("Please add data folder first.")
-% end
-
-
-% input.omega_0_variation = 1;
-
 
 
 
@@ -100,15 +30,15 @@ input.end_time = endDate_global;
 % input.sigma_noise = 10^(-4.997600275200348);
 % input.sigma_buff = 10^(1.006063949951578);
 
-input.lambda_VIV = 10 ^ (-3.205807066435641);
-input.sigma_p_VIV = 2.364213410063755e+03;
-input.omega_0_variation_VIV =0.997084192068784;
+input.lambda_VIV = 10 ^ (-8);
+input.sigma_p_VIV = 100;
+input.omega_0_variation_VIV =1;
 % input.Q_value = 10^(0.353349363040930);
 % input.Q_value = 10^(0.999859620626994);
-input.Q_value = 10^(-4);
+input.Q_value = 10^(-2);
 % input.sigma_noise = 10^(-1.001828754582245);
-input.sigma_noise = 10^(-4);
-input.sigma_buff = 10^(2.999801566796520);
+input.sigma_noise = 10^(-8);
+input.sigma_buff = 10^(2);
 
 %% logL优化参数
 %     lb = [-10, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
@@ -258,7 +188,7 @@ if fig_bool
         else
             create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'holdon',holdon);
         end
-        legend("Force from direct integration")
+        legend("Force from Kalman Filter")
         title("modal force for "+"mode"+modesel(VIV_mode_seq(k1)));
         current_plot = current_plot + 1;
         ylim([-100,100])

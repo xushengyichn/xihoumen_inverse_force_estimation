@@ -308,9 +308,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
     %% 4 反算模态力
     C_buff = sigma_buff^2*eye(nmodes);
-    Q_buff_c= B_c_buff * C_buff * B_c_buff';
 
-    Q_buff_d = Q_buff_c*dt;
 
 
     Q = Q_value * eye(ns);
@@ -368,11 +366,13 @@ function [result_Main] = KalmanMain(input,varargin)
     A_a_m = Fad_m;
     G_a_m = Gad_m;
     Q_a_m = Qad_m;
+    % Q_buff_c= B_c_buff * C_buff * B_c_buff';
+    % Q_buff_d = Q_buff_c*dt;
+    Q_buff_d = B_d_buff * C_buff * B_d_buff'/dt;
     Q_a_m(1:ns,1:ns)=Q_a_m(1:ns,1:ns)+Q_buff_d;
-    R_a_m = J_d_buff*C_buff*J_d_buff'+ R;
-    %TODO:S matirx
-    % S_a_m = blkdiag(B_c_buff*C_buff*J_c_buff',zeros(size(L_c_m)))*dt;
-    S_a_m = [B_c_buff*C_buff*J_c_buff'*dt;zeros(size(L_c_m,1),size(B_c_buff*C_buff*J_c_buff'*dt,2))];
+    R_a_m = J_d_buff*C_buff*J_d_buff'*dt+ R;
+    S_a_m = [B_d_buff*C_buff*J_d_buff';zeros(size(L_c_m,1),size(B_d_buff*C_buff*J_d_buff',2))];
+    % TODO: here might be wrong
     yn_a = yn;
     N = length(Acc_Data.mergedData.Time);
     NN = N;
@@ -385,7 +385,7 @@ function [result_Main] = KalmanMain(input,varargin)
 
     % [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
     % [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'steadystate','no');
-    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', true,'showtext',showtext_char);
+    [x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', false,'showtext',showtext_char);
     % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
     xa_history = x_k_k;
     pa_history = P_k_k;
