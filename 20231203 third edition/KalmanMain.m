@@ -370,8 +370,8 @@ function [result_Main] = KalmanMain(input,varargin)
     % Q_buff_d = Q_buff_c*dt;
     Q_buff_d = B_d_buff * C_buff * B_d_buff'/dt;
     Q_a_m(1:ns,1:ns)=Q_a_m(1:ns,1:ns)+Q_buff_d;
-    R_a_m = J_d_buff*C_buff*J_d_buff'*dt+ R;
-    S_a_m = [B_d_buff*C_buff*J_d_buff';zeros(size(L_c_m,1),size(B_d_buff*C_buff*J_d_buff',2))];
+    R_a_m = J_d_buff*C_buff*J_d_buff'/dt+ R;
+    S_a_m = [B_d_buff*C_buff*J_d_buff'/dt;zeros(size(L_c_m,1),size(B_d_buff*C_buff*J_d_buff',2))];
     % TODO: here might be wrong
     yn_a = yn;
     N = length(Acc_Data.mergedData.Time);
