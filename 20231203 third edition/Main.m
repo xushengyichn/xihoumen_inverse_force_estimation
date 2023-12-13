@@ -33,15 +33,15 @@ input.end_time = endDate_global;
 % input.sigma_noise = 10^(-3.002040883214257);
 % input.sigma_buff = 10^(0.995376815359536);
 
-input.lambda_VIV = 10 ^ (-5.541799085306928);
-input.sigma_p_VIV = 5.007796028376493e+04;
-input.omega_0_variation_VIV =0.999096403843444;
+input.lambda_VIV = 10 ^ (-8.725260766057426);
+input.sigma_p_VIV = 4.594524428349437e+04;
+input.omega_0_variation_VIV =1.001880394311541;
 % input.Q_value = 10^(0.353349363040930);
 % input.Q_value = 10^(0.999859620626994);
-input.Q_value = 10^(-6.489412332381146);
-% input.sigma_noise = 10^(-1.001828754582245);
-input.sigma_noise = 10^(-1);
-input.sigma_buff = 10^(1);
+input.Q_value = 10^(-5.056871357602549);
+% input.sigma_noise = 10^(-1.004737165205446);
+input.sigma_noise = 10^(-1.301006929986168);
+input.sigma_buff = 10^(0.070362659875298);
 
 %% logL优化参数
 %     lb = [-10, 10, 0.9, -10, -5, 1]; % 这里的值是假设的，请根据您的情况进行修改
@@ -83,7 +83,7 @@ end
 
 mode_deck = result_Main.mode_deck;
 
-if 1
+if 0
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
@@ -170,6 +170,8 @@ wind_dir = input.wind_dir;
 
 t = result_Main.t;
 F_filter = p_filt_m;
+
+
 
 %% plot
 if fig_bool

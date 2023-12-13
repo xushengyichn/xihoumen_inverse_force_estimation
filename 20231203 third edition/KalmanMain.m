@@ -439,7 +439,8 @@ function [result_Main] = KalmanMain(input,varargin)
     logek=0;
     for k1 = 1:nt
         ek = yn(:,k1)-yn_reconstruct(:,k1);
-        logek_i = -0.5*ek.'*result.invSk*ek;
+        % logek_i = -0.5*ek.'*result.invSk*ek;
+        logek_i = -0.5*ek.'*ek;
         logek = logek + logek_i;
     end
 

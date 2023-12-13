@@ -43,6 +43,8 @@ elseif strcmp(computer_name,'NTNU08916')
     addpath(genpath("C:\Users\shengyix\Documents\GitHub\xihoumen_data_extract"))
 elseif strcmp(computer_name,'WIN-JFOFTCAS8GU')
     addpath(genpath("D:\XSY\ForceEstimation"))
+elseif strcmp(computer_name,'WIN-IUMUERP66UT')
+    addpath(genpath("C:\Users\xushengyi\Documents\Github"))
 else
     error("Please add path first.")
 end
@@ -89,7 +91,7 @@ elseif strcmp(computer_name,'xushengyi')
 elseif strcmp(computer_name,'ROG-SHENGYI')
     input.acc_dir = "D:\xihoumendata\acc";
     input.wind_dir = "D:\xihoumendata\wind";
-elseif strcmp(computer_name,'ketizu')
+elseif strcmp(computer_name,'WIN-IUMUERP66UT')
     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 elseif strcmp(computer_name,'NTNU08916')
