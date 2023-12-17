@@ -171,6 +171,8 @@ wind_dir = input.wind_dir;
 t = result_Main.t;
 F_filter = p_filt_m;
 
+amp_temp = amp_cell{1}{1};
+t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
 
 
 %% plot

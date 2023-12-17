@@ -19,15 +19,15 @@ f_keep = 0.33 * [0.9, 1.1];
 timeDifferences = diff(Acc_Data.mergedData.Time); % Returns a duration array
 dt = seconds(timeDifferences(1)); % Converts the first duration value to seconds and assigns to dt
 fs = 1 / dt;
-Acc_Data.mergedData.AC2_1 = fft_filter(fs, Acc_Data.mergedData.AC2_1, f_keep)';
-Acc_Data.mergedData.AC2_2 = fft_filter(fs, Acc_Data.mergedData.AC2_2, f_keep)';
-Acc_Data.mergedData.AC2_3 = fft_filter(fs, Acc_Data.mergedData.AC2_3, f_keep)';
-Acc_Data.mergedData.AC3_1 = fft_filter(fs, Acc_Data.mergedData.AC3_1, f_keep)';
-Acc_Data.mergedData.AC3_2 = fft_filter(fs, Acc_Data.mergedData.AC3_2, f_keep)';
-Acc_Data.mergedData.AC3_3 = fft_filter(fs, Acc_Data.mergedData.AC3_3, f_keep)';
-Acc_Data.mergedData.AC4_1 = fft_filter(fs, Acc_Data.mergedData.AC4_1, f_keep)';
-Acc_Data.mergedData.AC4_2 = fft_filter(fs, Acc_Data.mergedData.AC4_2, f_keep)';
-Acc_Data.mergedData.AC4_3 = fft_filter(fs, Acc_Data.mergedData.AC4_3, f_keep)';
+% Acc_Data.mergedData.AC2_1 = fft_filter(fs, Acc_Data.mergedData.AC2_1, f_keep)';
+% Acc_Data.mergedData.AC2_2 = fft_filter(fs, Acc_Data.mergedData.AC2_2, f_keep)';
+% Acc_Data.mergedData.AC2_3 = fft_filter(fs, Acc_Data.mergedData.AC2_3, f_keep)';
+% Acc_Data.mergedData.AC3_1 = fft_filter(fs, Acc_Data.mergedData.AC3_1, f_keep)';
+% Acc_Data.mergedData.AC3_2 = fft_filter(fs, Acc_Data.mergedData.AC3_2, f_keep)';
+% Acc_Data.mergedData.AC3_3 = fft_filter(fs, Acc_Data.mergedData.AC3_3, f_keep)';
+% Acc_Data.mergedData.AC4_1 = fft_filter(fs, Acc_Data.mergedData.AC4_1, f_keep)';
+% Acc_Data.mergedData.AC4_2 = fft_filter(fs, Acc_Data.mergedData.AC4_2, f_keep)';
+% Acc_Data.mergedData.AC4_3 = fft_filter(fs, Acc_Data.mergedData.AC4_3, f_keep)';
 
 
 yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
@@ -121,3 +121,20 @@ hold on
 create_subplot(@plot, total_plots, current_plot, {f2, magnitude_F_filter}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure);
 xlim([0,0.5])
 
+figure
+current_plot =  1;
+[f, magnitude] =fft_transform(fs,yn(3, :));
+create_subplot(@plot, total_plots, current_plot, {t, yn(3, :)}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
+title("Time domain");
+xlabel("Time")
+ylabel("Acceleration (m/s^2)")
+print -clipboard -dbitmap
+
+current_plot = current_plot + 1;
+create_subplot(@plot, total_plots, current_plot, {f, magnitude}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
+xlim([0,0.5])
+set(gca,'YScale','log')
+title("Frequency domain");
+xlabel("Frequency (Hz)")
+ylabel("Amplitude")
+current_plot = current_plot + 1;
