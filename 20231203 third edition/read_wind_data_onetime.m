@@ -1,4 +1,4 @@
-function [result] = read_wind_data_onetime(timestamps,duration,dirName)
+function [result] = read_wind_data_onetime(timestamps,duration,dirName,sensors)
      % 如果没有输入参数，执行以下测试或调试代码
     if nargin == 0
         clc;clear;close all;
@@ -9,7 +9,8 @@ function [result] = read_wind_data_onetime(timestamps,duration,dirName)
         timestamps = [timestamp1 ;timestamp2];
         duration = minutes(10);
         dirName = 'F:\test\result_wind\';
-        [result] = read_wind_data_onetime(timestamps,duration,dirName);
+        sensors = [0 0 0 0 1 1];% 0 代表不导出，1 代表导出 分别对应 UA1 UA2 UA3 UA4 UA5 UA6
+        [result] = read_wind_data_onetime(timestamps,duration,dirName,sensors);
         disp('Tests completed.');
         return;
     end
@@ -70,74 +71,106 @@ function [result] = read_wind_data_onetime(timestamps,duration,dirName)
         % 假设表格中有一个名为 'Timestamp' 的时间戳列
         segment_temp = whole_table(whole_table.Time >= start_time & whole_table.Time <= end_time, :);
         time_series = segment_temp.Time;
-        U_x_1 = segment_temp.UA1_x;%north
-        U_y_1 = segment_temp.UA1_y;%west
-        U_z_1 = segment_temp.UA1_z;%up
 
-        U_x_2 = segment_temp.UA2_x;%north
-        U_y_2 = segment_temp.UA2_y;%west
-        U_z_2 = segment_temp.UA2_z;%up
+        if sensors(1) == 0
+            UA1_x = [];
+            UA1_y = [];
+            UA1_z = [];
+        else
+            UA1_x = segment_temp.UA1_x;%north
+            UA1_y = segment_temp.UA1_y;%west
+            UA1_z = segment_temp.UA1_z;%up
+            result_1=cal_wind_property(UA1_x,UA1_y,UA1_z,45);
+            resultsTable_UA1 = struct2table(result_1); % Convert struct result to table
+            resultsTable_UA1.timestamp = timestamp;
+            resultsTable_UA1 = movevars(resultsTable_UA1, 'timestamp', 'Before', resultsTable_UA1.Properties.VariableNames{1});
+            UA1 = [UA1;resultsTable_UA1];
+        end
 
-        U_x_3 = segment_temp.UA3_x;%north
-        U_y_3 = segment_temp.UA3_y;%west
-        U_z_3 = segment_temp.UA3_z;%up
+        if sensors(2) == 0
+            UA2_x = [];
+            UA2_y = [];
+            UA2_z = [];
+        else
+            UA2_x = segment_temp.UA2_x;%north
+            UA2_y = segment_temp.UA2_y;%west
+            UA2_z = segment_temp.UA2_z;%up
+            result_2=cal_wind_property(UA2_x,UA2_y,UA2_z,45);
+            resultsTable_UA2 = struct2table(result_2); % Convert struct result to table
+            resultsTable_UA2.timestamp = timestamp;
+            resultsTable_UA2 = movevars(resultsTable_UA2, 'timestamp', 'Before', resultsTable_UA2.Properties.VariableNames{1});
+            UA2 = [UA2;resultsTable_UA2];
+        end
 
-        U_x_4 = segment_temp.UA4_x;%north
-        U_y_4 = segment_temp.UA4_y;%west
-        U_z_4 = segment_temp.UA4_z;%up
+        if sensors(3) == 0
+            UA3_x = [];
+            UA3_y = [];
+            UA3_z = [];
+        else
+            UA3_x = segment_temp.UA3_x;%north
+            UA3_y = segment_temp.UA3_y;%west
+            UA3_z = segment_temp.UA3_z;%up
+            result_3=cal_wind_property(UA3_x,UA3_y,UA3_z,45);
+            resultsTable_UA3 = struct2table(result_3); % Convert struct result to table
+            resultsTable_UA3.timestamp = timestamp;
+            resultsTable_UA3 = movevars(resultsTable_UA3, 'timestamp', 'Before', resultsTable_UA3.Properties.VariableNames{1});
+            UA3 = [UA3;resultsTable_UA3];
+    
+        end
 
-        U_x_5 = segment_temp.UA5_x;%north
-        U_y_5 = segment_temp.UA5_y;%west
-        U_z_5 = segment_temp.UA5_z;%up
+        if sensors(4) == 0
+            UA4_x = [];
+            UA4_y = [];
+            UA4_z = [];
+        else
+            UA4_x = segment_temp.UA4_x;%north
+            UA4_y = segment_temp.UA4_y;%west
+            UA4_z = segment_temp.UA4_z;%up
+            result_4=cal_wind_property(UA4_x,UA4_y,UA4_z,45);
+            resultsTable_UA4 = struct2table(result_4); % Convert struct result to table
+            resultsTable_UA4.timestamp = timestamp;
+            resultsTable_UA4 = movevars(resultsTable_UA4, 'timestamp', 'Before', resultsTable_UA4.Properties.VariableNames{1});
+            UA4 = [UA4;resultsTable_UA4];
+        end
 
-        U_x_6 = segment_temp.UA6_x;%north
-        U_y_6 = segment_temp.UA6_y;%west
-        U_z_6 = segment_temp.UA6_z;%up
+        if sensors(5) == 0
+            UA5_x = [];
+            UA5_y = [];
+            UA5_z = [];
+        else
+            UA5_x = segment_temp.UA5_x;%north
+            UA5_y = segment_temp.UA5_y;%west
+            UA5_z = segment_temp.UA5_z;%up
+            result_5=cal_wind_property(UA5_x,UA5_y,UA5_z,45);
+            resultsTable_UA5 = struct2table(result_5); % Convert struct result to table
+            resultsTable_UA5.timestamp = timestamp;
+            resultsTable_UA5 = movevars(resultsTable_UA5, 'timestamp', 'Before', resultsTable_UA5.Properties.VariableNames{1});
+            UA5 = [UA5;resultsTable_UA5];
+        end
+
+        if sensors(6) == 0
+            UA6_x = [];
+            UA6_y = [];
+            UA6_z = [];
+        else
+            UA6_x = segment_temp.UA6_x;%north
+            UA6_y = segment_temp.UA6_y;%west
+            UA6_z = segment_temp.UA6_z;%up
+            result_6=cal_wind_property(UA6_x,UA6_y,UA6_z,45);
+            resultsTable_UA6 = struct2table(result_6); % Convert struct result to table
+            resultsTable_UA6.timestamp = timestamp;
+            resultsTable_UA6 = movevars(resultsTable_UA6, 'timestamp', 'Before', resultsTable_UA6.Properties.VariableNames{1});
+            UA6 = [UA6;resultsTable_UA6];
+        end
+        
+
 
         % UA3是靠南安装的（假定西堠门桥45°走向，测量风向为45°-225°），UA4是靠北安装的（假定西堠门桥45°走向，测量风向为225°-360°，0°-45°）
 
-        result_1=cal_wind_property(U_x_1,U_y_1,U_z_1,45);
-        resultsTable_UA1 = struct2table(result_1); % Convert struct result to table
 
 
-        result_2=cal_wind_property(U_x_2,U_y_2,U_z_2,45);
-        resultsTable_UA2 = struct2table(result_2); % Convert struct result to table
 
 
-        result_3=cal_wind_property(U_x_3,U_y_3,U_z_3,45);
-        resultsTable_UA3 = struct2table(result_3); % Convert struct result to table
-
-
-        result_4=cal_wind_property(U_x_4,U_y_4,U_z_4,45);
-        resultsTable_UA4 = struct2table(result_4); % Convert struct result to table
-
-        result_5=cal_wind_property(U_x_5,U_y_5,U_z_5,45);
-        resultsTable_UA5 = struct2table(result_5); % Convert struct result to table
-
-
-        result_6=cal_wind_property(U_x_6,U_y_6,U_z_6,45);
-        resultsTable_UA6 = struct2table(result_6); % Convert struct result to table
-
-        resultsTable_UA1.timestamp = timestamp;
-        resultsTable_UA2.timestamp = timestamp;
-        resultsTable_UA3.timestamp = timestamp;
-        resultsTable_UA4.timestamp = timestamp;
-        resultsTable_UA5.timestamp = timestamp;
-        resultsTable_UA6.timestamp = timestamp;
-
-        resultsTable_UA1 = movevars(resultsTable_UA1, 'timestamp', 'Before', resultsTable_UA1.Properties.VariableNames{1});
-        resultsTable_UA2 = movevars(resultsTable_UA2, 'timestamp', 'Before', resultsTable_UA2.Properties.VariableNames{1});
-        resultsTable_UA3 = movevars(resultsTable_UA3, 'timestamp', 'Before', resultsTable_UA3.Properties.VariableNames{1});
-        resultsTable_UA4 = movevars(resultsTable_UA4, 'timestamp', 'Before', resultsTable_UA4.Properties.VariableNames{1});
-        resultsTable_UA5 = movevars(resultsTable_UA5, 'timestamp', 'Before', resultsTable_UA5.Properties.VariableNames{1});
-        resultsTable_UA6 = movevars(resultsTable_UA6, 'timestamp', 'Before', resultsTable_UA6.Properties.VariableNames{1});
-
-        UA1 = [UA1;resultsTable_UA1];
-        UA2 = [UA2;resultsTable_UA2];
-        UA3 = [UA3;resultsTable_UA3];
-        UA4 = [UA4;resultsTable_UA4];
-        UA5 = [UA5;resultsTable_UA5];
-        UA6 = [UA6;resultsTable_UA6];
 
 
         

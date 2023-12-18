@@ -15,8 +15,8 @@ n = 4;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
 endDate_global = result.endDate;
-input.start_time = startDate_global;
-input.end_time = endDate_global;
+input.start_time = startDate_global-hours(0.5);
+input.end_time = endDate_global+hours(1);
 
 
 
@@ -369,7 +369,67 @@ if fig_bool
                 ylabel("Damping ratio")
             end
 
+     end
+
+     %% wind speed with amplitude and damping ratio
+     duration = minutes(2);
+     windspeed_result=read_wind_data_onetime(t_cycle_mean_temp,duration,input.wind_dir_all,[1 1 0 0 0 0]);
+
+    UA5 = windspeed_result.UA1;
+    UA6 = windspeed_result.UA2;
+
+    beta_deg_mean_UA5 = UA5.beta_deg_mean;
+    beta_deg_mean_UA6 = UA6.beta_deg_mean;
+
+    % judge if the wind direction of both UA5 and UA6 is from 45°-225°
+    for k1 = 1:length(beta_deg_mean_UA5)
+
+        if and(beta_deg_mean_UA5(k1) > 45, beta_deg_mean_UA5(k1) < 225) && and(beta_deg_mean_UA6(k1) > 45, beta_deg_mean_UA6(k1) < 225)
+            U_sel(k1) = UA5.U(k1);
+            AoA_sel(k1)=UA5.alpha_deg_mean(k1);
+
+            % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
+        elseif or(and(beta_deg_mean_UA5(k1) > 225, beta_deg_mean_UA5(k1) < 360), and(beta_deg_mean_UA5(k1) > 0, beta_deg_mean_UA5(k1) < 45)) && or(and(beta_deg_mean_UA6(k1) > 225, beta_deg_mean_UA6(k1) < 360), and(beta_deg_mean_UA6(k1) > 0, beta_deg_mean_UA6(k1) < 45))
+            U_sel(k1) = UA6.U(k1);
+            AoA_sel(k1)=UA6.alpha_deg_mean(k1);
+        else
+
+            if abs(UA5.alpha_deg_mean(k1)) < abs(UA6.alpha_deg_mean)
+                U_sel(k1) =UA5.U(k1);
+                AoA_sel(K1)=UA5.alpha_deg_mean(k1);
+            else
+                U_sel(k1) =UA6.U(k1);
+                AoA_sel(K1)=UA6.alpha_deg_mean(k1);
+            end
+
+            disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
+        end
+
     end
+    
+    figure
+    amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
+    zeta_filter = zeta_all_cell{1}{1};
+    % C=rescale(AoA_sel,10,100);
+    S=rescale(secondsFromReference,10,100);
+    C = AoA_sel;
+    scatter3(amp_filter,U_sel,zeta_filter,S,C)
+                        % 设置 colormap
+
+                colorbar
+    colormap('jet');  % 选择一个颜色映射，比如 'parula'
+    clim([-2 0]);       % 设置颜色映射的数据范围为 -3 到 +3
+
+    zlim([-0.01,0])
+    xlim([0.01,0.09])
+    ylim([5,12])
+    % 定义平面的四个角的 x, y, 和 z 坐标
+    x = [min(amp_filter), max(amp_filter), max(amp_filter), min(amp_filter)];
+    y = [min(U_sel), min(U_sel), max(U_sel), max(U_sel)];
+    z = [-0.003, -0.003, -0.003, -0.003]; % 所有点都在 z = 0.003 高度
+
+    % 创建透明平面
+    patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
 
 end
 
