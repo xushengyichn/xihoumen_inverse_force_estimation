@@ -25,10 +25,10 @@ input.end_time = endDate_global;
 % input.sigma_noise = 10 ^ (-1.301006929986168);
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
-input.lambda_VIV = 10 ^ (-8.725260766057426);
-input.sigma_p_VIV = 4.594524428349437e+04;
-input.Q_value = 10 ^ (-5.056871357602549);
-input.sigma_buff = 10 ^ (0.070362659875298);
+input.lambda_VIV = 10 ^ (-3.684938247891515);
+input.sigma_p_VIV = 2.845907607798993e+02;
+input.Q_value = 10 ^ (-7.743718510318171);
+input.sigma_buff = 10 ^ (1.351597903572570);
 
 input.omega_0_variation_VIV = 1;
 input.sigma_noise = 10 ^ (-1.301006929986168);
@@ -108,9 +108,15 @@ if 0 % 选择参数进行优化
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
 
     options = optimoptions('ga', 'MaxGenerations', 100, 'Display', 'iter', 'UseParallel', true);
-    [x, fval] = ga(@(params) fitnessFunction(params, external_params), 4, [], [], [], [], lb, ub, [], IntCon, options);
+    [x, fval] = ga(@(params) fitnessFunction_sel(params, external_params), 4, [], [], [], [], lb, ub, [], IntCon, options);
     % 保存结果
     save('optimization_results.mat', 'x', 'fval');
+
+    input.lambda_VIV = 10 ^ (x(1));
+    input.sigma_p_VIV = x(2);
+    input.Q_value = 10 ^ (x(3));
+    input.sigma_buff = 10 ^ (x(4));
+
 
 end
 
@@ -231,24 +237,24 @@ if fig_bool
     ylabel('Dimensionless displacement')
 
     %% reconstructed data comparison (reconstructed vs kalman filter vitural sensoring)
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape(VIV_mode_seq) * u, t, h_hat(15, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-    legend("Kalman filter reconstruct", 'filtered from kalman filter')
+    create_subplot(@plot, total_plots, current_plot, { t, h_hat(15, :),t, node_shape(VIV_mode_seq) * u}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    legend( 'filtered from kalman filter',"Kalman filter reconstruct")
     % title("reconstructed displacement vs kalman filter vitural sensoring")
     title("Dis (1/2span)")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
     ylabel('Displacement (m)')
 
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape(VIV_mode_seq) * udot, t, h_hat(9, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-    legend("Kalman filter reconstruct", 'filtered from kalman filter')
+    create_subplot(@plot, total_plots, current_plot, { t, h_hat(9, :),t, node_shape(VIV_mode_seq) * udot}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    legend( 'filtered from kalman filter',"Kalman filter reconstruct")
     % title("reconstructed velocity vs kalman filter vitural sensoring")
     title("Vel (1/2span)")
     current_plot = current_plot + 1;
     xlabel('Time (s)')
     ylabel('Velocity (m/s)')
 
-    create_subplot(@plot, total_plots, current_plot, {t, node_shape(VIV_mode_seq) * u2dot, t, h_hat(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-    legend("Kalman filter reconstruct", 'filtered from kalman filter')
+    create_subplot(@plot, total_plots, current_plot, { t, h_hat(3, :),t, node_shape(VIV_mode_seq) * u2dot}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    legend( 'filtered from kalman filter',"Kalman filter reconstruct")
     % title("reconstructed acceleration vs kalman filter vitural sensoring")
     title("Acc (1/2span)")
     current_plot = current_plot + 1;
