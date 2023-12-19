@@ -3,9 +3,10 @@ function [result] = read_acceleration_data(start_time,end_time,dirName)
         if nargin == 0
             clc;clear;close all;
             disp('Running tests...');
-            start_time = datetime('2013-02-15 13:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-            end_time = datetime('2013-02-17 05:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
-            dirName = 'F:\test\result\';
+            run("CommonCommand.m")
+            start_time = datetime('2013-02-06 00:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+            end_time = datetime('2013-02-06 06:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
+            dirName = input.acc_dir;
             [result] = read_acceleration_data(start_time,end_time,dirName);
             disp('Tests completed.');
             return;
