@@ -93,6 +93,7 @@ elseif strcmp(computer_name,'xushengyi')
 elseif strcmp(computer_name,'ROG-SHENGYI')
     input.acc_dir = "D:\xihoumendata\acc";
     input.wind_dir = "D:\xihoumendata\wind";
+    input.wind_dir_all = "D:\xihoumendata\wind_all";
 elseif strcmp(computer_name,'WIN-IUMUERP66UT')
     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
