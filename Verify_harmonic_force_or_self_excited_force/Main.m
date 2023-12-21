@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com
 %Date: 2023-01-25 15:24:39
-%LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-02 22:37:24
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\Verify_harmonic_force_or_self_excited_force\Main.m
+%LastEditors: xushengyichn xushengyichn@outlook.com
+%LastEditTime: 2023-12-21 21:16:30
+%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/Verify_harmonic_force_or_self_excited_force/Main.m
 %Description: 本脚本功能为输入一组TMD参数以及气动力控制参数，获得多阶模态涡振的响应
 %
 %Copyright (c) 2023 by xushengyichn 54436848+xushengyichn@users.noreply.github.com, All Rights Reserved.
@@ -11,19 +11,20 @@
 clc
 clear
 close all
-addpath(genpath("F:\git\Function_shengyi_package"))
-addpath(genpath("F:\git\ssm_tools"))
-addpath(genpath("F:\git\HHT-Tutorial\HuangEMD"))
-addpath(genpath("D:\matlab\Mingjie杰哥参数识别程序\HHT-Tutorial-master"))
-subStreamNumberDefault = 2132;
-run('InitScript.m');
-%% 0 绘图参数
-fig_bool = ON;
-num_figs_in_row = 10; %每一行显示几个图
-figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
-%设置图片间隔
-gap_between_images = [0, 0];
-figureIdx = 0;
+run("CommonCommand.m")
+% addpath(genpath("F:\git\Function_shengyi_package"))
+% addpath(genpath("F:\git\ssm_tools"))
+% addpath(genpath("F:\git\HHT-Tutorial\HuangEMD"))
+% addpath(genpath("D:\matlab\Mingjie杰哥参数识别程序\HHT-Tutorial-master"))
+% subStreamNumberDefault = 2132;
+% run('InitScript.m');
+% %% 0 绘图参数
+% fig_bool = ON;
+% num_figs_in_row = 10; %每一行显示几个图
+% figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
+% %设置图片间隔
+% gap_between_images = [0, 0];
+% figureIdx = 0;
 
 %% 输入预先设定的参数
 % Preset parameters
@@ -228,16 +229,25 @@ d = 100;
 p = 0;
 [peaks, locs] = findpeaks(Fa,'MinPeakDistance', d,'MinPeakProminence', p);
 
+
+
+total_plots = 16; % 或任何你需要的子图数量
+current_plot = 1;
+num_figs_in_row = [];
+figWidthFactor = 1.5;
+%     figPosition = [1080*2.5,100];
+figPosition = [100,100];
+newfigure = false;
+holdon = true;
+
 % 画图来验证峰值检测的准确性
-figure;
-plot(t, Fa);
+create_subplot(@plot, total_plots, current_plot, {t, Fa}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',true,'firstfigure',true);
 hold on;
-plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
-hold off;
+create_subplot(@plot, total_plots, current_plot, {t(locs), peaks, 'ro'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 title('Peak detection');
 xlabel('Time');
 ylabel('Force');
-
+current_plot = current_plot + 1;
 
 for k1 = 1:length(locs)-1
     dt = t(locs(k1+1))-t(locs(k1));
@@ -251,8 +261,9 @@ for k1 = 1:length(locs)-1
 end
 amp_filt_kalman=amp;
 zeta_filt_kalman=zeta;
-figure
-plot(amp_filt_kalman,zeta_filt_kalman)
+create_subplot(@plot, total_plots, current_plot, {amp_filt_kalman,zeta_filt_kalman}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+current_plot = current_plot + 1;
+
 
 
 Fa = F_viv;
@@ -267,14 +278,13 @@ p = 0;
 [peaks, locs] = findpeaks(Fa,'MinPeakDistance', d,'MinPeakProminence', p);
 
 % 画图来验证峰值检测的准确性
-figure;
-plot(t, Fa);
+create_subplot(@plot, total_plots, current_plot, {t, Fa}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 hold on;
-plot(t(locs), peaks, 'ro'); % 红色的圆圈表示检测到的峰值
-hold off;
+create_subplot(@plot, total_plots, current_plot, {t(locs), peaks, 'ro'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 title('Peak detection');
 xlabel('Time');
 ylabel('Force');
+current_plot = current_plot + 1;
 
 
 for k1 = 1:length(locs)-1
@@ -290,8 +300,9 @@ end
 amp_real=amp;
 zeta_real=zeta;
 
-figure
-plot(amp_real,zeta_real)
+
+create_subplot(@plot, total_plots, current_plot, {amp_real,zeta_real}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+current_plot = current_plot + 1;
 
 
 %% Calculate aerodynamic damping ratio
@@ -314,8 +325,9 @@ plot(amp_real,zeta_real)
 % title('Instantaneous Amplitude vs Time');
 
 
-figure
-plot(t,frex)
+
+create_subplot(@plot, total_plots, current_plot, {t,frex}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+current_plot = current_plot + 1;
 
 omgx = frex*2*pi;
 for k1 = 1:length(ex)-1
@@ -324,17 +336,16 @@ end
 
 epsx = [epsx epsx(end)];
 
-figure
-plot(t,epsx)
+
+create_subplot(@plot, total_plots, current_plot, {t,epsx}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 grid
+current_plot = current_plot + 1;
 
 
-figure
-plot(x_k_k(1,:),x_k_k(2,:))
+create_subplot(@plot, total_plots, current_plot, {x_k_k(1,:),x_k_k(2,:)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+grid
+current_plot = current_plot + 1;
 
-% figure
-% [f, magnitude] = fft_transform(fs,u_re)
-% plot(f,magnitude)
 
 
 
@@ -342,86 +353,59 @@ plot(x_k_k(1,:),x_k_k(2,:))
 
 
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(t, u, 'LineWidth', 2);
+
+create_subplot(@plot, total_plots, current_plot, {t, u, 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 hold on
-plot(t, u_re, 'LineWidth', 2);
+create_subplot(@plot, total_plots, current_plot, {t, u_re, 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 xlabel('Time (s)')
 ylabel('Modal Displacement')
 legend('True','Recalculated using VIV force')
+current_plot = current_plot + 1;
 
-
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(t, F_viv, 'LineWidth', 2);
+create_subplot(@plot, total_plots, current_plot, {t, F_viv, 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 hold on
-plot(t, p_filt_m, 'LineWidth', 2);
+create_subplot(@plot, total_plots, current_plot, {t, p_filt_m, 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 xlabel('Time (s)')
 ylabel('Modal VIV force')
 legend('True','Estimated')
+current_plot = current_plot + 1;
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(f, log(magnitude), 'LineWidth', 2);
+create_subplot(@plot, total_plots, current_plot, {f, log(magnitude), 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 hold on 
-plot(f_re, log(magnitude_re), 'LineWidth', 2);
-plot(f_re_kalman, log(magnitude_re_kalman), 'LineWidth', 2);
+create_subplot(@plot, total_plots, current_plot, {f_re, log(magnitude_re), 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+create_subplot(@plot, total_plots, current_plot, {f_re_kalman, log(magnitude_re_kalman), 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 xlabel('Frequency (Hz)')
 ylabel('Log Magnitude')
 legend('True','Recalculated using VIV force','Recalculated using VIV force estimated by Kalman Filter')
+current_plot = current_plot + 1;
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(nodegap,mode_deck, 'LineWidth', 2);
+create_subplot(@plot, total_plots, current_plot, {nodegap,mode_deck, 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 xlabel('Location (m)')
 ylabel('Mode shape')
+current_plot = current_plot + 1;
 
 
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-plot(t,xn_true(1,:), 'LineWidth', 2);
+create_subplot(@plot, total_plots, current_plot, {t,xn_true(1,:), 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 hold on
-plot(t,xn(1,:), 'LineWidth', 2);
-plot(t,xn_re_kalman(1,:),'LineWidth',2);
-plot(t,xa_history(1,:),'LineWidth',2);
+create_subplot(@plot, total_plots, current_plot, {t,xn(1,:), 'LineWidth', 2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+create_subplot(@plot, total_plots, current_plot, {t,xn_re_kalman(1,:),'LineWidth',2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+create_subplot(@plot, total_plots, current_plot, {t,xa_history(1,:),'LineWidth',2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 xlabel('Time (s)')
 ylabel('Modal Displacement')
 legend('True','Calculate using VIV force','Recalculated using VIV force estimated by Kalman filter','Kalman filter estimated')
+current_plot = current_plot + 1;
 
 
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% plot(t,zeta_polynomial, 'LineWidth', 2);
-% hold on
-% plot(t,u_re*0.00001)
-% % plot(t,zeta_filt_kalman, 'LineWidth', 2);
-% xlabel('Time (s)')
-% ylabel('Aerodynamic damping ratio')
-% legend('True','Kalman filter estimated')
-
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% scatter(abs(u_re),zeta_polynomial)
-% xlabel('Displacement')
-% ylabel('Aerodynamic damping ratio')
-
-[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-scatter(ex,epsx,'green')
+create_subplot(@scatter, total_plots, current_plot, {ex,epsx,'green'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 hold on
-scatter(amp_filt_kalman,-zeta_filt_kalman,'o')
-scatter(amp_real,-zeta_real,'k')
+create_subplot(@scatter, total_plots, current_plot, {amp_filt_kalman,-zeta_filt_kalman,'o'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
+create_subplot(@scatter, total_plots, current_plot, {amp_real,-zeta_real,'k'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor,'figPosition',figPosition,'newfigure',newfigure,'firstfigure',false);
 xlabel('Displacement')
 ylabel('Aerodynamic damping ratio')
 ylim([-0.2 0])
 legend("calculated by displacement","calculated by force","real")
+current_plot = current_plot + 1;
 
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% scatter(abs(u_re),zeta_filt_kalman)
-% xlabel('Displacement')
-% ylabel('Aerodynamic damping ratio')
-% ylim([-0.01 0.015])
-% 
-% [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
-% % plot(t,zeta_polynomial, 'LineWidth', 2);
-% hold on
-% plot(t,zeta_filt_kalman, 'LineWidth', 2);
-% xlabel('Time (s)')
-% ylabel('Aerodynamic damping ratio')
-% legend('True','Kalman filter estimated')
 
 %% functions
 
