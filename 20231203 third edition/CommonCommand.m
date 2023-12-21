@@ -24,6 +24,7 @@ if strcmp(computer_name,'SHENGYI_HP')
     addpath(genpath("F:\git\ssm_tools\"))
     addpath(genpath("F:\git\Function_shengyi_package\"))
     addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
+    addpath(genpath("F:\git\xihoumen_data_extract\"))
     addpath(genpath("F:\git\HHT-Tutorial\"))
 elseif strcmp(computer_name,'xushengyi')
     addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
@@ -85,15 +86,18 @@ end
 if strcmp(computer_name,'SHENGYI_HP')
     input.acc_dir = "F:\test\result";
     input.wind_dir = "F:\test\result_wind_10min";
+    input.wind_dir_all = "F:\test\result_wind";
 elseif strcmp(computer_name,'xushengyi')
     input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
     input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 elseif strcmp(computer_name,'ROG-SHENGYI')
     input.acc_dir = "D:\xihoumendata\acc";
     input.wind_dir = "D:\xihoumendata\wind";
+    input.wind_dir_all = "D:\xihoumendata\wind_all";
 elseif strcmp(computer_name,'WIN-IUMUERP66UT')
     input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
     input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+    input.wind_dir_all = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind";
 elseif strcmp(computer_name,'NTNU08916')
     input.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
     input.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";

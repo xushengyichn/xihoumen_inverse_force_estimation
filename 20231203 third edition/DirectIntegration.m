@@ -3,8 +3,8 @@ run('CommonCommand.m');
 
 n = 4;
 [result] = viv2013(n, OFF);
-startDate_global = result.startDate;
-endDate_global = result.endDate;
+startDate_global = result.startDate - hours(0.5);
+endDate_global = result.endDate + hours(1);
 input.start_time = startDate_global;
 input.end_time = endDate_global;
 
@@ -100,9 +100,11 @@ data = importdata("temp.mat");
 t= data.t;
 F_filter = data.F_filter;
 
-create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',firstfigure);
-hold on
+
 create_subplot(@plot, total_plots, current_plot, {t,F_filter}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure);
+hold on
+create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',firstfigure);
+legend("filter","direct ingetration")
 title("ft");
 current_plot = current_plot + 1;
 
@@ -121,3 +123,20 @@ hold on
 create_subplot(@plot, total_plots, current_plot, {f2, magnitude_F_filter}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure);
 xlim([0,0.5])
 
+figure
+current_plot =  1;
+[f, magnitude] =fft_transform(fs,yn(3, :));
+create_subplot(@plot, total_plots, current_plot, {t, yn(3, :)}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
+title("Time domain");
+xlabel("Time")
+ylabel("Acceleration (m/s^2)")
+print -clipboard -dbitmap
+
+current_plot = current_plot + 1;
+create_subplot(@plot, total_plots, current_plot, {f, magnitude}, 'num_figs_in_row', num_figs_in_row,'newfigure',true);
+xlim([0,0.5])
+set(gca,'YScale','log')
+title("Frequency domain");
+xlabel("Frequency (Hz)")
+ylabel("Amplitude")
+current_plot = current_plot + 1;
