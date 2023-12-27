@@ -1,3 +1,13 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Author: ShengyiXu xushengyichn@outlook.com
+%Date: 2023-12-21 23:06:32
+%LastEditors: ShengyiXu xushengyichn@outlook.com
+%LastEditTime: 2023-12-27 20:04:55
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231203 third edition\CommonCommand.m
+%Description: 
+%
+%Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 获取操作系统类型
 [osType, ~] = computer;
 switch osType
@@ -26,6 +36,7 @@ if strcmp(computer_name,'SHENGYI_HP')
     addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
     addpath(genpath("F:\git\xihoumen_data_extract\"))
     addpath(genpath("F:\git\HHT-Tutorial\"))
+    addpath(genpath("F:\git\sysid_tools\"))
 elseif strcmp(computer_name,'xushengyi')
     addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
     addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
