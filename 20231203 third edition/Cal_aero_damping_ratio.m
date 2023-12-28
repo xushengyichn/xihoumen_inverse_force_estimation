@@ -159,8 +159,9 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
 
     % 寻找不同模态不同频率力信号的周期
     for k1 = 1:nVIV
-        filtered_Fa_current = filtered_Fa{k1}; % 获取当前模态的滤波数据
+        % filtered_Fa_current = filtered_Fa{k1}; % 获取当前模态的滤波数据
         % filtered_dis_current = filtered_dis{k1}; % 获取当前模态的滤波数据
+        filtered_vel_current = filtered_vel{k1}; % 获取当前模态的滤波数据
         
         peaks_locs_struct = struct(); % 初始化一个结构体以保存peaks和locs       
         for k2 = 1:length(top_freqs{k1})
@@ -168,9 +169,12 @@ function [result_Main]=Cal_aero_damping_ratio(input,varargin)
             T_temp = 1/f_temp;
             d = T_temp * 50*0.9;
             pp = 0;
-            [peaks, locs] = findpeaks(filtered_Fa_current{k2}, ...
+            [peaks, locs] = findpeaks(filtered_vel_current{k2}, ...
                                       'MinPeakDistance', d, ...
                                       'MinPeakProminence', pp);
+            % [peaks, locs] = findpeaks(filtered_Fa_current{k2}, ...
+            %                           'MinPeakDistance', d, ...
+            %                           'MinPeakProminence', pp);
             % [peaks, locs] = findpeaks(filtered_dis_current{k2}, ...
             %               'MinPeakDistance', d, ...
             %               'MinPeakProminence', pp);

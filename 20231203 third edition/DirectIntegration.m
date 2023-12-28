@@ -3,15 +3,15 @@ run('CommonCommand.m');
 
 n = 4;
 [result] = viv2013(n, OFF);
-startDate_global = result.startDate - hours(0.5);
-endDate_global = result.endDate + hours(1);
-input.start_time = startDate_global;
-input.end_time = endDate_global;
+startDate_global = result.startDate;
+endDate_global = result.endDate;
+input_data.start_time = startDate_global;
+input_data.end_time = endDate_global;
 
-start_time = input.start_time;
-end_time = input.end_time;
+start_time = input_data.start_time;
+end_time = input_data.end_time;
 
-acc_dir = input.acc_dir;
+acc_dir = input_data.acc_dir;
 
 [Acc_Data] = read_acceleration_data(start_time, end_time, acc_dir);
 
