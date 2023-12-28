@@ -95,26 +95,26 @@ switch osType
         result = '';
 end
 if strcmp(computer_name,'SHENGYI_HP')
-    input.acc_dir = "F:\test\result";
-    input.wind_dir = "F:\test\result_wind_10min";
-    input.wind_dir_all = "F:\test\result_wind";
+    input_data.acc_dir = "F:\test\result";
+    input_data.wind_dir = "F:\test\result_wind_10min";
+    input_data.wind_dir_all = "F:\test\result_wind";
 elseif strcmp(computer_name,'xushengyi')
-    input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-    input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+    input_data.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
+    input_data.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 elseif strcmp(computer_name,'ROG-SHENGYI')
-    input.acc_dir = "D:\xihoumendata\acc";
-    input.wind_dir = "D:\xihoumendata\wind";
-    input.wind_dir_all = "D:\xihoumendata\wind_all";
+    input_data.acc_dir = "D:\xihoumendata\acc";
+    input_data.wind_dir = "D:\xihoumendata\wind";
+    input_data.wind_dir_all = "D:\xihoumendata\wind_all";
 elseif strcmp(computer_name,'WIN-IUMUERP66UT')
-    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-    input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
-    input.wind_dir_all = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind";
+    input_data.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+    input_data.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+    input_data.wind_dir_all = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind";
 elseif strcmp(computer_name,'NTNU08916')
-    input.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
-    input.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";
+    input_data.acc_dir = "C:\Users\shengyix\Documents\xihoumendata\acc";
+    input_data.wind_dir = "C:\Users\shengyix\Documents\xihoumendata\wind";
 elseif strcmp(computer_name,'WIN-JFOFTCAS8GU')
-    input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-    input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+    input_data.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+    input_data.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 else
     error("Please add data folder first.")
 end

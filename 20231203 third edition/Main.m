@@ -15,8 +15,8 @@ n = 4;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
 endDate_global = result.endDate;
-input.start_time = startDate_global;
-input.end_time = endDate_global;
+input_data.start_time = startDate_global;
+input_data.end_time = endDate_global;
 
 % input.lambda_VIV = 10 ^ (-8.725260766057426);
 % input.sigma_p_VIV = 4.594524428349437e+04;
@@ -25,13 +25,13 @@ input.end_time = endDate_global;
 % input.sigma_noise = 10 ^ (-1.301006929986168);
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
-input.lambda_VIV = 10 ^ (-3.684938247891515);
-input.sigma_p_VIV = 2.845907607798993e+02;
-input.Q_value = 10 ^ (-7.743718510318171);
-input.sigma_buff = 10 ^ (1.351597903572570);
+input_data.lambda_VIV = 10 ^ (-3.684938247891515);
+input_data.sigma_p_VIV = 2.845907607798993e+02;
+input_data.Q_value = 10 ^ (-7.743718510318171);
+input_data.sigma_buff = 10 ^ (1.351597903572570);
 
-input.omega_0_variation_VIV = 1;
-input.sigma_noise = 10 ^ (-1.301006929986168);
+input_data.omega_0_variation_VIV = 1;
+input_data.sigma_noise = 10 ^ (-1.301006929986168);
 
 %% logL优化参数
 modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
@@ -39,17 +39,17 @@ modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
 
 VIV_mode_seq = find(modesel == 23);
 % modesel = 23;
-input.modesel = modesel;
-input.VIV_mode_seq = VIV_mode_seq;
+input_data.modesel = modesel;
+input_data.VIV_mode_seq = VIV_mode_seq;
 nVIV = length(VIV_mode_seq);
-input.nVIV = nVIV;
+input_data.nVIV = nVIV;
 
 showtext = true;
 showplot = false;
 
 %% Apply Kalman Filter
 % [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'nofilter');
+[result_Main] = KalmanMain(input_data, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
@@ -68,7 +68,7 @@ if 0 %优化所有参数
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
     external_params.modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
-    external_params.acc_dir = input.acc_dir;
+    external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
     external_params.ft_directint = ft_directint;
@@ -93,12 +93,12 @@ if 0 % 选择参数进行优化
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
     external_params.modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
-    external_params.acc_dir = input.acc_dir;
+    external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
     external_params.ft_directint = ft_directint;
-    external_params.omega_0_variation_VIV = input.omega_0_variation_VIV;
-    external_params.sigma_noise = input.sigma_noise;
+    external_params.omega_0_variation_VIV = input_data.omega_0_variation_VIV;
+    external_params.sigma_noise = input_data.sigma_noise;
     % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-4, 1e1, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
@@ -112,10 +112,10 @@ if 0 % 选择参数进行优化
     % 保存结果
     save('optimization_results.mat', 'x', 'fval');
 
-    input.lambda_VIV = 10 ^ (x(1));
-    input.sigma_p_VIV = x(2);
-    input.Q_value = 10 ^ (x(3));
-    input.sigma_buff = 10 ^ (x(4));
+    input_data.lambda_VIV = 10 ^ (x(1));
+    input_data.sigma_p_VIV = x(2);
+    input_data.Q_value = 10 ^ (x(3));
+    input_data.sigma_buff = 10 ^ (x(4));
 
 
 end
@@ -143,9 +143,9 @@ u0 = zeros(nVIV, 1);
 udot0 = zeros(nVIV, 1);
 [u udot u2dot] = NewmarkInt(t_temp, MM(VIV_mode_seq, VIV_mode_seq), CC(VIV_mode_seq, VIV_mode_seq), KK(VIV_mode_seq, VIV_mode_seq), p_filt_m, 1/2, 1/4, u0, udot0);
 
-input.u = u;
-input.udot = udot;
-input.u2dot = u2dot;
+input_data.u = u;
+input_data.udot = udot;
+input_data.u2dot = u2dot;
 
 %% replace the force
 yn = result_Main.yn;
@@ -159,13 +159,13 @@ yn_reconstruct = result_Main.yn_reconstruct;
 fields = fieldnames(result_Main);
 
 for i = 1:numel(fields)
-    input.(fields{i}) = result_Main.(fields{i});
+    input_data.(fields{i}) = result_Main.(fields{i});
 end
 
 % input = result_Main;
-input.ncycle = 10;
+input_data.ncycle = 10;
 
-[result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'fft');
+[result_Damping] = Cal_aero_damping_ratio(input_data, 'showplot', false, 'filterstyle', 'fft');
 % [result_Damping] = Cal_aero_damping_ratio(input, 'showplot', false, 'filterstyle', 'nofilter');
 
 amp_cell = result_Damping.amp_cell;
@@ -175,9 +175,9 @@ t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
 %% read wind data
 
 % [result] = viv2013(n, OFF);
-start_time = input.start_time;
-end_time = input.end_time;
-wind_dir = input.wind_dir;
+start_time = input_data.start_time;
+end_time = input_data.end_time;
+wind_dir = input_data.wind_dir;
 [result_wind] = read_wind_data(start_time, end_time, wind_dir);
 
 t = result_Main.t;
@@ -186,7 +186,7 @@ F_filter = p_filt_m;
 amp_temp = amp_cell{1}{1};
 t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
 duration = minutes(10);
-windspeed_result = read_wind_data_onetime(t_cycle_mean_temp, duration, input.wind_dir_all, [1 1 0 0 0 0]);
+windspeed_result = read_wind_data_onetime(t_cycle_mean_temp, duration, input_data.wind_dir_all, [1 1 0 0 0 0]);
 %% plot
 if fig_bool
     % 定义总子图数量
@@ -316,7 +316,7 @@ if fig_bool
     %% Damping ratio calculation
     amp_temp = amp_cell{1}{1};
     % t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
-    m_cycle = input.ncycle; %cycles to be averaged
+    m_cycle = input_data.ncycle; %cycles to be averaged
     zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
 
     for k1 = 1:length(t_cycle_mean_temp)
