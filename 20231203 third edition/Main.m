@@ -101,7 +101,7 @@ if 0 % 选择参数进行优化
     external_params.sigma_noise = input_data.sigma_noise;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-4, 1e1, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
+    lb = [-5, 1e1, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e4,  -5,  2]; % 这里的值也是假设的
     
     % 定义整数和连续变量
@@ -569,7 +569,7 @@ fields = fieldnames(result_Main);
 
 logL = result_Main.logL;
 logek = result_Main.logek;
-%     target = -logL;% 因为 ga 试图最小化函数，所以取负数
-target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+target = -logL;% 因为 ga 试图最小化函数，所以取负数
+% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
 
 end
