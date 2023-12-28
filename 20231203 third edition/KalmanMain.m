@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-12-28 17:33:37
+%LastEditTime: 2023-12-28 17:41:13
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231203 third edition\KalmanMain.m
 %Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
@@ -523,6 +523,7 @@ result_Main.n_sensors = n_sensors;
 result_Main.S_a = S_a;
 result_Main.phi = phi;
 result_Main.loc_acc = loc_acc;
+result_Main.zeta = zeta;
 
 
 if fig_bool == ON

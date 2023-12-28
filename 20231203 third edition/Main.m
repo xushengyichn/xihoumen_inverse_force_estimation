@@ -366,8 +366,9 @@ if fig_bool
         
     end
     
+    zeta_structure = result_Main.zeta;
     zeta1 = zeta_all_cell{1}{1};
-    zeta2 = zetam - 0.3/100;
+    zeta2 = zetam - zeta_structure(VIV_mode_seq);
     
     target = norm(zeta1 - zeta2);
     disp(target)
@@ -386,7 +387,7 @@ if fig_bool
             
             % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
             
-            create_subplot(@scatter, total_plots, current_plot, {amp_temp * max(mode_deck(:, VIV_mode_seq(k1))), zetam - 0.3/100}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+            create_subplot(@scatter, total_plots, current_plot, {amp_temp * max(mode_deck(:, VIV_mode_seq(k1))), zetam - zeta_structure(VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
             hold on
             create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, VIV_mode_seq(k1))), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
             
@@ -487,7 +488,7 @@ if fig_bool
     patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
     
     amp_filterdis = amp_temp * max(mode_deck(:, VIV_mode_seq(1)));
-    zeta_filterdis = zetam - 0.3/100;
+    zeta_filterdis = zetam - zeta_structure(VIV_mode_seq);
     create_subplot(@scatter3, total_plots, current_plot, {amp_filterdis, U_sel, zeta_filterdis, S, C}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
     xlabel('Amp. (m)')
     ylabel('Wind speed (m/s)')
