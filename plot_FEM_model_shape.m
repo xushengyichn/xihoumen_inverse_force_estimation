@@ -83,7 +83,8 @@ xlabel('X'); ylabel('Y'); zlabel('Z');
 % Add title
 title('My FEM Model'); 
 % View in 3D
-view(45, 35.264); 
+% view(45, 35.264); 
+view(1, -1);
 % Use equal scaling
 axis equal; 
 % Add light
@@ -91,9 +92,45 @@ camlight('headlight');
 % Use gouraud lighting
 lighting gouraud;
 hold off;
+figureIdx=figureIdx-1
 
-
-
+%plot finite element model
+[figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
+% Define color, point size and marker for scatter plot
+color = 'b'; % Color blue
+marker = 'o'; % Circle marker
+size = 15; % Size of marker
+scatter3(nodes.X, nodes.Y, nodes.Z, size, color, marker, 'filled'); % scatter plot for nodes
+% Define line color for beams
+beamColor = 'k'; % Black color
+hold on; % hold current plot
+% Plot each beam
+% Plot all lines at once
+line(X, Y, Z, 'Color', beamColor, 'LineWidth', lineWidthThin);
+% Add grids
+grid off; % 或者添加这行来明确关闭网格
+% Add labels to each axis
+% xlabel('X'); ylabel('Y'); zlabel('Z'); 
+axis off;
+% Add title
+% title('My FEM Model'); 
+% View in 3D
+% view(45, 35.264); 
+view(1, -1);
+% Use equal scaling
+axis equal; 
+% Add light
+camlight('headlight');
+% Use gouraud lighting
+lighting gouraud;
+hold off;
+% 设置背景透明
+% set(gca, 'Color', 'none'); % 去除坐标轴背景
+% set(gcf, 'Color', 'none'); % 去除整个图形的背景
+% 去除刻度轴
+set(gca, 'xtick', [], 'ytick', [], 'ztick', []);
+print -clipboard -dbitmap
+figureIdx=figureIdx-1
 
 % plot modal shape
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);

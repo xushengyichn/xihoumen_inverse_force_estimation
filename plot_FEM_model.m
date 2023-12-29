@@ -16,6 +16,7 @@ addpath(genpath("F:\git\ssm_tools"))
 addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
 addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
 addpath(genpath("F:\git\Function_shengyi_package"))
+addpath(genpath("D:\git\xihoumen_inverse_force_estimation"))
 subStreamNumberDefault = 2132;
 run('InitScript.m');
 %% 0 绘图参数
