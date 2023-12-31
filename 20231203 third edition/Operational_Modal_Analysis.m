@@ -61,7 +61,7 @@ y = [AC2_1;AC2_3;AC3_1;AC3_3;AC4_1;AC4_3];
 y_ref =y([2 3],:);
 fs = fs;
 blockrows = 100
-nb =20
+nb = 20
 
 order = 1:50;
 
@@ -182,8 +182,7 @@ table_fre = table();
 table_fre.sequence = (1:k_value)';
 table_fre.frequency = mean_fre;
 table_fre.damping_ratio = mean_xi;
-
-
+table_fre.omega = mean_fre*2*pi;
 
 %% modal updating
 modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
@@ -291,7 +290,7 @@ for k1 = 1:length(order)
     hold on
 end
 ylim([0,1/100]);
-close all
+% close all
 
 
 %% plot
