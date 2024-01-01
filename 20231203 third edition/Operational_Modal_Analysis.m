@@ -196,6 +196,25 @@ table_fre.frequency = mean_fre;
 table_fre.damping_ratio = mean_xi;
 table_fre.omega = mean_fre*2*pi;
 
+%% calculate the error of the modes
+fre_error=[];
+xi_error=[];
+for k1 = 1:length(unique_groups)
+    list_fre_temp = list_fre{k1};
+    list_std_fre_temp = list_std_fre{k1};
+    fre_min = min(list_fre_temp-list_std_fre_temp);
+    fre_max = max(list_fre_temp+list_std_fre_temp);
+    fre_error(:,k1)=[fre_min;fre_max];
+end
+
+for k1 = 1:length(unique_groups)
+    list_xi_temp = list_xi{k1};
+    list_std_xi_temp = list_std_xi{k1};
+    xi_min = min(list_xi_temp-list_std_xi_temp);
+    xi_max = max(list_xi_temp+list_std_xi_temp);
+    xi_error(:,k1)=[xi_min;xi_max];
+end
+
 %% modal updating
 modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
 nmodes = length(modesel);
@@ -259,103 +278,55 @@ filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
 save(filename,'table_fre',"start_time","end_time");
 disp(table_fre)
 %% test
-fre_error=[];
-xi_error=[];
-for k1 = 1:length(unique_groups)
-    list_fre_temp = list_fre{k1};
-    list_std_fre_temp = list_std_fre{k1};
-    fre_min = min(list_fre_temp-list_std_fre_temp);
-    fre_max = max(list_fre_temp+list_std_fre_temp);
-    fre_error(:,k1)=[fre_min;fre_max];
-end
-
-for k1 = 1:length(unique_groups)
-    list_xi_temp = list_xi{k1};
-    list_std_xi_temp = list_std_xi{k1};
-    xi_min = min(list_xi_temp-list_std_xi_temp);
-    xi_max = max(list_xi_temp+list_std_xi_temp);
-    xi_error(:,k1)=[xi_min;xi_max];
-end
 
 
-figure
-h = gscatter(all_fre,all_xi,new_idx);
-legend("off")
-xlim([0,0.5])
 
-hold on
-% 获取每个组的颜色，以便误差线与散点颜色匹配
-colors = get(h, 'Color');
-if iscell(colors)
-    colors = cell2mat(colors);
-end
-
-% 绘制每个组的矩形
-for k1 = 1:size(fre_error, 2)
-    fre_min = fre_error(1, k1);
-    fre_max = fre_error(2, k1);
-    xi_min = xi_error(1, k1);
-    xi_max = xi_error(2, k1);
-
-    % 矩形的位置和尺寸
-    pos = [fre_min, xi_min, fre_max - fre_min, xi_max - xi_min];
-
-    % 绘制矩形
-    rectangle('Position', pos, 'EdgeColor', colors(k1, :), 'LineWidth', 1.5);
-end
-
-scatter(mean_fre,mean_xi)
-scatter(Result.Freq,0.3/100*ones(size(Result.Freq)))
-% 关闭 hold 状态
-hold off;
 %% plot
-if 0
-    
-    close all
+if 1
     
     
     
     stabplot(omega_id,xi_id,order,Phi_id,'cov_w',cov_omega,'cov_xi',cov_xi,'std_w_tol',0.1,'std_xi_tol',1);
     
     
-    
-    % 定义总子图数量
-    total_plots = 50; % 或任何你需要的子图数量
-    current_plot = 1;
-    num_figs_in_row = [];
-    figWidthFactor = 1.5;
-    %     figPosition = [1080*2.5,100];
-    figPosition = [100, 100];
-    newfigure = true;
-    holdon = false;
-    figure
-    for k1 = 1:length(order)
-        create_subplot(@scatter, total_plots, current_plot, {1:length(omega_id{k1}),omega_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-        current_plot = current_plot+1;
-    end
-    
-    figure
-    for k1 = 1:length(order)
-        create_subplot(@scatter, total_plots, current_plot, {1:length(omega_id{k1}),omega_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', true);
-        hold on
-    end
-    
-    figure
-    current_plot = 1;
-    for k1 = 1:length(order)
-        create_subplot(@scatter, total_plots, current_plot, {1:length(xi_id{k1}),xi_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-        ylim([0,1/100]);
-        current_plot = current_plot+1;
-    end
-    
-    figure
-    for k1 = 1:length(order)
-        create_subplot(@scatter, total_plots, current_plot, {1:length(xi_id{k1}),xi_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', true);
-        hold on
-    end
-    ylim([0,1/100]);
-    % close all
-    
+    % 
+    % % 定义总子图数量
+    % total_plots = 50; % 或任何你需要的子图数量
+    % current_plot = 1;
+    % num_figs_in_row = [];
+    % figWidthFactor = 1.5;
+    % %     figPosition = [1080*2.5,100];
+    % figPosition = [100, 100];
+    % newfigure = true;
+    % holdon = false;
+    % figure
+    % for k1 = 1:length(order)
+    %     create_subplot(@scatter, total_plots, current_plot, {1:length(omega_id{k1}),omega_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+    %     current_plot = current_plot+1;
+    % end
+    % 
+    % figure
+    % for k1 = 1:length(order)
+    %     create_subplot(@scatter, total_plots, current_plot, {1:length(omega_id{k1}),omega_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', true);
+    %     hold on
+    % end
+    % 
+    % figure
+    % current_plot = 1;
+    % for k1 = 1:length(order)
+    %     create_subplot(@scatter, total_plots, current_plot, {1:length(xi_id{k1}),xi_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+    %     ylim([0,1/100]);
+    %     current_plot = current_plot+1;
+    % end
+    % 
+    % figure
+    % for k1 = 1:length(order)
+    %     create_subplot(@scatter, total_plots, current_plot, {1:length(xi_id{k1}),xi_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', true);
+    %     hold on
+    % end
+    % ylim([0,1/100]);
+    % % close all
+    % 
     
     %% plot
     % 定义总子图数量
@@ -454,5 +425,38 @@ if 0
     ylabel("Damping ratio");xlabel("Cluster");title("Damping ratio")
     current_plot = current_plot+1;
     
+
+
+    figure
+    h = gscatter(all_fre,all_xi,new_idx);
+    legend("off")
+    xlim([0,0.5])
+    
+    hold on
+    % 获取每个组的颜色，以便误差线与散点颜色匹配
+    colors = get(h, 'Color');
+    if iscell(colors)
+        colors = cell2mat(colors);
+    end
+    
+    % 绘制每个组的矩形
+    for k1 = 1:size(fre_error, 2)
+        fre_min = fre_error(1, k1);
+        fre_max = fre_error(2, k1);
+        xi_min = xi_error(1, k1);
+        xi_max = xi_error(2, k1);
+    
+        % 矩形的位置和尺寸
+        pos = [fre_min, xi_min, fre_max - fre_min, xi_max - xi_min];
+    
+        % 绘制矩形
+        rectangle('Position', pos, 'EdgeColor', colors(k1, :), 'LineWidth', 1.5);
+    end
+    
+    scatter(mean_fre,mean_xi)
+    scatter(Result.Freq,0.3/100*ones(size(Result.Freq)))
+    % 关闭 hold 状态
+    hold off;
+
     holdon = true;
 end
