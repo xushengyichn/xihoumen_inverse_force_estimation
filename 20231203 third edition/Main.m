@@ -513,7 +513,7 @@ if fig_bool
     patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
     
 end
-
+holdon = true
 %% functions
 function target = fitnessFunction(params, external_params)
 input.lambda_VIV = 10 ^ params(1);

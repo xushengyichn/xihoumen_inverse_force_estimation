@@ -225,7 +225,7 @@ set(h, 'Position', [100, 100, 1920, 1080]); % 设置为更高的分辨率
 set(h, 'PaperPositionMode', 'manual', 'PaperPosition', [0 0 20 20]);
 
 set(gcf, 'Renderer', 'painters'); % 使用 'painters' 渲染器
-print(h, 'MyHighQualityOutput.pdf', '-dpdf', '-r2400');
+% print(h, 'MyHighQualityOutput.pdf', '-dpdf', '-r2400');
 
 
 function [vertices,faces]=drawRectangularTube(X, Y, Z, width, height)
