@@ -1,58 +1,82 @@
+clc
+clear
+close all
+% 测试数据
+X = [0; 1];
+Y = [0; 1];
+Z = [0; 1];
+width = 0.01; % 矩形宽度
+height = 2; % 矩形高度
 
-clc;clear;close all
+% figure;
+% drawRectangularTube(X, Y, Z, width, height);
+% axis equal;
+% view(3);
+drawCylindricalTube([0; 5], [0; 0], [0; 0], 1, 20);
+
+% patch('Vertices', vertices, 'Faces', faces, 'FaceColor', 'blue');
+function drawRectangularTube(X, Y, Z, width, height)
+    % 计算方向向量
+    direction = [X(2) - X(1), Y(2) - Y(1), Z(2) - Z(1)];
+    direction = direction / norm(direction);
+    
+    % 计算垂直于方向向量的两个向量
+    if direction(1) == 0 && direction(2) == 0
+        v1 = cross(direction, [1, 0, 0]);
+    else
+        v1 = cross(direction, [0, 0, 1]);
+    end
+    v1 = v1 / norm(v1);
+    v2 = cross(direction, v1);
+    v2 = v2 / norm(v2);
+
+    % 计算矩形的四个角点
+    corners = [v1 * width / 2 + v2 * height / 2; 
+               -v1 * width / 2 + v2 * height / 2;
+               -v1 * width / 2 - v2 * height / 2;
+                v1 * width / 2 - v2 * height / 2];
+    
+    % 创建管道的八个顶点
+    vertices = [X(1), Y(1), Z(1)] + corners;
+    vertices = [vertices; [X(2), Y(2), Z(2)] + corners];
+
+    % 定义矩形面
+    faces = [1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4; 5 6 7 8];
+
+    % 绘制矩形管道
+    patch('Vertices', vertices, 'Faces', faces, 'FaceColor', 'blue');
+end
 
 
-addpath(genpath("F:\git\ssm_tools"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-addpath(genpath("F:\git\Function_shengyi_package"))
-addpath(genpath("D:\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
-addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
-addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
-addpath(genpath("G:\2013\allVIB（移动）"))
-subStreamNumberDefault = 2132;
-run('InitScript.m');
-%% 0 绘图参数
-fig_bool = ON;
-num_figs_in_row = 5; %每一行显示几个图
-figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
-%设置图片间隔
-gap_between_images = [0, 0];
-figureIdx = 0;
+function drawCylindricalTube(X, Y, Z, radius, numSides)
+    % 计算方向向量
+    direction = [X(2) - X(1), Y(2) - Y(1), Z(2) - Z(1)];
+    direction = direction / norm(direction);
+    
+    % 计算垂直于方向向量的两个向量
+    if direction(1) == 0 && direction(2) == 0
+        v1 = cross(direction, [1, 0, 0]);
+    else
+        v1 = cross(direction, [0, 0, 1]);
+    end
+    v1 = v1 / norm(v1);
+    v2 = cross(direction, v1);
+    v2 = v2 / norm(v2);
 
-% 定义一个简单的测试信号
-fs = 1000;  % 采样频率
-t = 0:1/fs:1-1/fs;  % 时间向量
-f1 = 50;  % 信号的频率
-f2 = 60;
-data1 = 2*sin(2*pi*f1*t);  % 生成信号
-data2 = sin(2*pi*f2*t);  % 生成信号
-data = data1+data2;
-% 定义需要保留的频率范围
-f_keep = [45 55];  % 保留 45 到 55 Hz 之间的频率
+    % 生成圆柱的顶点
+    theta = linspace(0, 2*pi, numSides);
+    circlePoints = radius * [cos(theta); sin(theta)];
+    verticesTop = circlePoints' * [v1; v2] + repmat([X(1), Y(1), Z(1)], numSides, 1);
+    verticesBottom = circlePoints' * [v1; v2] + repmat([X(2), Y(2), Z(2)], numSides, 1);
+    vertices = [verticesTop; verticesBottom];
 
-% 使用fft_filter函数
-data_filtered = fft_filter(fs, data, f_keep);
+    % 定义圆柱体的面
+    faces = [];
+    for i = 1:numSides-1
+        faces = [faces; i i+1 i+1+numSides i+numSides];
+    end
+    faces = [faces; numSides 1 1+numSides 2*numSides];
 
-[f, magnitude] =fft_transform(fs,data_filtered);
-
-% 为了验证幅度是否正确, 计算原始信号和滤波信号的RMS(均方根)值
-rms_original = sqrt(mean(data.^2));
-rms_filtered = sqrt(mean(data_filtered.^2));
-
-% 显示结果
-fprintf('Original RMS: %.2f\n', rms_original);
-fprintf('Filtered RMS: %.2f\n', rms_filtered);
-
-% 可视化结果
-figure;
-subplot(2,1,1);
-plot(t, data);
-title('Original Signal');
-subplot(2,1,2);
-plot(t, data_filtered);
-title('Filtered Signal');
-
-figure
-plot(f,magnitude)
-title('fft');
+    % 绘制圆柱形管道
+    patch('Vertices', vertices, 'Faces', faces, 'FaceColor', 'blue');
+end
