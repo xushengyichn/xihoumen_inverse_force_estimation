@@ -37,13 +37,14 @@ figureIdx = 0;
 % /OUTPUT, 'elements', txt
 % ELIST
 % /OUTPUT
-[X,Y,Z,nodes,elements]=plot_FEM('nodes.txt','elements.txt');
+
 
 
 
 
 %% plot
-
+if 0 
+[X,Y,Z,nodes,elements]=plot_FEM('nodes.txt','elements.txt');
 %plot finite element model
 [figureIdx, figPos_temp, hFigure] = create_figure(figureIdx, num_figs_in_row, figPos, gap_between_images);
 % Define color, point size and marker for scatter plot
@@ -82,7 +83,7 @@ set(gca, 'xtick', [], 'ytick', [], 'ztick', []);
 print -clipboard -dbitmap
 figureIdx=figureIdx-1
 
-
+end
 %% plot FEM with different element
 close all
 [X,Y,Z,nodes,elements]=plot_FEM_with_element('nodes.txt','elements.txt');
@@ -192,7 +193,66 @@ for k2 = 1:length(X_temp)
     patch('Vertices', vertices, 'Faces', faces, 'FaceColor', '#9fa0a0','EdgeColor','none');
 end
 
+%生成球
+% 塔1 21300 塔 22950
+x_center = 21300+(22950-21300)/4;
+y_center = -15.699;
+z_center = 85;
+radius = 2;
+% 生成球的坐标
+[X, Y, Z] = sphere;
+% 调整球的坐标
+X = X * radius + x_center;
+Y = Y * radius + y_center;
+Z = Z * radius + z_center;
+% 绘制球
+hold on
+surf(X, Y, Z, 'FaceColor', 'red', 'EdgeColor', 'none');  % 设置表面颜色为红色，边缘颜色无
 
+x_center = 21300+(22950-21300)/4;
+y_center = -15.699;
+z_center = 85;
+radius = 10;
+% 生成球的坐标
+[X, Y, Z] = sphere;
+% 调整球的坐标
+X = X * radius + x_center;
+Y = Y * radius + y_center;
+Z = Z * radius + z_center;
+% 绘制球
+hold on
+surf(X, Y, Z, 'FaceColor', 'red', 'EdgeColor', 'none','FaceAlpha',0.5);  % 设置表面颜色为红色，边缘颜色无
+
+
+
+x_center = 21300+(22950-21300)/4;
+y_center = -15.699;
+z_center = 65 ;
+radius = 2;
+% 生成球的坐标
+[X, Y, Z] = sphere;
+% 调整球的坐标
+X = X * radius + x_center;
+Y = Y * radius + y_center;
+Z = Z * radius + z_center;
+% 绘制球
+hold on
+surf(X, Y, Z, 'FaceColor', 'blue', 'EdgeColor', 'none');  % 设置表面颜色为红色，边缘颜色无
+
+
+x_center = 21300+(22950-21300)/4;
+y_center = -15.699;
+z_center = 65 ;
+radius = 10;
+% 生成球的坐标
+[X, Y, Z] = sphere;
+% 调整球的坐标
+X = X * radius + x_center;
+Y = Y * radius + y_center;
+Z = Z * radius + z_center;
+% 绘制球
+hold on
+surf(X, Y, Z, 'FaceColor', 'blue', 'EdgeColor', 'none','FaceAlpha',0.5);  % 设置表面颜色为红色，边缘颜色无
 
 
 grid off; % 或者添加这行来明确关闭网格
@@ -214,18 +274,40 @@ camlight('right');
 % Use gouraud lighting
 lighting phong;
 hold off;
-% 设置背景透明
-% set(gca, 'Color', 'none'); % 去除坐标轴背景
-% set(gcf, 'Color', 'none'); % 去除整个图形的背景
+
+
+% 设置摄像机的位置
+campos([21000 -500 300]);
+% % 设置摄像机的观察目标
+camtarget([21500 0 75]);
+% % 设置摄像机的“上”方向
+% camup([upX upY upZ]);
+% % 设置摄像机的视角宽度
+camva(20);
+% 选择投影类型
+camproj('orthographic');
+% 更新图形窗口
+drawnow;
+
+
+
+% % 设置背景透明
+% % set(gca, 'Color', 'none'); % 去除坐标轴背景
+% % set(gcf, 'Color', 'none'); % 去除整个图形的背景
 % 去除刻度轴
 set(gca, 'xtick', [], 'ytick', [], 'ztick', []);
-print -clipboard -dbitmap
-figureIdx=figureIdx-1
+% print -clipboard -dbitmap
+% figureIdx=figureIdx-1
 set(h, 'Position', [100, 100, 1920, 1080]); % 设置为更高的分辨率
-set(h, 'PaperPositionMode', 'manual', 'PaperPosition', [0 0 20 20]);
+% set(h, 'PaperPositionMode', 'manual', 'PaperPosition', [0 0 20 20]);
 
-set(gcf, 'Renderer', 'painters'); % 使用 'painters' 渲染器
-% print(h, 'MyHighQualityOutput.pdf', '-dpdf', '-r2400');
+set(gcf, 'Renderer', 'opengl');
+set(gcf,'Renderermode','manual');
+% opengl('hardware');
+exportgraphics(h, 'MyHighQualityOutput.pdf', 'Resolution', 1200);
+
+% print(h, 'MyHighQualityOutput.pdf', '-dpdf', '-r1200');
+% exportgraphics(h, 'MyHighQualityOutput.pdf', 'ContentType', 'vector', 'Resolution', 2400);
 
 
 function [vertices,faces]=drawRectangularTube(X, Y, Z, width, height)
