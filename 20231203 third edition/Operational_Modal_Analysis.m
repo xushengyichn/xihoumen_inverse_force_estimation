@@ -278,11 +278,34 @@ filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
 save(filename,'table_fre',"start_time","end_time");
 disp(table_fre)
 %% test
+close all
+FEM_mode_sel = 8;
+mode_deck_plot = (Result.mode_deck(:,FEM_mode_sel));
+FEM_freq = Result.Freq(FEM_mode_sel);
+figure('Position', [[100, 100], 960, 540]);
+plot(Result.node_loc,mode_deck_plot)
 
+sensor_loc = [578+1650/4,578+1650*2/4,578+1650*3/4];
+% find the modal shape of the sensor location
+[~,idx_sensor_loc] = min(abs(Result.node_loc-sensor_loc));
+phi_sensor_loc = mode_deck_plot(idx_sensor_loc);
+hold on
+scatter(sensor_loc,phi_sensor_loc,'filled')
 
+Modal_analysis_mode_sel = 7;
+order_sel = 41;
+w_sel = w_array{order_sel}(Modal_analysis_mode_sel);
+freq_sel = w_sel/(2*pi);
+xi_sel = xi_array{order_sel}(Modal_analysis_mode_sel);
+phi_sel = phi_array{order_sel}(:,Modal_analysis_mode_sel);
+
+loc = [1,1.1,2,2.1,3,3.1]';
+plot_modal_shape_animation(phi_sel,'loc',loc)
+disp("FEM mode "+FEM_mode_sel+" : Frequency = "+FEM_freq+" Hz")
+disp("Mode shape of order "+order_sel+" and mode "+Modal_analysis_mode_sel+" : Frequency = "+freq_sel+" Hz, Damping ratio = "+xi_sel)
 
 %% plot
-if 1
+if 0
     
     
     
