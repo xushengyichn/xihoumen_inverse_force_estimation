@@ -1,14 +1,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: xushengyichn 54436848+xushengyichn@users.noreply.github.com
 %Date: 2023-06-05 10:56:30
-%LastEditors: xushengyichn 54436848+xushengyichn@users.noreply.github.com
-%LastEditTime: 2023-06-05 16:33:01
-%FilePath: \code\Main.m
+%LastEditors: ShengyiXu xushengyichn@outlook.com
+%LastEditTime: 2024-01-05 12:18:30
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsc:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\4其他科研工作\2023年12月19日反算涡激力\manuscript\matlab\HMS_3D\plot_FEM_with_element.m
 %Description: Inverse calculation of vortex-induced force of Xihoumen Bridge
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [X_struct,Y_struct,Z_struct,nodes,elements]=plot_FEM_with_element(nodes_table,elements_table)
+function [X_struct,Y_struct,Z_struct,nodes,elements]=plot_FEM_with_element(nodes_table,elements_table,varargin)
+
+%% init
+
+p = inputParser;
+addParameter(p,'if_modeshape',false,@islogical);
+addParameter(p,'FEM_data',@isstruct);
+parse(p,varargin{:});
+if_modeshape = p.Results.if_modeshape;
+FEM_data = p.Results.FEM_data;
 
 
 %% 1 Finite Element Model
@@ -45,9 +54,23 @@ for i = 1:height(nodes)
 end
 
 % Now, 'connectedNodes' contains only nodes connected to an element
+output=FEM_data;
 nodes = connectedNodes;
 % nodes_info = nodes;
+if if_modeshape
+    node_modal_shape = [nodes.NODE, nodes.X, nodes.Y, nodes.Z];
+    Mapping_data = output.Mapping;
+    modal_shape_all = output.eig_vec;
+    mode_num  =output.mode_num;
+    modal_shape_plot = modal_shape_all(:,mode_num);
+    modal_shape_plot = modal_shape_plot/max(abs(modal_shape_plot))*output.amplify;
 
+    [node_modal_shape,nodes_displacement,nodes_displacementMagnitude,X_modal_shape,Y_modal_shape,Z_modal_shape]= update_node(node_modal_shape,modal_shape_plot,Mapping_data,elements);
+
+    nodes.X = node_modal_shape(:,2);
+    nodes.Y = node_modal_shape(:,3);
+    nodes.Z = node_modal_shape(:,4);
+end
 % Number of beams
 numBeams = size(elements, 1);
 
