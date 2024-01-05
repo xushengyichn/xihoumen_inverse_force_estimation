@@ -1,6 +1,6 @@
 clc; clear; close all;
 run('CommonCommand.m');
-
+tic
 %% 输入参数
 % input.num_figs_in_row = 12; %每一行显示几个图
 % input.figPos = figPos; %图的大小，参数基于InitScript.m中的设置
@@ -172,6 +172,7 @@ amp_cell = result_Damping.amp_cell;
 zeta_all_cell = result_Damping.zeta_all_cell;
 top_freqs = result_Damping.top_freqs;
 t_cycle_mean_cell = result_Damping.t_cycle_mean_cell;
+
 %% read wind data
 
 % [result] = viv2013(n, OFF);
@@ -227,6 +228,18 @@ if fig_bool
         if k1 == 1
             create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', true, 'holdon', holdon);
             hold on
+            NN = length(t);
+            tnew=t';
+            t_fill = [tnew(1:NN) fliplr(tnew(1:NN))];
+            Pp_filt_m_cov = result_Main.Pp_filt_m;
+            Pp_filt_m_cov_upper_bound =  F_filter(k1, :)+sqrt(Pp_filt_m_cov );
+            Pp_filt_m_cov_lower_bound =  F_filter(k1, :)-sqrt(Pp_filt_m_cov );
+            h_hat_fill = [Pp_filt_m_cov_upper_bound fliplr(Pp_filt_m_cov_lower_bound)];
+            [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
+            hold on
+            create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+
+
         else
             create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
         end
@@ -283,6 +296,62 @@ if fig_bool
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     
+
+    %% kalman filter vitural sensoring and the covariance
+    create_subplot(@plot, total_plots, current_plot, { t, h_hat(15, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    NN = length(t);
+    tnew=t';
+    t_fill = [tnew(1:NN) fliplr(tnew(1:NN))];
+    h_hat_cov = result_Main.h_hat_covariance(15,15);
+    h_hat_upper_bound = h_hat(15, :)+sqrt(h_hat_cov);
+    h_hat_lower_bound = h_hat(15, :)-sqrt(h_hat_cov);
+    h_hat_fill = [h_hat_upper_bound fliplr(h_hat_lower_bound)];
+    hold on
+    [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
+    create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+   
+    legend( 'filtered from kalman filter')
+    % title("reconstructed displacement vs kalman filter vitural sensoring")
+    title("Dis (1/2span)")
+    current_plot = current_plot + 1;
+    xlabel('Time (s)')
+    ylabel('Displacement (m)')
+    
+    create_subplot(@plot, total_plots, current_plot, { t, h_hat(9, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    tnew=t';
+    t_fill = [tnew(1:NN) fliplr(tnew(1:NN))];
+    h_hat_cov = result_Main.h_hat_covariance(9,9);
+    h_hat_upper_bound = h_hat(9, :)+sqrt(h_hat_cov);
+    h_hat_lower_bound = h_hat(9, :)-sqrt(h_hat_cov);
+    h_hat_fill = [h_hat_upper_bound fliplr(h_hat_lower_bound)];
+    [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
+    hold on
+    create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+
+    legend( 'filtered from kalman filter')
+    % title("reconstructed velocity vs kalman filter vitural sensoring")
+    title("Vel (1/2span)")
+    current_plot = current_plot + 1;
+    xlabel('Time (s)')
+    ylabel('Velocity (m/s)')
+    
+    create_subplot(@plot, total_plots, current_plot, { t, h_hat(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    tnew=t';
+    t_fill = [tnew(1:NN) fliplr(tnew(1:NN))];
+    h_hat_cov = result_Main.h_hat_covariance(3,3);
+    h_hat_upper_bound = h_hat(3, :)+sqrt(h_hat_cov);
+    h_hat_lower_bound = h_hat(3, :)-sqrt(h_hat_cov);
+    h_hat_fill = [h_hat_upper_bound fliplr(h_hat_lower_bound)];
+    [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
+    hold on
+    create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+
+    legend( 'filtered from kalman filter')
+    % title("reconstructed acceleration vs kalman filter vitural sensoring")
+    title("Acc (1/2span)")
+    current_plot = current_plot + 1;
+    xlabel('Time (s)')
+    ylabel('Acceleration (m/s^2)')
     %% wind speed during the period
     % beta_deg_mean_UA5 = result_wind.resultsTable_UA5.beta_deg_mean;
     % beta_deg_mean_UA6 = result_wind.resultsTable_UA6.beta_deg_mean;
@@ -514,6 +583,7 @@ if fig_bool
     
 end
 holdon = true
+toc
 %% functions
 function target = fitnessFunction(params, external_params)
 input.lambda_VIV = 10 ^ params(1);
@@ -572,4 +642,14 @@ logek = result_Main.logek;
 target = -logL;% 因为 ga 试图最小化函数，所以取负数
 % target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
 
+end
+
+function [x_reduced, y_reduced] = reduceDataPoints(x, y, factor)
+    % 确保降采样因子是正整数
+    factor = max(1, round(factor));
+    
+    % 进行降采样
+    indices = 1:factor:length(x); % 每隔 'factor' 个点取一个点
+    x_reduced = x(indices);
+    y_reduced = y(indices);
 end

@@ -431,7 +431,7 @@ H_d_m = H_c_m;
 p_filt_m = H_d_m * xa_history(ns + 1:end, :);
 
 
-Pp_filt_m = H_d_m * pa_history(ns + 1:end, :);
+Pp_filt_m = H_d_m * pa_history(ns + 1:end,ns + 1:end)*H_d_m';
 % [f, magnitude] = fft_transform(fs, x_k_k(1, :));
 %% 5 fft and bandpass filter for the estimated modal force
 for k1 = 1:length(VIV_mode_seq)
@@ -465,6 +465,10 @@ G_c_v = [S_d_v * phi - S_a_v * phi * omega2, S_v_v * phi - S_a_v * phi * Gamma];
 
 % h_hat = G_c_v * x_filt_original + J_c_v * p_filt_m;
 h_hat = G_c_v * x_filt_original + J_c_v_VIV * p_filt_m;
+
+%calculate covariance
+G_a_v=[G_c_v,J_c_v_VIV*H_c_m ];
+h_hat_covariance = G_a_v*P_k_k*G_a_v';
 
 %% 7 重构涡振响应
 p_reconstruct = p_filt_m;
@@ -525,7 +529,9 @@ result_Main.S_a = S_a;
 result_Main.phi = phi;
 result_Main.loc_acc = loc_acc;
 result_Main.zeta = zeta;
-
+result_Main.P_k_k = P_k_k;
+result_Main.Pp_filt_m = Pp_filt_m;
+result_Main.h_hat_covariance=h_hat_covariance;
 
 if fig_bool == ON
     
