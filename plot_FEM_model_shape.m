@@ -12,15 +12,16 @@ clc
 clear
 close all
 %% General Parameters
-addpath(genpath("F:\git\ssm_tools"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
-addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
-addpath(genpath("F:\git\Function_shengyi_package"))
-addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model"))
-addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
-
-subStreamNumberDefault = 2132;
-run('InitScript.m');
+% addpath(genpath("F:\git\ssm_tools"))
+% addpath(genpath("D:\Users\xushe\Documents\GitHub\ssm_tools"))
+% addpath(genpath("D:\Users\xushe\Documents\GitHub\Function_shengyi_package"))
+% addpath(genpath("F:\git\Function_shengyi_package"))
+% addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model"))
+% addpath(genpath("C:\Users\xushe\OneDrive\NAS云同步\Drive\0博士研究生\3大论文\研究内容\研究内容 3：气动力模型及参数识别；\反算气动力"))
+% 
+% subStreamNumberDefault = 2132;
+% run('InitScript.m');
+run("CommonCommand.m")
 %% 0 绘图参数
 fig_bool = ON;
 num_figs_in_row = 5; %每一行显示几个图
@@ -52,7 +53,8 @@ node_modal_shape=[nodes.NODE, nodes.X, nodes.Y, nodes.Z];
 % node_modal_shape_original = node_modal_shape;
 Mapping_data = output.Mapping;
 modal_shape_all = output.eig_vec;
-mode_num  =23;
+mode_num  =5;
+output.Freq(mode_num)
 modal_shape_plot = modal_shape_all(:,mode_num);
 modal_shape_plot = modal_shape_plot/max(abs(modal_shape_plot))*50;
 

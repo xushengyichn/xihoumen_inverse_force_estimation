@@ -253,6 +253,9 @@ for k1 = 1:k_value
     else
         % 计算与Fre_FEM中每个频率的差值，并找到最小的差值
         [~, closestIdx] = min(abs(Fre_FEM - frequency));
+        disp(Fre_FEM)
+        disp(frequency);
+        closestIdx = input("please input the updated mode index:");
         % 记录最接近的频率值
         idx_ModalFEM(k1) = Fre_FEM(closestIdx);
         Fre_FEM(closestIdx)=[]; % remove duplicated value
@@ -279,7 +282,7 @@ save(filename,'table_fre',"start_time","end_time");
 disp(table_fre)
 %% test
 close all
-FEM_mode_sel = 8;
+FEM_mode_sel = 11;
 mode_deck_plot = (Result.mode_deck(:,FEM_mode_sel));
 FEM_freq = Result.Freq(FEM_mode_sel);
 figure('Position', [[100, 100], 960, 540]);
@@ -292,7 +295,7 @@ phi_sensor_loc = mode_deck_plot(idx_sensor_loc);
 hold on
 scatter(sensor_loc,phi_sensor_loc,'filled')
 
-Modal_analysis_mode_sel = 7;
+Modal_analysis_mode_sel =9;
 order_sel = 41;
 w_sel = w_array{order_sel}(Modal_analysis_mode_sel);
 freq_sel = w_sel/(2*pi);
