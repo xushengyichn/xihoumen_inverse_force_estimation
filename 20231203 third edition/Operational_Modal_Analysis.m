@@ -278,7 +278,7 @@ formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' '
 formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
 
 filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
-save(filename,'table_fre',"start_time","end_time");
+% save(filename,'table_fre',"start_time","end_time");
 disp(table_fre)
 %% test
 close all
