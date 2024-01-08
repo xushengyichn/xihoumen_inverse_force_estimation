@@ -56,7 +56,11 @@ elseif strcmp(computer_name,'NTNU08916')
 elseif strcmp(computer_name,'WIN-JFOFTCAS8GU')
     addpath(genpath("D:\XSY\ForceEstimation"))
 elseif strcmp(computer_name,'WIN-IUMUERP66UT')
-    addpath(genpath("C:\Users\xushengyi\Documents\Github"))
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package"))
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\ssm_tools"))
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_data_extract"))
+    addpath(genpath("C:\Users\xushengyi\Documents\Github\sysid_tools"))
+    addpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model")
 else
     error("Please add path first.")
 end
