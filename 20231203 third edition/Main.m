@@ -25,10 +25,10 @@ input_data.end_time = endDate_global;
 % input.sigma_noise = 10 ^ (-1.301006929986168);
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
-input_data.lambda_VIV = 10 ^ (-3.684938247891515);
-input_data.sigma_p_VIV = 2.845907607798993e+02;
-input_data.Q_value = 10 ^ (-7.743718510318171);
-input_data.sigma_buff = 10 ^ (1.351597903572570);
+input_data.lambda_VIV = 10 ^ (-3.059366447657016);
+input_data.sigma_p_VIV = 5.682743296566430e+03;
+input_data.Q_value = 10 ^ (-5.004258502467064);
+input_data.sigma_buff = 10 ^ (1.237973827837277);
 
 input_data.omega_0_variation_VIV = 1;
 input_data.sigma_noise = 10 ^ (-1.301006929986168);
@@ -46,6 +46,63 @@ input_data.nVIV = nVIV;
 
 showtext = true;
 showplot = false;
+
+
+%% plot logL with changing parameters
+if 1
+    lambda_VIVs = logspace(-4, -0, 100);
+    sigma_p_VIVs = linspace(1e1, 1e4, 100);
+
+    [lambda_VIVs, sigma_p_VIVs] = meshgrid(lambda_VIVs, sigma_p_VIVs);
+    variables = [lambda_VIVs(:), sigma_p_VIVs(:)];
+
+    logLs = zeros(size(variables, 1), 1);
+    logSks = zeros(size(variables, 1), 1);
+    logeks = zeros(size(variables, 1), 1);
+
+    for k1 = 1:size(variables, 1)
+        input_data.lambda_VIV = variables(k1, 1);
+        input_data.sigma_p_VIV = variables(k1, 2);
+        input_data.omega_0_variation_VIV = 1;
+        input_data.Q_value = 10 ^ (-5.004258502467064);
+        input_data.sigma_noise = 10 ^ (-1.301006929986168);
+        input_data.sigma_buff = 10 ^ (1.237973827837277);
+        [result_Main] = KalmanMain(input_data, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+        logLs(k1) = result_Main.logL;
+        logSks(k1) = result_Main.logSk;
+        logeks(k1) = result_Main.logek;
+    end
+
+    logLs = reshape(logLs, size(lambda_VIVs));
+    logSks = reshape(logSks, size(lambda_VIVs));
+    logeks = reshape(logeks, size(lambda_VIVs));
+
+    figure
+    surf(lambda_VIVs, sigma_p_VIVs, logLs)
+    xlabel('lambda_VIV')
+    ylabel('sigma_p_VIV')
+    zlabel('logL')
+
+    figure
+    surf(lambda_VIVs, sigma_p_VIVs, logSks)
+    xlabel('lambda_VIV')
+    ylabel('sigma_p_VIV')
+    zlabel('logSk')
+
+    figure
+    surf(lambda_VIVs, sigma_p_VIVs, logeks)
+    xlabel('lambda_VIV')
+    ylabel('sigma_p_VIV')
+    zlabel('logek')
+
+
+
+
+
+
+
+end
+
 
 %% Apply Kalman Filter
 % [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
@@ -87,7 +144,7 @@ if 0 %优化所有参数
     
 end
 
-if 1 % 选择参数进行优化
+if 0 % 选择参数进行优化
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
