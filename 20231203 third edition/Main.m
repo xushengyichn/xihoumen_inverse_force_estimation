@@ -213,7 +213,7 @@ end
 %% plot
 if fig_bool
     % 定义总子图数量
-    total_plots = 16; % 或任何你需要的子图数量
+    total_plots = 20; % 或任何你需要的子图数量
     current_plot = 1;
     num_figs_in_row = [];
     figWidthFactor = 1.5;

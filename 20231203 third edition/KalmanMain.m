@@ -249,11 +249,11 @@ if 1
     
     for k1 = 1:size(Modal_updating_data,1)
         idx_ModalFEM_temp = Modal_updating_data.idx_ModalFEM(k1);
-        replece_idx = find(Freq == idx_ModalFEM_temp);
+        replece_idx = find(abs(Freq - idx_ModalFEM_temp)<1e-6);
         if ~isempty(replece_idx)
             Freq(replece_idx) = Modal_updating_data.frequency(k1);
             zeta(replece_idx) = Modal_updating_data.damping_ratio(k1);
-            KK_eq(replece_idx) = MM_eq(replece_idx) * (2 * pi * Freq(replece_idx))^2;
+            KK_eq(replece_idx,replece_idx) = MM_eq(replece_idx,replece_idx) * (2 * pi * Freq(replece_idx))^2;
             
             
             % Freq(VIV_mode_seq) = 0.328240;

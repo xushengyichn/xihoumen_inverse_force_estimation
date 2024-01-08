@@ -48,8 +48,15 @@ Mapping_data = Result.Mapping;
 phi = mode_vec; %模态向量 每一列是一个模态
 nodegap = Result.nodegap;
 
-xi = 0.3/100;
-Omega = 2 * pi * Result.Freq;
+
+load("Modal_updating_04_Feb_2013_22_00_00_05_Feb_2013_00_00_00.mat")
+VIV_seq = 7;
+xi = table_fre.damping_ratio(VIV_seq);
+Omega = 2 * pi * table_fre.frequency(VIV_seq);
+
+
+% xi = 0.3/100;
+% Omega = 2 * pi * Result.Freq;
 Fs = 50;
 MM = 1;
 KK = MM * Omega ^ 2;
