@@ -170,7 +170,7 @@ if 0 % 选择参数进行优化
 end
 
 
-if 1 % 选择参数进行优化
+if 0 % 选择参数进行优化
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
