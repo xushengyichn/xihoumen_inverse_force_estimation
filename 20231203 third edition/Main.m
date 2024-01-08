@@ -249,7 +249,12 @@ if fig_bool
         current_plot = current_plot + 1;
         ylim([-100, 100])
     end
-    
+    [f, magnitude] = fft_transform(50,F_filter(1, :));
+    create_subplot(@plot, total_plots, current_plot, {f, magnitude}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
+    title("Force in the frequency domain")
+    xlabel("Frequency")
+    ylabel("Amplitude")
+    current_plot = current_plot + 1;
     save temp.mat t F_filter
     %% installation of the sensors and the rms of the sensors
     % 三个传感器位置的振型大小
