@@ -87,7 +87,7 @@ if 0 %优化所有参数
     
 end
 
-if 0 % 选择参数进行优化
+if 1 % 选择参数进行优化
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
@@ -101,7 +101,7 @@ if 0 % 选择参数进行优化
     external_params.sigma_noise = input_data.sigma_noise;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-5, 1e1, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
+    lb = [-4, 1e1, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e4,  -5,  2]; % 这里的值也是假设的
     
     % 定义整数和连续变量
