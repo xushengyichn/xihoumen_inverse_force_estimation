@@ -25,10 +25,12 @@ input_data.end_time = endDate_global;
 % input.sigma_noise = 10 ^ (-1.301006929986168);
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
-input_data.lambda_VIV = 10 ^ (-3.059366447657016);
-input_data.sigma_p_VIV = 5.682743296566430e+03;
-input_data.Q_value = 10 ^ (-5.004258502467064);
-input_data.sigma_buff = 10 ^ (1.237973827837277);
+
+input_data.lambda_VIV = 10 ^ (-3.684938247891515);
+input_data.sigma_p_VIV = 2.845907607798993e+02;
+input_data.Q_value = 10 ^ (-7.743718510318171);
+input_data.sigma_buff = 10 ^ (1.351597903572570);
+
 
 input_data.omega_0_variation_VIV = 1;
 input_data.sigma_noise = 10 ^ (-1.301006929986168);
@@ -49,7 +51,7 @@ showplot = false;
 
 
 %% plot logL with changing parameters
-if 1
+if 0
     lambda_VIVs = logspace(-4, -0, 10);
     sigma_p_VIVs = linspace(1e1, 1e4, 10);
 
