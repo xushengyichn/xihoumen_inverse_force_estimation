@@ -26,9 +26,9 @@ input_data.end_time = endDate_global;
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
 
-input_data.lambda_VIV = 10 ^ (-3.684938247891515);
-input_data.sigma_p_VIV = 2.845907607798993e+02;
-input_data.sigma_buff = 10 ^ (1.351597903572570);
+input_data.lambda_VIV = 10 ^ (-2.811167465692750);
+input_data.sigma_p_VIV = 19.780509673791514;
+input_data.sigma_buff = 10 ^ (1.227049609131640);
 
 
 % input_data.Q_value = 10 ^ (-7.743718510318171);
@@ -53,7 +53,7 @@ showplot = false;
 
 %% plot logL with changing parameters
 if 0
-    lambda_VIVs = logspace(-4, -0, 10);
+    lambda_VIVs = logspace(-6, -0, 20);
     sigma_p_VIVs = linspace(1e1, 1e4, 10);
 
     [lambda_VIVs, sigma_p_VIVs] = meshgrid(lambda_VIVs, sigma_p_VIVs);
@@ -68,9 +68,9 @@ if 0
         input_data_temp.lambda_VIV = variables(k1, 1);
         input_data_temp.sigma_p_VIV = variables(k1, 2);
         input_data_temp.omega_0_variation_VIV = 1;
-        input_data_temp.Q_value = 10 ^ (-5.004258502467064);
+        input_data_temp.Q_value = 10 ^ (-5);
         input_data_temp.sigma_noise = 10 ^ (-1.301006929986168);
-        input_data_temp.sigma_buff = 10 ^ (1.237973827837277);
+        input_data_temp.sigma_buff = 10 ^ (1.351597903572570);
         [result_Main] = KalmanMain(input_data_temp, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
         logLs(k1) = result_Main.logL;
         logSks(k1) = result_Main.logSk;
@@ -150,13 +150,13 @@ if 0 % 选择参数进行优化
     external_params.sigma_noise = input_data.sigma_noise;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-4, 1e1, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
+    lb = [-4, 1e0, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e4,  -5,  2]; % 这里的值也是假设的
     
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
     
-    options = optimoptions('ga', 'MaxGenerations', 100, 'Display', 'iter', 'UseParallel', true);
+    options = optimoptions('ga', 'MaxGenerations', 3, 'Display', 'iter', 'UseParallel', true);
     [x, fval] = ga(@(params) fitnessFunction_sel(params, external_params), 4, [], [], [], [], lb, ub, [], IntCon, options);
     % 保存结果
     save('optimization_results.mat', 'x', 'fval');
@@ -185,8 +185,8 @@ if 1 % 选择参数进行优化
     external_params.Q_value = input_data.Q_value;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-4, 1e1,  0]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [0, 1e4,  2]; % 这里的值也是假设的
+    lb = [-4, 1e0,  0]; % 这里的值是假设的，请根据您的情况进行修改
+    ub = [0, 1e2,  2]; % 这里的值也是假设的
     
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
@@ -206,9 +206,7 @@ end
 
 %% Apply kalman filter
 % [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-input_data.lambda_VIV = 10 ^ (x(1));
-    input_data.sigma_p_VIV = x(2);
-    input_data.sigma_buff = 10 ^ (x(3));
+
 [result_Main] = KalmanMain(input_data, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
