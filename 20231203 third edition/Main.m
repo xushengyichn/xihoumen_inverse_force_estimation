@@ -40,8 +40,11 @@ input_data.sigma_noise = 10 ^ (-1.301006929986168);
 
 
 %% logL优化参数
-% modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
-modesel = [2,3,5,6,13,20,22,33];%去掉了两个广义坐标为0的点模态
+modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+moderemove = [4,5,9];
+modeall(moderemove)=[];
+modesel = modeall;
+% modesel = [2,3,5,6,13,20,22,33];%去掉了两个广义坐标为0的点模态
 
 
 VIV_mode_seq = find(modesel == 22);
@@ -366,7 +369,7 @@ if fig_bool
     xlabel("Frequency")
     ylabel("Amplitude")
     current_plot = current_plot + 1;
-    save temp.mat t F_filter
+    save temp2.mat t F_filter
     %% installation of the sensors and the rms of the sensors
     % 三个传感器位置的振型大小
     loc_acc = result_Main.loc_acc;

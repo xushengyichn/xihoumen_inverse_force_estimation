@@ -50,7 +50,7 @@ nodegap = Result.nodegap;
 
 
 load("Modal_updating_04_Feb_2013_22_00_00_05_Feb_2013_00_00_00.mat")
-VIV_seq = 5;
+VIV_seq = 7;
 xi = table_fre.damping_ratio(VIV_seq);
 Omega = 2 * pi * table_fre.frequency(VIV_seq);
 
