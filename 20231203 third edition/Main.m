@@ -26,9 +26,9 @@ input_data.end_time = endDate_global;
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
 
-input_data.lambda_VIV = 10 ^ (-2.811167465692750);
-input_data.sigma_p_VIV = 19.780509673791514;
-input_data.sigma_buff = 10 ^ (1.227049609131640);
+input_data.lambda_VIV = 10 ^ (-2.884165956214285);
+input_data.sigma_p_VIV = 32.517827934819310;
+input_data.sigma_buff = 10 ^ (1.381082662419010);
 
 
 % input_data.Q_value = 10 ^ (-7.743718510318171);
@@ -36,12 +36,15 @@ input_data.Q_value = 10 ^ (-5);
 input_data.omega_0_variation_VIV = 1;
 input_data.sigma_noise = 10 ^ (-1.301006929986168);
 
+
+
+
 %% logL优化参数
 modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
 % modesel = [2,3,23];
 
 VIV_mode_seq = find(modesel == 22);
-% modesel = 23;
+
 input_data.modesel = modesel;
 input_data.VIV_mode_seq = VIV_mode_seq;
 nVIV = length(VIV_mode_seq);
@@ -123,16 +126,26 @@ if 0 %优化所有参数
     external_params.ft_directint = ft_directint;
     % external_params.modesel = [23];
     % 定义参数的范围
-    lb = [-12, 1e2, 0.98, -10, -8, 0]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [-4, 1e5, 1.02, -5, -1, 2]; % 这里的值也是假设的
+    lb = [-4, 1e0, 0.98, -6, -3, 0]; % 这里的值是假设的，请根据您的情况进行修改
+    ub = [0, 1e4, 1.02, -4, -1, 2]; % 这里的值也是假设的
     
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
     
-    options = optimoptions('ga', 'MaxGenerations', 100, 'Display', 'iter', 'UseParallel', true);
+    options = optimoptions('ga', 'MaxGenerations', 50, 'Display', 'iter', 'UseParallel', true);
     [x, fval] = ga(@(params) fitnessFunction(params, external_params), 6, [], [], [], [], lb, ub, [], IntCon, options);
     % 保存结果
     save('optimization_results.mat', 'x', 'fval');
+
+    input_data.lambda_VIV = 10 ^ (x(1));
+input_data.sigma_p_VIV = x(2);
+input_data.omega_0_variation_VIV = x(3);
+input_data.sigma_buff = 10 ^ (x(6));
+input_data.Q_value = 10 ^ (x(4));
+
+input_data.sigma_noise = 10 ^ (x(5));
+
+
     
 end
 
@@ -151,12 +164,12 @@ if 0 % 选择参数进行优化
     % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-4, 1e0, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [0, 1e4,  -5,  2]; % 这里的值也是假设的
+    ub = [0, 1e4,  -4,  2]; % 这里的值也是假设的
     
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
     
-    options = optimoptions('ga', 'MaxGenerations', 3, 'Display', 'iter', 'UseParallel', true);
+    options = optimoptions('ga', 'MaxGenerations', 30, 'Display', 'iter', 'UseParallel', true);
     [x, fval] = ga(@(params) fitnessFunction_sel(params, external_params), 4, [], [], [], [], lb, ub, [], IntCon, options);
     % 保存结果
     save('optimization_results.mat', 'x', 'fval');
@@ -191,7 +204,7 @@ if 0 % 选择参数进行优化
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
     
-    options = optimoptions('ga', 'MaxGenerations', 10, 'Display', 'iter', 'UseParallel', true);
+    options = optimoptions('ga', 'MaxGenerations', 30, 'Display', 'iter', 'UseParallel', true);
     [x, fval] = ga(@(params) fitnessFunction_sel2(params, external_params), 3, [], [], [], [], lb, ub, [], IntCon, options);
     % 保存结果
     save('optimization_results.mat', 'x', 'fval');
@@ -714,8 +727,8 @@ fields = fieldnames(result_Main);
 
 logL = result_Main.logL;
 logek = result_Main.logek;
-%     target = -logL;% 因为 ga 试图最小化函数，所以取负数
-target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
 
 end
 

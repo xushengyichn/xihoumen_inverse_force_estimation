@@ -38,7 +38,7 @@ yn(5, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1
 yn(6, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
 
 
-modesel = 23;
+modesel = 22;
 nmodes = length(modesel); ns = nmodes * 2;
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel, 'showtext', false);
 node_loc = Result.node_loc;
@@ -50,7 +50,7 @@ nodegap = Result.nodegap;
 
 
 load("Modal_updating_04_Feb_2013_22_00_00_05_Feb_2013_00_00_00.mat")
-VIV_seq = 7;
+VIV_seq = 5;
 xi = table_fre.damping_ratio(VIV_seq);
 Omega = 2 * pi * table_fre.frequency(VIV_seq);
 
