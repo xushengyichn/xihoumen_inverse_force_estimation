@@ -282,7 +282,7 @@ save(filename,'table_fre',"start_time","end_time");
 disp(table_fre)
 %% test
 close all
-FEM_mode_sel = 5;
+FEM_mode_sel = 9;
 mode_deck_plot = (Result.mode_deck(:,FEM_mode_sel));
 FEM_freq = Result.Freq(FEM_mode_sel);
 figure('Position', [[100, 100], 960, 540]);

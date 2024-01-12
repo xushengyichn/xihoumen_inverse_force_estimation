@@ -40,8 +40,9 @@ input_data.sigma_noise = 10 ^ (-1.301006929986168);
 
 
 %% logL优化参数
-modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
-% modesel = [2,3,23];
+% modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+modesel = [2,3,5,6,13,20,22,33];%去掉了两个广义坐标为0的点模态
+
 
 VIV_mode_seq = find(modesel == 22);
 
@@ -119,12 +120,11 @@ if 0 %优化所有参数
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    external_params.modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+    external_params.modesel = modesel;
     external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
     external_params.ft_directint = ft_directint;
-    % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-4, 1e0, 0.98, -6, -3, 0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e4, 1.02, -4, -1, 2]; % 这里的值也是假设的
@@ -154,14 +154,13 @@ if 0 % 选择参数进行优化
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    external_params.modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+    external_params.modesel = modesel;
     external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
     external_params.ft_directint = ft_directint;
     external_params.omega_0_variation_VIV = input_data.omega_0_variation_VIV;
     external_params.sigma_noise = input_data.sigma_noise;
-    % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-4, 1e0, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e4,  -4,  2]; % 这里的值也是假设的
@@ -188,7 +187,7 @@ if 0 % 选择参数进行优化
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    external_params.modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+    external_params.modesel = modesel;
     external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
@@ -196,7 +195,6 @@ if 0 % 选择参数进行优化
     external_params.omega_0_variation_VIV = input_data.omega_0_variation_VIV;
     external_params.sigma_noise = input_data.sigma_noise;
     external_params.Q_value = input_data.Q_value;
-    % external_params.modesel = [23];
     % 定义参数的范围
     lb = [-4, 1e0,  0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e2,  2]; % 这里的值也是假设的
