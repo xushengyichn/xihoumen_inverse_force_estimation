@@ -37,10 +37,10 @@ input_data.omega_0_variation_VIV = 1;
 input_data.sigma_noise = 10 ^ (-1.301006929986168);
 
 %% logL优化参数
-modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
+modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
 % modesel = [2,3,23];
 
-VIV_mode_seq = find(modesel == 23);
+VIV_mode_seq = find(modesel == 22);
 % modesel = 23;
 input_data.modesel = modesel;
 input_data.VIV_mode_seq = VIV_mode_seq;
@@ -116,7 +116,7 @@ if 0 %优化所有参数
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    external_params.modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
+    external_params.modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
     external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
@@ -141,7 +141,7 @@ if 0 % 选择参数进行优化
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    external_params.modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
+    external_params.modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
     external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
@@ -175,7 +175,7 @@ if 0 % 选择参数进行优化
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
     % 在调用 ga 函数之前，您可以这样设置 external_params：
-    external_params.modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
+    external_params.modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
     external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;

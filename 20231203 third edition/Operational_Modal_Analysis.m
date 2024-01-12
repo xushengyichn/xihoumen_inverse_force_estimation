@@ -216,7 +216,7 @@ for k1 = 1:length(unique_groups)
 end
 
 %% modal updating
-modesel = [2, 3, 5, 6, 7, 9, 15, 21, 23, 29, 33, 39, 44, 45];
+modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
 nmodes = length(modesel);
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',true);
 Fre_FEM = Result.Freq;
@@ -278,11 +278,11 @@ formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' '
 formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
 
 filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
-% save(filename,'table_fre',"start_time","end_time");
+save(filename,'table_fre',"start_time","end_time");
 disp(table_fre)
 %% test
 close all
-FEM_mode_sel = 11;
+FEM_mode_sel = 5;
 mode_deck_plot = (Result.mode_deck(:,FEM_mode_sel));
 FEM_freq = Result.Freq(FEM_mode_sel);
 figure('Position', [[100, 100], 960, 540]);
@@ -295,7 +295,7 @@ phi_sensor_loc = mode_deck_plot(idx_sensor_loc);
 hold on
 scatter(sensor_loc,phi_sensor_loc,'filled')
 
-Modal_analysis_mode_sel =9;
+Modal_analysis_mode_sel =5;
 order_sel = 41;
 w_sel = w_array{order_sel}(Modal_analysis_mode_sel);
 freq_sel = w_sel/(2*pi);
