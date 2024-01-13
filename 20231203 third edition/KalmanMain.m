@@ -278,10 +278,16 @@ Mapping_data = Result.Mapping;
 if showtext
     disp("Damping ratio of the structure is set as "+num2str(zeta));
 end
+% TODO: test begin
+% Freq(4)=0.15
+% TODO: test end
 omega = diag(2 * pi * Freq);
 CC_eq = 2 .* MM_eq .* omega .* zeta;
 
 phi = mode_vec; %模态向量 每一列是一个模态
+% TODO: test begin
+% phi(:,4)=phi(:,4)*0.00001
+% TODO: test end
 C = CC_eq; K = KK_eq; M = MM_eq;
 
 Gamma = C; % 对应文献中表述的符号
@@ -292,7 +298,7 @@ omega2 = K;
 % loc_acc= [578+1650/4*3;578+1650/2;578+1650/4];
 % loc_acc = [1403];
 
-%     loc_acc = [989; 1403; 1783];
+% loc_acc = [1403];
 loc_acc = [990.5; 1403; 1815.5];
 loc_vel = [];
 loc_dis = [];
@@ -307,14 +313,25 @@ acc_names = ["Main span 1/4", "Main span 1/2", "Main span 3/4"];
 % yn(4, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
 % yn(5, :) = Acc_Data.mergedData.AC4_1 / 1000 * 9.8;
 % yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
-
+% 
 yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
 yn(2, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
 yn(3, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
 yn(4, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
-yn(5, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
-yn(6, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
-
+% yn(5, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
+% yn(6, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
+yn(5, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+% figure
+% plot(yn(1, :))
+% hold on 
+% plot(yn(2, :))
+% 
+% plot(yn(3, :))
+% plot(yn(4, :))
+% plot(yn(5, :))
+% plot(yn(6, :))
+% legend("1","2","3","4","5","6")
 % yn(1, :) = Acc_Data.mergedData.AC3_1 / 1000 * 9.8;
 % yn(2, :) = Acc_Data.mergedData.AC3_3 / 1000 * 9.8;
 
@@ -349,7 +366,12 @@ C_buff = sigma_buff^2*eye(nmodes);
 
 Q = Q_value * eye(ns);
 R = R_value * eye(n_sensors);
-
+% TODO: test begin
+% R(1,1)=10;
+% R(2,2)=10;
+% R(5,5)=10;
+% R(6,6)=10;
+% TODO: test end 
 x0 = zeros(ns, 1);
 
 Q_xd = Q;

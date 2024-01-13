@@ -34,14 +34,15 @@ input_data.sigma_buff = 10 ^ (1.381082662419010);
 % input_data.Q_value = 10 ^ (-7.743718510318171);
 input_data.Q_value = 10 ^ (-5);
 input_data.omega_0_variation_VIV = 1;
-input_data.sigma_noise = 10 ^ (-1.301006929986168);
+input_data.sigma_noise = 10 ^ (-1.3);
+% input_data.sigma_noise = 10 ^ (0);
 
 
 
 
 %% logL优化参数
 modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
-moderemove = [4,5,9];
+moderemove = [4,9];
 modeall(moderemove)=[];
 modesel = modeall;
 % modesel = [2,3,5,6,13,20,22,33];%去掉了两个广义坐标为0的点模态
