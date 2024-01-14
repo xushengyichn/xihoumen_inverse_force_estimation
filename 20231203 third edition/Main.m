@@ -26,9 +26,9 @@ input_data.end_time = endDate_global;
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
 
-input_data.lambda_VIV = 10 ^ (-2.884165956214285);
-input_data.sigma_p_VIV = 32.517827934819310;
-input_data.sigma_buff = 10 ^ (1.381082662419010);
+input_data.lambda_VIV = 10 ^ (-3.713913979390664);
+input_data.sigma_p_VIV = 21.646629206465330;
+input_data.sigma_buff = 10 ^ (0.029549284168558);
 
 
 % input_data.Q_value = 10 ^ (-7.743718510318171);
@@ -153,7 +153,7 @@ input_data.sigma_noise = 10 ^ (x(5));
     
 end
 
-if 0 % 选择参数进行优化
+if 1 % 选择参数进行优化
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
