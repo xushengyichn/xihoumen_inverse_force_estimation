@@ -2,36 +2,37 @@
 %Author: xushengyichn xushengyichn@outlook.com
 %Date: 2023-10-20 12:45:02
 %LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-10-23 23:30:40
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231005 first version\tune_hyperparameter.m
+%LastEditTime: 2024-01-14 21:56:10
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231203 third edition\tune_hyperparameter.m
 %Description: 由于选择不同参数会对阻尼比计算结果产生影响，因此需要进行参数选择实验
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clc; clear; close all;
-addpath(genpath("F:\git\ssm_tools\"))
-addpath(genpath("F:\git\Function_shengyi_package\"))
-addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
-addpath(genpath("F:\git\HHT-Tutorial\"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
-addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
-addpath(genpath("C:\Users\xushengyi\Documents\Github\ssm_tools"))
-addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package\"))
-addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model\"))
+run('CommonCommand.m');
+% addpath(genpath("F:\git\ssm_tools\"))
+% addpath(genpath("F:\git\Function_shengyi_package\"))
+% addpath(genpath("F:\git\xihoumen_inverse_force_estimation\FEM_model\"))
+% addpath(genpath("F:\git\HHT-Tutorial\"))
+% addpath(genpath("/Users/xushengyi/Documents/GitHub/Function_shengyi_package"))
+% addpath(genpath("/Users/xushengyi/Documents/GitHub/ssm_tools_sy"))
+% addpath(genpath("/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/FEM_model"))
+% addpath(genpath("/Users/xushengyi/Documents/GitHub/HHT-Tutorial"))
+% addpath(genpath("C:\Users\xushengyi\Documents\Github\ssm_tools"))
+% addpath(genpath("C:\Users\xushengyi\Documents\Github\Function_shengyi_package\"))
+% addpath(genpath("C:\Users\xushengyi\Documents\Github\xihoumen_inverse_force_estimation\FEM_model\"))
 
-subStreamNumberDefault = 2132;
+% subStreamNumberDefault = 2132;
 
-run("InitScript.m")
+% run("InitScript.m")
 %% 0 绘图参数
-fig_bool = ON;
-num_figs_in_row = 12; %每一行显示几个图
-figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
-%设置图片间隔
-gap_between_images = [0, 0];
-figureIdx = 0;
+% fig_bool = ON;
+% num_figs_in_row = 12; %每一行显示几个图
+% figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
+% %设置图片间隔
+% gap_between_images = [0, 0];
+% figureIdx = 0;
 
 n = 4;
 [result] = viv2013(n, OFF);
@@ -43,8 +44,8 @@ input.end_time = endDate_global;
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 % input.acc_dir = "F:\test\result";
 % input.wind_dir = "F:\test\result_wind_10min";
-input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
-input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
+% input.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
+% input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 
 
 % % 定义每个实验的参数
@@ -61,15 +62,15 @@ input.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
 
 n1=10;
 n2=30;
-lambda_list = logspace(-5,-1,n1);
-sigma_p_list = linspace(1e2,1e5,n2);
+lambda_VIV_list = logspace(-5,-1,n1);
+sigma_p_VIV_list = linspace(1e1,1e5,n2);
 % sigma_p_list = logspace(2,5,n2);
 
-[X, Y] = meshgrid(lambda_list, sigma_p_list);
+[X, Y] = meshgrid(lambda_VIV_list, sigma_p_VIV_list);
 combinations = [reshape(X, [], 1), reshape(Y, [], 1)];
 
-lambda_vals = combinations(:, 1);
-sigma_p_vals = combinations(:, 2);
+lambda_VIV_vals = combinations(:, 1);
+sigma_p_VIV_vals = combinations(:, 2);
 numIterations = size(combinations,1);
 
 if isempty(gcp('nocreate'))
@@ -90,11 +91,11 @@ parfor i = 1:numIterations
     local_input = input;
     
     % 设置local_input的参数
-    local_input.lambda = lambda_vals(i);
-    local_input.sigma_p = sigma_p_vals(i);
-    local_input.omega_0_variation = 0.904969462898074;
-    local_input.Q_value = 10 ^ (-9.901777612793937);
-    local_input.R_value = 10 ^ (-3.866588296864785);
+    local_input.lambda_VIV = lambda_VIV_vals(i);
+    local_input.sigma_p_VIV = sigma_p_VIV_vals(i);
+    local_input.omega_0_variation = 1;
+    local_input.Q_value = 10 ^ (-9.023298502893022);
+    local_input.R_value = 10 ^ (-1.3);
     
     modesel = 23;
     local_input.modesel = modesel;
