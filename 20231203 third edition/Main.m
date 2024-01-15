@@ -62,8 +62,9 @@ showplot = false;
 %% plot logL with changing parameters
 if 1
 
-    lambda_VIVs = logspace(-5,-1,20);
-    sigma_p_VIVs = linspace(1e1,1e5,10);
+    lambda_VIVs = logspace(-10,-1,20);
+    % sigma_p_VIVs = linspace(1e1,1e5,10);
+    sigma_p_VIVs = logspace(-1,6,10);
 
     [lambda_VIVs, sigma_p_VIVs] = meshgrid(lambda_VIVs, sigma_p_VIVs);
     variables = [lambda_VIVs(:), sigma_p_VIVs(:)];
@@ -77,9 +78,10 @@ if 1
         input_data_temp.lambda_VIV = variables(k1, 1);
         input_data_temp.sigma_p_VIV = variables(k1, 2);
         input_data_temp.omega_0_variation_VIV = 1;
-        input_data_temp.Q_value = 10 ^ (-5);
-        input_data_temp.sigma_noise = 10 ^ (-1.301006929986168);
-        input_data_temp.sigma_buff = 10 ^ (1.351597903572570);
+
+        input_data_temp.Q_value = 10 ^ (-9.023298502893022);
+        input_data_temp.sigma_noise = 10 ^ (-1.3);
+        input_data_temp.sigma_buff = 10 ^ (0.057229481634271);
         [result_Main] = KalmanMain(input_data_temp, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
         logLs(k1) = result_Main.logL;
         logSks(k1) = result_Main.logSk;
@@ -91,26 +93,27 @@ if 1
     logeks = reshape(logeks, size(lambda_VIVs));
 
     figure
-    surf(log(lambda_VIVs), sigma_p_VIVs, logLs)
+    surf(log10(lambda_VIVs), log10(sigma_p_VIVs), logLs)
     xlabel('lambda_VIV')
     ylabel('sigma_p_VIV')
     zlabel('logL')
+    hold on
+    scatter3(log10(10 ^ (-3.942762294993564)),log10(2.045644004352163e+02),9256033.339209)
 
     figure
-    surf(log(lambda_VIVs), sigma_p_VIVs, logSks)
+    surf(log10(lambda_VIVs), log10(sigma_p_VIVs), logSks)
     xlabel('lambda_VIV')
     ylabel('sigma_p_VIV')
     zlabel('logSk')
-
+    
     figure
-    surf(log(lambda_VIVs), sigma_p_VIVs, logeks)
+    surf(log10(lambda_VIVs), log10(sigma_p_VIVs), logeks)
     xlabel('lambda_VIV')
     ylabel('sigma_p_VIV')
     zlabel('logek')
 
 
-
-
+    
 
 
 
