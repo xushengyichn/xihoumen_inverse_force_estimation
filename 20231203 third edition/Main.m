@@ -60,9 +60,10 @@ showplot = false;
 
 
 %% plot logL with changing parameters
-if 0
-    lambda_VIVs = logspace(-6, -0, 20);
-    sigma_p_VIVs = linspace(1e1, 1e4, 10);
+if 1
+
+    lambda_VIVs = logspace(-5,-1,20);
+    sigma_p_VIVs = linspace(1e1,1e5,10);
 
     [lambda_VIVs, sigma_p_VIVs] = meshgrid(lambda_VIVs, sigma_p_VIVs);
     variables = [lambda_VIVs(:), sigma_p_VIVs(:)];
