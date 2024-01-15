@@ -112,12 +112,16 @@ if 1
     ylabel('sigma_p_VIV')
     zlabel('logek')
 
-
     
-
-
+    figure
+    contourf(log10(lambda_VIVs), log10(sigma_p_VIVs), logLs)
+    hold on
+    scatter(log10(10^(-3.942762294993564)), log10(2.045644004352163e+02), 'filled');
+   
+    return
 
 end
+
 
 
 %% Apply Kalman Filter
