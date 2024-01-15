@@ -38,8 +38,8 @@ n = 4;
 [result] = viv2013(n, OFF);
 startDate_global = result.startDate;
 endDate_global = result.endDate;
-input.start_time = startDate_global;
-input.end_time = endDate_global;
+input_data.start_time = startDate_global;
+input_data.end_time = endDate_global;
 % input.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
 % input.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 % input.acc_dir = "F:\test\result";
@@ -85,21 +85,32 @@ b = ProgressBar(numIterations, ...
 b.setup([], [], []);
 
 
-parfor i = 1:numIterations
+for i = 1:numIterations
 % for i = 1:numIterations
     % 创建input的局部副本
-    local_input = input;
+    local_input = input_data;
     
     % 设置local_input的参数
     local_input.lambda_VIV = lambda_VIV_vals(i);
     local_input.sigma_p_VIV = sigma_p_VIV_vals(i);
-    local_input.omega_0_variation = 1;
+    local_input.omega_0_variation_VIV = 1;
     local_input.Q_value = 10 ^ (-9.023298502893022);
-    local_input.R_value = 10 ^ (-1.3);
+    local_input.sigma_noise  = 10 ^ (-1.3);
+
     
-    modesel = 23;
+
+    local_input.sigma_buff = 10 ^ (0.057229481634271);
+
+    modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+    moderemove = [4,9];
+    modeall(moderemove)=[];
+    modesel = modeall;
+
+
+
+    VIV_mode_seq = find(modesel == 22);
     local_input.modesel = modesel;
-    
+    local_input.VIV_mode_seq=VIV_mode_seq;
     % 运行实验并保存结果
     % tic
     results_experiment = run_experiment(local_input, 'showtext', false, 'showplot', false,'caldamp',false);
