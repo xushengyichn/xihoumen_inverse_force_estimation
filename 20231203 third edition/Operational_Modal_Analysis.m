@@ -216,7 +216,7 @@ for k1 = 1:length(unique_groups)
 end
 
 %% modal updating
-modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 32];
 nmodes = length(modesel);
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',true);
 Fre_FEM = Result.Freq;
