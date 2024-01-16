@@ -8,8 +8,8 @@ run('CommonCommand.m');
 
 
 %% load acceleration and wind data
-start_time = datetime('2013-02-04 22:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-end_time = datetime('2013-02-05 00:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
+start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
 % start_time = result.startDate;
 % end_time = result.endDate;
 [acc_result] = read_acceleration_data(start_time,end_time,input_data.acc_dir);
@@ -153,7 +153,7 @@ end
 all_std_fre = all_std_w/(2*pi);
 all_w_orders = [all_w,all_orders];
 rng(1); % For reproducibility
-k_value = 20;
+k_value = 14;
 [idx,w_kmean] = kmeans(all_w,k_value);
 
 % 计算每个组的均值
@@ -256,9 +256,13 @@ for k1 = 1:k_value
         disp(Fre_FEM)
         disp(frequency);
         closestIdx = input("please input the updated mode index:");
-        % 记录最接近的频率值
-        idx_ModalFEM(k1) = Fre_FEM(closestIdx);
-        Fre_FEM(closestIdx)=[]; % remove duplicated value
+        if closestIdx==0
+            idx_ModalFEM(k1) = 0;
+        else
+            % 记录最接近的频率值
+            idx_ModalFEM(k1) = Fre_FEM(closestIdx);
+            Fre_FEM(closestIdx)=[]; % remove duplicated value
+        end
     end
 end
 

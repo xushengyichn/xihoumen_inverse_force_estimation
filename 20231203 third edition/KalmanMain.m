@@ -223,8 +223,8 @@ zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
 %% modal updating
 if 1
-    start_time = datetime('2013-02-04 22:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-    end_time = datetime('2013-02-05 00:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
+    start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+    end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
     
     % 替换日期时间字符串中的冒号和其他特殊字符
     start_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
