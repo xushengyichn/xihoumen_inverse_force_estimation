@@ -61,24 +61,24 @@ showplot = false;
 
 %% plot logL with changing parameters
 if 0
-
+    
     lambda_VIVs = logspace(-10,-1,20);
     % sigma_p_VIVs = linspace(1e1,1e5,10);
     sigma_p_VIVs = logspace(-1,6,10);
-
+    
     [lambda_VIVs, sigma_p_VIVs] = meshgrid(lambda_VIVs, sigma_p_VIVs);
     variables = [lambda_VIVs(:), sigma_p_VIVs(:)];
-
+    
     logLs = zeros(size(variables, 1), 1);
     logSks = zeros(size(variables, 1), 1);
     logeks = zeros(size(variables, 1), 1);
-
+    
     parfor k1 = 1:size(variables, 1)
         input_data_temp = input_data;
         input_data_temp.lambda_VIV = variables(k1, 1);
         input_data_temp.sigma_p_VIV = variables(k1, 2);
         input_data_temp.omega_0_variation_VIV = 1;
-
+        
         input_data_temp.Q_value = 10 ^ (-9.023298502893022);
         input_data_temp.sigma_noise = 10 ^ (-1.3);
         input_data_temp.sigma_buff = 10 ^ (0.057229481634271);
@@ -87,11 +87,11 @@ if 0
         logSks(k1) = result_Main.logSk;
         logeks(k1) = result_Main.logek;
     end
-
+    
     logLs = reshape(logLs, size(lambda_VIVs));
     logSks = reshape(logSks, size(lambda_VIVs));
     logeks = reshape(logeks, size(lambda_VIVs));
-
+    
     figure
     surf(log10(lambda_VIVs), log10(sigma_p_VIVs), logLs)
     xlabel('lambda_VIV')
@@ -99,7 +99,7 @@ if 0
     zlabel('logL')
     hold on
     scatter3(log10(10 ^ (-3.942762294993564)),log10(2.045644004352163e+02),9256033.339209)
-
+    
     figure
     surf(log10(lambda_VIVs), log10(sigma_p_VIVs), logSks)
     xlabel('lambda_VIV')
@@ -111,15 +111,15 @@ if 0
     xlabel('lambda_VIV')
     ylabel('sigma_p_VIV')
     zlabel('logek')
-
+    
     
     figure
     contourf(log10(lambda_VIVs), log10(sigma_p_VIVs), logLs)
     hold on
     scatter(log10(10^(-3.942762294993564)), log10(2.045644004352163e+02), 'filled');
-   
+    
     return
-
+    
 end
 
 
@@ -148,16 +148,16 @@ if 0 %优化所有参数
     [x, fval] = ga(@(params) fitnessFunction(params, external_params), 6, [], [], [], [], lb, ub, [], IntCon, options);
     % 保存结果
     save('optimization_results.mat', 'x', 'fval');
-
+    
     input_data.lambda_VIV = 10 ^ (x(1));
-input_data.sigma_p_VIV = x(2);
-input_data.omega_0_variation_VIV = x(3);
-input_data.sigma_buff = 10 ^ (x(6));
-input_data.Q_value = 10 ^ (x(4));
-
-input_data.sigma_noise = 10 ^ (x(5));
-
-
+    input_data.sigma_p_VIV = x(2);
+    input_data.omega_0_variation_VIV = x(3);
+    input_data.sigma_buff = 10 ^ (x(6));
+    input_data.Q_value = 10 ^ (x(4));
+    
+    input_data.sigma_noise = 10 ^ (x(5));
+    
+    
     
 end
 
@@ -361,8 +361,8 @@ if fig_bool
             [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
             hold on
             create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-
-
+            
+            
         else
             create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
         end
@@ -424,7 +424,7 @@ if fig_bool
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     
-
+    
     %% kalman filter vitural sensoring and the covariance
     create_subplot(@plot, total_plots, current_plot, { t, h_hat(15, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
     NN = length(t);
@@ -437,7 +437,7 @@ if fig_bool
     hold on
     [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
     create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-   
+    
     legend( 'filtered from kalman filter')
     % title("reconstructed displacement vs kalman filter vitural sensoring")
     title("Dis (1/2span)")
@@ -455,7 +455,7 @@ if fig_bool
     [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
     hold on
     create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-
+    
     legend( 'filtered from kalman filter')
     % title("reconstructed velocity vs kalman filter vitural sensoring")
     title("Vel (1/2span)")
@@ -473,7 +473,7 @@ if fig_bool
     [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
     hold on
     create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-
+    
     legend( 'filtered from kalman filter')
     % title("reconstructed acceleration vs kalman filter vitural sensoring")
     title("Acc (1/2span)")
@@ -737,7 +737,7 @@ fields = fieldnames(result_Main);
 
 logL = result_Main.logL;
 logek = result_Main.logek;
-    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+target = -logL;% 因为 ga 试图最小化函数，所以取负数
 % target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
 
 end
@@ -801,11 +801,11 @@ target = -logL;% 因为 ga 试图最小化函数，所以取负数
 end
 
 function [x_reduced, y_reduced] = reduceDataPoints(x, y, factor)
-    % 确保降采样因子是正整数
-    factor = max(1, round(factor));
-    
-    % 进行降采样
-    indices = 1:factor:length(x); % 每隔 'factor' 个点取一个点
-    x_reduced = x(indices);
-    y_reduced = y(indices);
+% 确保降采样因子是正整数
+factor = max(1, round(factor));
+
+% 进行降采样
+indices = 1:factor:length(x); % 每隔 'factor' 个点取一个点
+x_reduced = x(indices);
+y_reduced = y(indices);
 end
