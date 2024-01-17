@@ -235,7 +235,7 @@ if 0 % 选择参数进行优化
     external_params.acc_dir = input_data.acc_dir;
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
-    external_params.ft_directint = ft_directint;
+    % external_params.ft_directint = ft_directint;
     external_params.omega_0_variation_VIV = input_data.omega_0_variation_VIV;
     external_params.sigma_noise = input_data.sigma_noise;
     external_params.Q_value = input_data.Q_value;
@@ -259,6 +259,39 @@ if 0 % 选择参数进行优化
 
 end
 
+
+if 0 % 选择参数进行优化
+    %% 导入直接积分获得的涡激力
+    %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
+    % 在调用 ga 函数之前，您可以这样设置 external_params：
+    input_data.lambda_VIV = 10 ^ (-3);
+    external_params.modesel = modesel;
+    external_params.acc_dir = input_data.acc_dir;
+    external_params.VIV_mode_seq = VIV_mode_seq;
+    external_params.nVIV = nVIV;
+    % external_params.ft_directint = ft_directint;
+    external_params.omega_0_variation_VIV = input_data.omega_0_variation_VIV;
+    external_params.sigma_noise = input_data.sigma_noise;
+    external_params.Q_value = input_data.Q_value;
+    external_params.sigma_buff = input_data.sigma_buff;
+    external_params.lambda_VIV = input_data.lambda_VIV;
+
+    % 定义参数的范围
+    lb = [10^0]; % 这里的值是假设的，请根据您的情况进行修改
+    ub = [10^3]; % 这里的值也是假设的
+
+    % 定义整数和连续变量
+    IntCon = []; % 如果没有整数变量，否则提供整数变量的索引
+
+    options = optimoptions('ga', 'MaxGenerations', 30, 'Display', 'iter', 'UseParallel', true);
+    [x, fval] = ga(@(params) fitnessFunction_sel4(params, external_params), 1, [], [], [], [], lb, ub, [], IntCon, options);
+    % 保存结果
+    save('optimization_results_only_sigma.mat', 'x', 'fval');
+
+    input_data.sigma_p_VIV = x(1);
+
+
+end
 
 %% Apply kalman filter
 % [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
@@ -850,6 +883,34 @@ input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
 input.sigma_noise = external_params.sigma_noise;
 input.Q_value =external_params.Q_value ;
 input.sigma_p_VIV =external_params.sigma_p_VIV ;
+input.sigma_buff =external_params.sigma_buff ;
+% result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+fields = fieldnames(result_Main);
+
+logL = result_Main.logL;
+logek = result_Main.logek;
+target = -logL;% 因为 ga 试图最小化函数，所以取负数
+% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+
+end
+
+function target = fitnessFunction_sel4(params, external_params)
+input.sigma_p_VIV = params(1);
+
+input.modesel = external_params.modesel;
+
+n = 4;
+[result] = viv2013(n, false);
+input.start_time = result.startDate;
+input.end_time = result.endDate;
+input.acc_dir = external_params.acc_dir;
+input.VIV_mode_seq = external_params.VIV_mode_seq;
+input.nVIV = external_params.nVIV;
+input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
+input.sigma_noise = external_params.sigma_noise;
+input.Q_value =external_params.Q_value ;
+input.lambda_VIV =external_params.lambda_VIV ;
 input.sigma_buff =external_params.sigma_buff ;
 % result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
 [result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
