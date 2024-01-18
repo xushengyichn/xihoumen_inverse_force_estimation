@@ -49,8 +49,8 @@ phi = mode_vec; %模态向量 每一列是一个模态
 nodegap = Result.nodegap;
 
 
-load("Modal_updating_04_Feb_2013_22_00_00_05_Feb_2013_00_00_00.mat")
-VIV_seq = 7;
+load("Modal_updating_04_Feb_2013_23_15_00_04_Feb_2013_23_45_00.mat")
+VIV_seq = 5;
 xi = table_fre.damping_ratio(VIV_seq);
 Omega = 2 * pi * table_fre.frequency(VIV_seq);
 
@@ -96,8 +96,39 @@ ft_real = real(ft);
 ft_imag = imag(ft);
 
 
+% modal displacement
+zw = Hw .* fw;
+zt = ifft(ifftshift(zw));
+zt_real = real(zt);
+zt_imag = imag(zt);
 
-total_plots = 2; % 或任何你需要的子图数量
+vw = zw.*1i.*omega;
+vt = ifft(ifftshift(vw));
+vt_real = real(vt);
+
+aw = zw.*(-1).*(omega).^2;
+at = ifft(ifftshift(aw));
+at_real = real(at);
+
+
+Modeshape = FindModeShapewithLocation(loc_acc,node_loc,nodeondeck,Mapping_data,nodegap,mode_vec)
+z1 = zt_real*Modeshape(1);
+z2 = zt_real*Modeshape(2);
+z3 = zt_real*Modeshape(3);
+
+v1 = vt_real*Modeshape(1);
+v2 = vt_real*Modeshape(2);
+v3 = vt_real*Modeshape(3);
+
+a1 = at_real*Modeshape(1);
+a2 = at_real*Modeshape(2);
+a3 = at_real*Modeshape(3);
+
+
+
+%%
+
+total_plots = 10; % 或任何你需要的子图数量
 current_plot = 1;
 num_figs_in_row = [];
 newfigure = false;
@@ -113,6 +144,47 @@ hold on
 create_subplot(@plot, total_plots, current_plot, {t, ft}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',firstfigure);
 legend("filter","direct ingetration")
 title("ft");
+current_plot = current_plot + 1;
+
+
+create_subplot(@plot, total_plots, current_plot, {t, zt}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("zt");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, z1}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("z1");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, z2}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("z2");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, z3}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("z3");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, v1}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("v1");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, v2}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("v2");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, v3}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("v3");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, a1}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("a1");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, a2}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("a2");
+current_plot = current_plot + 1;
+
+create_subplot(@plot, total_plots, current_plot, {t, a3}, 'num_figs_in_row', num_figs_in_row,'newfigure',newfigure,'firstfigure',false);
+title("a3");
 current_plot = current_plot + 1;
 
 
