@@ -775,160 +775,337 @@ if fig_bool
     % 创建透明平面
     patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
 
+    %% Damping ratio calculation with wind speed
+    amp_temp = amp_cell{1}{1};
+    % t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
+    m_cycle = input_data.ncycle; %cycles to be averaged
+    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+
+    for k1 = 1:length(t_cycle_mean_temp)
+
+        if k1 <= m_cycle / 2 % Beginning boundary
+            start_idx = 1;
+            end_idx = start_idx + m_cycle;
+        elseif k1 > length(t_cycle_mean_temp) - m_cycle / 2 % Ending boundary
+            end_idx = length(t_cycle_mean_temp);
+            start_idx = end_idx - m_cycle;
+        else % Middle
+            start_idx = k1 - floor(m_cycle / 2);
+            end_idx = k1 + floor(m_cycle / 2);
+        end
+
+        deltam = log(amp_temp(start_idx) / amp_temp(end_idx));
+
+        zetam(k1) = sqrt(deltam ^ 2 / (4 * m_cycle ^ 2 * pi ^ 2 + deltam ^ 2));
+
+        if deltam > 0
+            zetam(k1) = abs(zetam(k1));
+        else
+            zetam(k1) = -abs(zetam(k1));
+        end
+
+    end
+
+    zeta_structure = result_Main.zeta;
+    zeta1 = zeta_all_cell{1}{1};
+    zeta2 = zetam - zeta_structure(VIV_mode_seq);
+
+    target = norm(zeta1 - zeta2);
+    disp(target)
+
+    for k1 = 1:nVIV
+
+        for k2 = 1:length(top_freqs{k1})
+            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+            datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+            % 提取第一个 datetime 对象作为参考点
+            referenceDatetime = datetimeArray(1);
+
+            % 计算每个 datetime 对象相对于参考点的秒数
+            secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+
+            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, VIV_mode_seq(k1))), zeta_all_cell{k1}{k2}, [], U_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+
+            current_plot = current_plot + 1;
+
+            % 设置 colormap
+            colormap('jet')
+            colorbar
+
+            hold on
+            plot([0, 0.15], [-0.003, -0.003])
+            % scatter(ex,epsx,'green')
+            str = "Mode : %d, Frequency : %.2f Hz with wind speed";
+            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+            xlim([0.00, 0.12])
+            ylim([-0.5, 0.5] / 100)
+            xlabel("Amplitude(m)")
+            ylabel("Damping ratio")
+        end
+
+    end
+    %% Damping ratio calculation with wind speed
+    amp_temp = amp_cell{1}{1};
+    % t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
+    m_cycle = input_data.ncycle; %cycles to be averaged
+    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+
+    for k1 = 1:length(t_cycle_mean_temp)
+
+        if k1 <= m_cycle / 2 % Beginning boundary
+            start_idx = 1;
+            end_idx = start_idx + m_cycle;
+        elseif k1 > length(t_cycle_mean_temp) - m_cycle / 2 % Ending boundary
+            end_idx = length(t_cycle_mean_temp);
+            start_idx = end_idx - m_cycle;
+        else % Middle
+            start_idx = k1 - floor(m_cycle / 2);
+            end_idx = k1 + floor(m_cycle / 2);
+        end
+
+        deltam = log(amp_temp(start_idx) / amp_temp(end_idx));
+
+        zetam(k1) = sqrt(deltam ^ 2 / (4 * m_cycle ^ 2 * pi ^ 2 + deltam ^ 2));
+
+        if deltam > 0
+            zetam(k1) = abs(zetam(k1));
+        else
+            zetam(k1) = -abs(zetam(k1));
+        end
+
+    end
+
+    zeta_structure = result_Main.zeta;
+    zeta1 = zeta_all_cell{1}{1};
+    zeta2 = zetam - zeta_structure(VIV_mode_seq);
+
+    target = norm(zeta1 - zeta2);
+    disp(target)
+
+    for k1 = 1:nVIV
+
+        for k2 = 1:length(top_freqs{k1})
+            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+            datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+            % 提取第一个 datetime 对象作为参考点
+            referenceDatetime = datetimeArray(1);
+
+            % 计算每个 datetime 对象相对于参考点的秒数
+            secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+
+            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, VIV_mode_seq(k1))), zeta_all_cell{k1}{k2}, [], AoA_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+
+            current_plot = current_plot + 1;
+
+            % 设置 colormap
+            colormap('jet')
+            colorbar
+
+            hold on
+            plot([0, 0.15], [-0.003, -0.003])
+            % scatter(ex,epsx,'green')
+            str = "Mode : %d, Frequency : %.2f Hz with attack of angle";
+            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+            xlim([0.00, 0.12])
+            ylim([-0.5, 0.5] / 100)
+            xlabel("Amplitude(m)")
+            ylabel("Damping ratio")
+        end
+
+        %% Damping ratio calculation with wind speed, AOA and amplitude
+        amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
+        zeta_filter = zeta_all_cell{1}{1};
+        % C=rescale(AoA_sel,10,100);
+        S = rescale(zeta_filter, 10, 100);
+        C = AoA_sel;
+        % C = secondsFromReference;
+        % scatter3(amp_filter,U_sel,zeta_filter,S,C)
+    
+        create_subplot(@scatter3, total_plots, current_plot, {amp_filter, U_sel,  zeta_filter,[],C}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+        xlabel('Amp. (m)')
+        ylabel('Wind speed (m/s)')
+        title("Damping ratio （Amp,U,damping ratio,,AOA）")
+        current_plot = current_plot + 1;
+    
+        % 设置 colormap
+    
+        colorbar
+        colormap('jet'); % 选择一个颜色映射，比如 'parula'
+        % clim([-2 0]); % 设置颜色映射的数据范围为 -3 到 +3
+    
+        % zlim([-0.01, 0])
+        % xlim([0.01, 0.09])
+        % ylim([5, 12])
+        % 定义平面的四个角的 x, y, 和 z 坐标
+        x = [min(amp_filter), max(amp_filter), max(amp_filter), min(amp_filter)];
+        y = [min(U_sel), min(U_sel), max(U_sel), max(U_sel)];
+        z = [-0.003, -0.003, -0.003, -0.003]; % 所有点都在 z = 0.003 高度
+
+        % 创建透明平面
+        patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
+    end
 end
-holdon = true
-toc
-%% functions
-function target = fitnessFunction(params, external_params)
-input.lambda_VIV = 10 ^ params(1);
-input.sigma_p_VIV = params(2);
-input.omega_0_variation_VIV = params(3);
-input.Q_value = 10 ^ params(4);
-input.sigma_noise = 10 ^ params(5);
-input.sigma_buff = 10 ^ params(6);
+    holdon = true
+    toc
+    %% functions
+    function target = fitnessFunction(params, external_params)
+    input.lambda_VIV = 10 ^ params(1);
+    input.sigma_p_VIV = params(2);
+    input.omega_0_variation_VIV = params(3);
+    input.Q_value = 10 ^ params(4);
+    input.sigma_noise = 10 ^ params(5);
+    input.sigma_buff = 10 ^ params(6);
 
-input.modesel = external_params.modesel;
+    input.modesel = external_params.modesel;
 
-n = 4;
-[result] = viv2013(n, false);
-input.start_time = result.startDate;
-input.end_time = result.endDate;
-input.acc_dir = external_params.acc_dir;
-input.VIV_mode_seq = external_params.VIV_mode_seq;
-input.nVIV = external_params.nVIV;
+    n = 4;
+    [result] = viv2013(n, false);
+    input.start_time = result.startDate;
+    input.end_time = result.endDate;
+    input.acc_dir = external_params.acc_dir;
+    input.VIV_mode_seq = external_params.VIV_mode_seq;
+    input.nVIV = external_params.nVIV;
 
-% result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
-fields = fieldnames(result_Main);
+    % result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    [result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+    fields = fieldnames(result_Main);
 
-logL = result_Main.logL;
-logek = result_Main.logek;
-target = -logL;% 因为 ga 试图最小化函数，所以取负数
-% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+    logL = result_Main.logL;
+    logek = result_Main.logek;
+    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    % target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
 
-end
-
-
-function target = fitnessFunction_sel(params, external_params)
-input.lambda_VIV = 10 ^ params(1);
-input.sigma_p_VIV = params(2);
-input.Q_value = 10 ^ params(3);
-input.sigma_buff = 10 ^ params(4);
-
-input.modesel = external_params.modesel;
-
-n = 4;
-[result] = viv2013(n, false);
-input.start_time = result.startDate;
-input.end_time = result.endDate;
-input.acc_dir = external_params.acc_dir;
-input.VIV_mode_seq = external_params.VIV_mode_seq;
-input.nVIV = external_params.nVIV;
-input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
-input.sigma_noise = external_params.sigma_noise;
-
-% result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
-fields = fieldnames(result_Main);
-
-logL = result_Main.logL;
-logek = result_Main.logek;
-target = -logL;% 因为 ga 试图最小化函数，所以取负数
-% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
-
-end
-
-function target = fitnessFunction_sel2(params, external_params)
-input.lambda_VIV = 10 ^ params(1);
-input.sigma_p_VIV = params(2);
-input.sigma_buff = 10 ^ params(3);
-
-input.modesel = external_params.modesel;
-
-n = 4;
-[result] = viv2013(n, false);
-input.start_time = result.startDate;
-input.end_time = result.endDate;
-input.acc_dir = external_params.acc_dir;
-input.VIV_mode_seq = external_params.VIV_mode_seq;
-input.nVIV = external_params.nVIV;
-input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
-input.sigma_noise = external_params.sigma_noise;
-input.Q_value =external_params.Q_value ;
-% result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
-fields = fieldnames(result_Main);
-
-logL = result_Main.logL;
-logek = result_Main.logek;
-target = -logL;% 因为 ga 试图最小化函数，所以取负数
-% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
-
-end
+    end
 
 
-function target = fitnessFunction_sel3(params, external_params)
-input.lambda_VIV = 10 ^ params(1);
+    function target = fitnessFunction_sel(params, external_params)
+    input.lambda_VIV = 10 ^ params(1);
+    input.sigma_p_VIV = params(2);
+    input.Q_value = 10 ^ params(3);
+    input.sigma_buff = 10 ^ params(4);
 
-input.modesel = external_params.modesel;
+    input.modesel = external_params.modesel;
 
-n = 4;
-[result] = viv2013(n, false);
-input.start_time = result.startDate;
-input.end_time = result.endDate;
-input.acc_dir = external_params.acc_dir;
-input.VIV_mode_seq = external_params.VIV_mode_seq;
-input.nVIV = external_params.nVIV;
-input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
-input.sigma_noise = external_params.sigma_noise;
-input.Q_value =external_params.Q_value ;
-input.sigma_p_VIV =external_params.sigma_p_VIV ;
-input.sigma_buff =external_params.sigma_buff ;
-% result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
-fields = fieldnames(result_Main);
+    n = 4;
+    [result] = viv2013(n, false);
+    input.start_time = result.startDate;
+    input.end_time = result.endDate;
+    input.acc_dir = external_params.acc_dir;
+    input.VIV_mode_seq = external_params.VIV_mode_seq;
+    input.nVIV = external_params.nVIV;
+    input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
+    input.sigma_noise = external_params.sigma_noise;
 
-logL = result_Main.logL;
-logek = result_Main.logek;
-target = -logL;% 因为 ga 试图最小化函数，所以取负数
-% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+    % result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    [result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+    fields = fieldnames(result_Main);
 
-end
+    logL = result_Main.logL;
+    logek = result_Main.logek;
+    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    % target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
 
-function target = fitnessFunction_sel4(params, external_params)
-input.sigma_p_VIV = params(1);
+    end
 
-input.modesel = external_params.modesel;
+    function target = fitnessFunction_sel2(params, external_params)
+    input.lambda_VIV = 10 ^ params(1);
+    input.sigma_p_VIV = params(2);
+    input.sigma_buff = 10 ^ params(3);
 
-n = 4;
-[result] = viv2013(n, false);
-input.start_time = result.startDate;
-input.end_time = result.endDate;
-input.acc_dir = external_params.acc_dir;
-input.VIV_mode_seq = external_params.VIV_mode_seq;
-input.nVIV = external_params.nVIV;
-input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
-input.sigma_noise = external_params.sigma_noise;
-input.Q_value =external_params.Q_value ;
-input.lambda_VIV =external_params.lambda_VIV ;
-input.sigma_buff =external_params.sigma_buff ;
-% result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
-[result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
-fields = fieldnames(result_Main);
+    input.modesel = external_params.modesel;
 
-logL = result_Main.logL;
-logek = result_Main.logek;
-target = -logL;% 因为 ga 试图最小化函数，所以取负数
-% target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+    n = 4;
+    [result] = viv2013(n, false);
+    input.start_time = result.startDate;
+    input.end_time = result.endDate;
+    input.acc_dir = external_params.acc_dir;
+    input.VIV_mode_seq = external_params.VIV_mode_seq;
+    input.nVIV = external_params.nVIV;
+    input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
+    input.sigma_noise = external_params.sigma_noise;
+    input.Q_value =external_params.Q_value ;
+    % result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    [result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+    fields = fieldnames(result_Main);
 
-end
+    logL = result_Main.logL;
+    logek = result_Main.logek;
+    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    % target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
 
-function [x_reduced, y_reduced] = reduceDataPoints(x, y, factor)
-% 确保降采样因子是正整数
-factor = max(1, round(factor));
+    end
 
-% 进行降采样
-indices = 1:factor:length(x); % 每隔 'factor' 个点取一个点
-x_reduced = x(indices);
-y_reduced = y(indices);
-end
+
+    function target = fitnessFunction_sel3(params, external_params)
+    input.lambda_VIV = 10 ^ params(1);
+
+    input.modesel = external_params.modesel;
+
+    n = 4;
+    [result] = viv2013(n, false);
+    input.start_time = result.startDate;
+    input.end_time = result.endDate;
+    input.acc_dir = external_params.acc_dir;
+    input.VIV_mode_seq = external_params.VIV_mode_seq;
+    input.nVIV = external_params.nVIV;
+    input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
+    input.sigma_noise = external_params.sigma_noise;
+    input.Q_value =external_params.Q_value ;
+    input.sigma_p_VIV =external_params.sigma_p_VIV ;
+    input.sigma_buff =external_params.sigma_buff ;
+    % result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    [result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+    fields = fieldnames(result_Main);
+
+    logL = result_Main.logL;
+    logek = result_Main.logek;
+    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    % target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+
+    end
+
+    function target = fitnessFunction_sel4(params, external_params)
+    input.sigma_p_VIV = params(1);
+
+    input.modesel = external_params.modesel;
+
+    n = 4;
+    [result] = viv2013(n, false);
+    input.start_time = result.startDate;
+    input.end_time = result.endDate;
+    input.acc_dir = external_params.acc_dir;
+    input.VIV_mode_seq = external_params.VIV_mode_seq;
+    input.nVIV = external_params.nVIV;
+    input.omega_0_variation_VIV = external_params.omega_0_variation_VIV;
+    input.sigma_noise = external_params.sigma_noise;
+    input.Q_value =external_params.Q_value ;
+    input.lambda_VIV =external_params.lambda_VIV ;
+    input.sigma_buff =external_params.sigma_buff ;
+    % result_Main = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
+    [result_Main] = KalmanMain(input, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+    fields = fieldnames(result_Main);
+
+    logL = result_Main.logL;
+    logek = result_Main.logek;
+    target = -logL;% 因为 ga 试图最小化函数，所以取负数
+    % target = abs(logek); % 因为 ga 试图最小化函数，所以取负数
+
+    end
+
+    function [x_reduced, y_reduced] = reduceDataPoints(x, y, factor)
+    % 确保降采样因子是正整数
+    factor = max(1, round(factor));
+
+    % 进行降采样
+    indices = 1:factor:length(x); % 每隔 'factor' 个点取一个点
+    x_reduced = x(indices);
+    y_reduced = y(indices);
+    end
