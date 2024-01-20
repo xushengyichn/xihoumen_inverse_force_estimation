@@ -5,11 +5,25 @@ run('CommonCommand.m');
 % n=4;
 % displayDates=true;
 % [result]=viv2013(n,displayDates);
+%% Read viv Data
+% 创建导入选项对象
+opts = detectImportOptions('vivData.csv');
 
+% 设置日期时间格式
+% 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
+opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+
+vivTable = readtable('vivData.csv',opts);
 
 %% load acceleration and wind data
-start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
+VIV_sel = 22;
+start_time = vivTable.startDate_update(VIV_sel);
+end_time = vivTable.endDate_update(VIV_sel);
+% start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+% end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
 % start_time = result.startDate;
 % end_time = result.endDate;
 [acc_result] = read_acceleration_data(start_time,end_time,input_data.acc_dir);
@@ -153,7 +167,8 @@ end
 all_std_fre = all_std_w/(2*pi);
 all_w_orders = [all_w,all_orders];
 rng(1); % For reproducibility
-k_value = 14;
+% k_value = 14;
+k_value = vivTable.k_value(VIV_sel);
 [idx,w_kmean] = kmeans(all_w,k_value);
 
 % 计算每个组的均值
@@ -216,6 +231,7 @@ for k1 = 1:length(unique_groups)
 end
 
 %% modal updating
+
 modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 32];
 nmodes = length(modesel);
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',true);
@@ -239,51 +255,54 @@ table_FEM.frequency = Fre_FEM;
 %         idx_ModalFEM(k1,1) = Fre_FEM(input_temp);
 %     end
 % end
+if 1
+    idx_ModalFEM = zeros(size(table_fre, 1), 1); % 初始化 idx_ModalFEM
 
-idx_ModalFEM = zeros(size(table_fre, 1), 1); % 初始化 idx_ModalFEM
+    for k1 = 1:k_value
+        table_sel = table_fre(k1,:);
+        frequency = table_sel.frequency; % 当前频率
 
-for k1 = 1:k_value
-    table_sel = table_fre(k1,:);
-    frequency = table_sel.frequency; % 当前频率
-    
-    % 寻找最接近的频率
-    if frequency > max(Fre_FEM)
-        % 如果频率超过了table_FEM的最大值
-        idx_ModalFEM(k1) = 0;
-    else
-        % 计算与Fre_FEM中每个频率的差值，并找到最小的差值
-        [~, closestIdx] = min(abs(Fre_FEM - frequency));
-        disp(Fre_FEM)
-        disp(frequency);
-        closestIdx = input("please input the updated mode index:");
-        if closestIdx==0
+        % 寻找最接近的频率
+        if frequency > max(Fre_FEM)
+            % 如果频率超过了table_FEM的最大值
             idx_ModalFEM(k1) = 0;
         else
-            % 记录最接近的频率值
-            idx_ModalFEM(k1) = Fre_FEM(closestIdx);
-            Fre_FEM(closestIdx)=[]; % remove duplicated value
+            % 计算与Fre_FEM中每个频率的差值，并找到最小的差值
+            [~, closestIdx] = min(abs(Fre_FEM - frequency));
+            disp(Fre_FEM)
+            disp(frequency);
+            closestIdx = input("please input the updated mode index:");
+            if closestIdx==0
+                idx_ModalFEM(k1) = 0;
+            else
+                % 记录最接近的频率值
+                idx_ModalFEM(k1) = Fre_FEM(closestIdx);
+                Fre_FEM(closestIdx)=[]; % remove duplicated value
+            end
         end
     end
+
+    % 将结果添加到table_fre中
+    table_fre.idx_ModalFEM = idx_ModalFEM;
+
+
+    % 替换日期时间字符串中的冒号和其他特殊字符
+    % start_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+    start_time.Format = 'MM_dd_yyyy_HH_mm_ss';
+    formatted_start_time = string(start_time);
+
+    % end_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+    end_time.Format = 'MM_dd_yyyy_HH_mm_ss';
+    formatted_end_time = string(end_time);
+
+
+    formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
+    formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
+
+    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    save(filename,'table_fre',"start_time","end_time");
+    disp(table_fre)
 end
-
-% 将结果添加到table_fre中
-table_fre.idx_ModalFEM = idx_ModalFEM;
-
-
-% 替换日期时间字符串中的冒号和其他特殊字符
-start_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
-formatted_start_time = string(start_time);
-
-end_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
-formatted_end_time = string(end_time);
-
-
-formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
-formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
-
-filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
-save(filename,'table_fre',"start_time","end_time");
-disp(table_fre)
 %% test
 close all
 FEM_mode_sel = 9;
@@ -312,14 +331,14 @@ disp("FEM mode "+FEM_mode_sel+" : Frequency = "+FEM_freq+" Hz")
 disp("Mode shape of order "+order_sel+" and mode "+Modal_analysis_mode_sel+" : Frequency = "+freq_sel+" Hz, Damping ratio = "+xi_sel)
 
 %% plot
-if 0
-    
-    
-    
+if 1
+
+
+
     stabplot(omega_id,xi_id,order,Phi_id,'cov_w',cov_omega,'cov_xi',cov_xi,'std_w_tol',0.1,'std_xi_tol',1);
-    
-    
-    % 
+
+
+    %
     % % 定义总子图数量
     % total_plots = 50; % 或任何你需要的子图数量
     % current_plot = 1;
@@ -334,13 +353,13 @@ if 0
     %     create_subplot(@scatter, total_plots, current_plot, {1:length(omega_id{k1}),omega_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
     %     current_plot = current_plot+1;
     % end
-    % 
+    %
     % figure
     % for k1 = 1:length(order)
     %     create_subplot(@scatter, total_plots, current_plot, {1:length(omega_id{k1}),omega_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', true);
     %     hold on
     % end
-    % 
+    %
     % figure
     % current_plot = 1;
     % for k1 = 1:length(order)
@@ -348,7 +367,7 @@ if 0
     %     ylim([0,1/100]);
     %     current_plot = current_plot+1;
     % end
-    % 
+    %
     % figure
     % for k1 = 1:length(order)
     %     create_subplot(@scatter, total_plots, current_plot, {1:length(xi_id{k1}),xi_id{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', true);
@@ -356,8 +375,8 @@ if 0
     % end
     % ylim([0,1/100]);
     % % close all
-    % 
-    
+    %
+
     %% plot
     % 定义总子图数量
     total_plots = 16; % 或任何你需要的子图数量
@@ -368,121 +387,121 @@ if 0
     figPosition = [100, 100];
     newfigure = true;
     holdon = false;
-    
+
     create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC2_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', true, 'holdon', holdon);
     hold on
     create_subplot(@plot, total_plots, current_plot, {T_new, AC2_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
     ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC2_1")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC2_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
     hold on
     create_subplot(@plot, total_plots, current_plot, {T_new, AC2_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
     ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC2_3")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC3_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
     hold on
     create_subplot(@plot, total_plots, current_plot, {T_new, AC3_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
     ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC3_1")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC3_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
     hold on
     create_subplot(@plot, total_plots, current_plot, {T_new, AC3_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
     ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC3_3")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC4_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
     hold on
     create_subplot(@plot, total_plots, current_plot, {T_new, AC4_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
     ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC4_1")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC4_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
     hold on
     create_subplot(@plot, total_plots, current_plot, {T_new, AC4_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
     ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC4_3")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {UA1.Time_Start,UA1.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
     ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA1")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {UA2.Time_Start,UA2.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
     ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA2")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {UA3.Time_Start,UA3.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
     ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA3")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {UA4.Time_Start,UA4.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
     ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA4")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {UA5.Time_Start,UA5.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
     ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA5")
     current_plot = current_plot+1;
-    
+
     create_subplot(@plot, total_plots, current_plot, {UA6.Time_Start,UA6.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
     ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA6")
     current_plot = current_plot+1;
-    
+
     create_subplot(@gscatter, total_plots, current_plot, {all_w,all_orders,new_idx}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
     legend('off')
     xlabel("Omega(rad/s)")
     current_plot = current_plot+1;
-    
+
     for k1 = 1:k_value
         create_subplot(@scatter, total_plots, current_plot, {list_fre{k1},k1*ones(length(list_fre{k1}),1)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
         hold on
     end
     xlabel("Frequency(Hz)");ylabel("Cluster");title("Frequency")
     current_plot = current_plot+1;
-    
+
     for k1 = 1:k_value
         create_subplot(@scatter, total_plots, current_plot, {list_xi{k1},k1*ones(length(list_xi{k1}),1)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
         hold on
     end
     xlabel("Damping ratio");ylabel("Cluster");title("Damping ratio")
     current_plot = current_plot+1;
-    
+
     for k1 = 1:k_value
         create_subplot(@scatter, total_plots, current_plot, {k1*ones(length(list_xi{k1}),1),list_xi{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
         hold on
     end
     ylabel("Damping ratio");xlabel("Cluster");title("Damping ratio")
     current_plot = current_plot+1;
-    
+
 
 
     figure
     h = gscatter(all_fre,all_xi,new_idx);
     legend("off")
     xlim([0,0.5])
-    
+
     hold on
     % 获取每个组的颜色，以便误差线与散点颜色匹配
     colors = get(h, 'Color');
     if iscell(colors)
         colors = cell2mat(colors);
     end
-    
+
     % 绘制每个组的矩形
     for k1 = 1:size(fre_error, 2)
         fre_min = fre_error(1, k1);
         fre_max = fre_error(2, k1);
         xi_min = xi_error(1, k1);
         xi_max = xi_error(2, k1);
-    
+
         % 矩形的位置和尺寸
         pos = [fre_min, xi_min, fre_max - fre_min, xi_max - xi_min];
-    
+
         % 绘制矩形
         rectangle('Position', pos, 'EdgeColor', colors(k1, :), 'LineWidth', 1.5);
     end
-    
+
     scatter(mean_fre,mean_xi)
     scatter(Result.Freq,0.3/100*ones(size(Result.Freq)))
     % 关闭 hold 状态
