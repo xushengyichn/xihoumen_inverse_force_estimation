@@ -11,12 +11,30 @@ tic
 % input.figureIdx = 0;
 % n = 13;
 % n = 4;
-n = 4;
-[result] = viv2013(n, OFF);
-startDate_global = result.startDate;
-endDate_global = result.endDate;
+% n = 4;
+% [result] = viv2013(n, OFF);
+% startDate_global = result.startDate;
+% endDate_global = result.endDate;
+VIV_sel = 3;
+opts = detectImportOptions('vivData.csv');
+
+% 设置日期时间格式
+% 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
+opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+
+vivTable = readtable('vivData.csv',opts);
+
+start_time = vivTable.startDate(VIV_sel);
+end_time = vivTable.endDate(VIV_sel);
+
+startDate_global = start_time;
+endDate_global = end_time;
 input_data.start_time = startDate_global;
 input_data.end_time = endDate_global;
+input_data.VIV_sel = VIV_sel;
 
 % input.lambda_VIV = 10 ^ (-8.725260766057426);
 % input.sigma_p_VIV = 4.594524428349437e+04;
@@ -665,7 +683,7 @@ if fig_bool
             % scatter(ex,epsx,'green')
             str = "Mode : %d, Frequency : %.2f Hz";
             title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
-            xlim([0.05, 0.12])
+            xlim([0, 0.12])
             ylim([-0.5, 0.5] / 100)
             xlabel("Amplitude(m)")
             ylabel("Damping ratio")

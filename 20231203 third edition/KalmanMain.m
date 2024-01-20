@@ -223,14 +223,27 @@ zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
 %% modal updating
 if 1
-    start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-    end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
+    opts = detectImportOptions('vivData.csv');
+
+    % 设置日期时间格式
+    % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
+    opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+    opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+    opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+    opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+    
+    vivTable = readtable('vivData.csv',opts);
+    
+    start_time = vivTable.startDate_update(input.VIV_sel);
+    end_time = vivTable.endDate_update(input.VIV_sel);
+    % start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+    % end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
     
     % 替换日期时间字符串中的冒号和其他特殊字符
-    start_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+    start_time.Format = 'MM_dd_yyyy_HH_mm_ss';
     formatted_start_time = string(start_time);
     
-    end_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+    end_time.Format = 'MM_dd_yyyy_HH_mm_ss';
     formatted_end_time = string(end_time);
     
     
