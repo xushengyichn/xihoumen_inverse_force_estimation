@@ -16,7 +16,8 @@ end
 run('CommonCommand.m');
 
 % 定义VIV_sel值的数组，例如：[1, 2, 3, ...]
-VIV_sels = [2,3,4,5,6]; % 根据你的数据集进行修改
+% VIV_sels = [2,3,4,5,6]; % 根据你的数据集进行修改
+VIV_sels = [7,8,9,10,11,12,16,17,18,19,22];
 % 定义不同的标记样式
 % 定义15种不同的标记样式和颜色
 markers = {'o', '+', '*', '.', 'x', 's', 'd', '^', 'v', '>', '<', 'p', 'h'};
@@ -94,5 +95,6 @@ x = [min(amp_filter), max(amp_filter), max(amp_filter), min(amp_filter)];
 y = [min(U_sel), min(U_sel), max(U_sel), max(U_sel)];
 z = [-0.003, -0.003, -0.003, -0.003];
 patch(x, y, z, 'blue', 'FaceAlpha', 0.3);
+zlim([-0.03,0.03])
 
 holdon=false;

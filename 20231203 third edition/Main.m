@@ -511,7 +511,8 @@ for k1 = 1:length(beta_deg_mean_UA5)
     end
 
 end
-
+amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
+zeta_filter = zeta_all_cell{1}{1};
 %% plot
 if fig_bool
     % 定义总子图数量
@@ -841,8 +842,7 @@ if fig_bool
     ylabel("Damping ratio")
 
 
-    amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
-    zeta_filter = zeta_all_cell{1}{1};
+    
     % C=rescale(AoA_sel,10,100);
     S = rescale(zeta_filter, 10, 100);
     C = AoA_sel;
@@ -874,13 +874,13 @@ if fig_bool
     holdon = true
     toc
 
+
+end
 %% save the result
 % eg: result_starttime_VIV_sel.mat VIV_sel is a variable
 startDate_global.Format = 'yyyy_MM_dd_HH_mm';
 filename = sprintf('result_%s_%s.mat', startDate_global, num2str(VIV_sel));
 save(filename, 'VIV_sel',"amp_filter","U_sel","zeta_filter","AoA_sel","datetimeArray");
-
-end
 
     %% functions
     function target = fitnessFunction(params, external_params)
