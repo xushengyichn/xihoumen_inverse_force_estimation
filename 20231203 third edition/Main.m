@@ -1,4 +1,8 @@
-clc; clear; close all;
+% 在被调用的脚本中
+if ~exist('skipClear', 'var')
+    clc; clear; close all;
+end
+
 run('CommonCommand.m');
 tic
 %% 输入参数
@@ -15,7 +19,9 @@ tic
 % [result] = viv2013(n, OFF);
 % startDate_global = result.startDate;
 % endDate_global = result.endDate;
-VIV_sel = 3;
+if ~exist("VIV_sel",'var')
+    VIV_sel = 6;
+end
 opts = detectImportOptions('vivData.csv');
 
 % 设置日期时间格式
@@ -415,7 +421,96 @@ else
     save(filename,'windspeed_result',"start_time","end_time");
 end
 
+%% Damping Ratio calculation
+amp_temp = amp_cell{1}{1};
+% t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
+m_cycle = input_data.ncycle; %cycles to be averaged
+zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
 
+for k1 = 1:length(t_cycle_mean_temp)
+
+    if k1 <= m_cycle / 2 % Beginning boundary
+        start_idx = 1;
+        end_idx = start_idx + m_cycle;
+    elseif k1 > length(t_cycle_mean_temp) - m_cycle / 2 % Ending boundary
+        end_idx = length(t_cycle_mean_temp);
+        start_idx = end_idx - m_cycle;
+    else % Middle
+        start_idx = k1 - floor(m_cycle / 2);
+        end_idx = k1 + floor(m_cycle / 2);
+    end
+
+    deltam = log(amp_temp(start_idx) / amp_temp(end_idx));
+
+    zetam(k1) = sqrt(deltam ^ 2 / (4 * m_cycle ^ 2 * pi ^ 2 + deltam ^ 2));
+
+    if deltam > 0
+        zetam(k1) = abs(zetam(k1));
+    else
+        zetam(k1) = -abs(zetam(k1));
+    end
+
+end
+
+zeta_structure = result_Main.zeta;
+zeta1 = zeta_all_cell{1}{1};
+zeta2 = zetam - zeta_structure(VIV_mode_seq);
+
+target = norm(zeta1 - zeta2);
+disp(target)
+
+for k1 = 1:nVIV
+
+    for k2 = 1:length(top_freqs{k1})
+        % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
+        datetimeArray = t_cycle_mean_cell{k1}{k2};
+
+        % 提取第一个 datetime 对象作为参考点
+        referenceDatetime = datetimeArray(1);
+
+        % 计算每个 datetime 对象相对于参考点的秒数
+        secondsFromReference = seconds(datetimeArray - referenceDatetime);
+
+        % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+
+
+    end
+
+end
+
+%% wind speed with amplitude and damping ratio
+
+UA5 = windspeed_result.UA1;
+UA6 = windspeed_result.UA2;
+
+beta_deg_mean_UA5 = UA5.beta_deg_mean;
+beta_deg_mean_UA6 = UA6.beta_deg_mean;
+
+% judge if the wind direction of both UA5 and UA6 is from 45°-225°
+for k1 = 1:length(beta_deg_mean_UA5)
+
+    if and(beta_deg_mean_UA5(k1) > 45, beta_deg_mean_UA5(k1) < 225) && and(beta_deg_mean_UA6(k1) > 45, beta_deg_mean_UA6(k1) < 225)
+        U_sel(k1) = UA5.U(k1);
+        AoA_sel(k1) = UA5.alpha_deg_mean(k1);
+
+        % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
+    elseif or(and(beta_deg_mean_UA5(k1) > 225, beta_deg_mean_UA5(k1) < 360), and(beta_deg_mean_UA5(k1) > 0, beta_deg_mean_UA5(k1) < 45)) && or(and(beta_deg_mean_UA6(k1) > 225, beta_deg_mean_UA6(k1) < 360), and(beta_deg_mean_UA6(k1) > 0, beta_deg_mean_UA6(k1) < 45))
+        U_sel(k1) = UA6.U(k1);
+        AoA_sel(k1) = UA6.alpha_deg_mean(k1);
+    else
+
+        if abs(UA5.alpha_deg_mean(k1)) < abs(UA6.alpha_deg_mean)
+            U_sel(k1) = UA5.U(k1);
+            AoA_sel(K1) = UA5.alpha_deg_mean(k1);
+        else
+            U_sel(k1) = UA6.U(k1);
+            AoA_sel(K1) = UA6.alpha_deg_mean(k1);
+        end
+
+        disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
+    end
+
+end
 
 %% plot
 if fig_bool
@@ -452,7 +547,7 @@ if fig_bool
         end
 
         legend("Force from Kalman Filter")
-        title("modal force for " + "mode"+modesel(VIV_mode_seq(k1)));
+        title("modal force for " + "mode"+modesel(VIV_mode_seq));
         current_plot = current_plot + 1;
         ylim([-100, 100])
     end
@@ -617,113 +712,28 @@ if fig_bool
     current_plot = current_plot + 1;
 
     %% Damping ratio calculation
-    amp_temp = amp_cell{1}{1};
-    % t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
-    m_cycle = input_data.ncycle; %cycles to be averaged
-    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
 
-    for k1 = 1:length(t_cycle_mean_temp)
 
-        if k1 <= m_cycle / 2 % Beginning boundary
-            start_idx = 1;
-            end_idx = start_idx + m_cycle;
-        elseif k1 > length(t_cycle_mean_temp) - m_cycle / 2 % Ending boundary
-            end_idx = length(t_cycle_mean_temp);
-            start_idx = end_idx - m_cycle;
-        else % Middle
-            start_idx = k1 - floor(m_cycle / 2);
-            end_idx = k1 + floor(m_cycle / 2);
-        end
+    create_subplot(@scatter, total_plots, current_plot, {amp_temp * max(mode_deck(:, VIV_mode_seq)), zetam - zeta_structure(VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+    hold on
+    create_subplot(@scatter, total_plots, current_plot, {amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
 
-        deltam = log(amp_temp(start_idx) / amp_temp(end_idx));
+    current_plot = current_plot + 1;
 
-        zetam(k1) = sqrt(deltam ^ 2 / (4 * m_cycle ^ 2 * pi ^ 2 + deltam ^ 2));
+    % 设置 colormap
+    colormap('jet')
+    colorbar
 
-        if deltam > 0
-            zetam(k1) = abs(zetam(k1));
-        else
-            zetam(k1) = -abs(zetam(k1));
-        end
-
-    end
-
-    zeta_structure = result_Main.zeta;
-    zeta1 = zeta_all_cell{1}{1};
-    zeta2 = zetam - zeta_structure(VIV_mode_seq);
-
-    target = norm(zeta1 - zeta2);
-    disp(target)
-
-    for k1 = 1:nVIV
-
-        for k2 = 1:length(top_freqs{k1})
-            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
-            datetimeArray = t_cycle_mean_cell{k1}{k2};
-
-            % 提取第一个 datetime 对象作为参考点
-            referenceDatetime = datetimeArray(1);
-
-            % 计算每个 datetime 对象相对于参考点的秒数
-            secondsFromReference = seconds(datetimeArray - referenceDatetime);
-
-            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
-
-            create_subplot(@scatter, total_plots, current_plot, {amp_temp * max(mode_deck(:, VIV_mode_seq(k1))), zetam - zeta_structure(VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-            hold on
-            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, VIV_mode_seq(k1))), zeta_all_cell{k1}{k2}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-
-            current_plot = current_plot + 1;
-
-            % 设置 colormap
-            colormap('jet')
-            colorbar
-
-            hold on
-            plot([0, 0.15], [-0.003, -0.003])
-            % scatter(ex,epsx,'green')
-            str = "Mode : %d, Frequency : %.2f Hz";
-            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
-            xlim([0, 0.12])
-            ylim([-0.5, 0.5] / 100)
-            xlabel("Amplitude(m)")
-            ylabel("Damping ratio")
-        end
-
-    end
-
-    %% wind speed with amplitude and damping ratio
-
-    UA5 = windspeed_result.UA1;
-    UA6 = windspeed_result.UA2;
-
-    beta_deg_mean_UA5 = UA5.beta_deg_mean;
-    beta_deg_mean_UA6 = UA6.beta_deg_mean;
-
-    % judge if the wind direction of both UA5 and UA6 is from 45°-225°
-    for k1 = 1:length(beta_deg_mean_UA5)
-
-        if and(beta_deg_mean_UA5(k1) > 45, beta_deg_mean_UA5(k1) < 225) && and(beta_deg_mean_UA6(k1) > 45, beta_deg_mean_UA6(k1) < 225)
-            U_sel(k1) = UA5.U(k1);
-            AoA_sel(k1) = UA5.alpha_deg_mean(k1);
-
-            % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
-        elseif or(and(beta_deg_mean_UA5(k1) > 225, beta_deg_mean_UA5(k1) < 360), and(beta_deg_mean_UA5(k1) > 0, beta_deg_mean_UA5(k1) < 45)) && or(and(beta_deg_mean_UA6(k1) > 225, beta_deg_mean_UA6(k1) < 360), and(beta_deg_mean_UA6(k1) > 0, beta_deg_mean_UA6(k1) < 45))
-            U_sel(k1) = UA6.U(k1);
-            AoA_sel(k1) = UA6.alpha_deg_mean(k1);
-        else
-
-            if abs(UA5.alpha_deg_mean(k1)) < abs(UA6.alpha_deg_mean)
-                U_sel(k1) = UA5.U(k1);
-                AoA_sel(K1) = UA5.alpha_deg_mean(k1);
-            else
-                U_sel(k1) = UA6.U(k1);
-                AoA_sel(K1) = UA6.alpha_deg_mean(k1);
-            end
-
-            disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
-        end
-
-    end
+    hold on
+    plot([0, 0.15], [-0.003, -0.003])
+    % scatter(ex,epsx,'green')
+    str = "Mode : %d, Frequency : %.2f Hz";
+    title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+    xlim([0, 0.12])
+    ylim([-0.5, 0.5] / 100)
+    xlabel("Amplitude(m)")
+    ylabel("Damping ratio")
+    
 
     create_subplot(@scatter, total_plots, current_plot, {t_cycle_mean_temp, U_sel}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
     xlabel('Time (s)')
@@ -794,185 +804,84 @@ if fig_bool
     patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
 
     %% Damping ratio calculation with wind speed
-    amp_temp = amp_cell{1}{1};
-    % t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
-    m_cycle = input_data.ncycle; %cycles to be averaged
-    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+    create_subplot(@scatter, total_plots, current_plot, {amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], U_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
 
-    for k1 = 1:length(t_cycle_mean_temp)
+    current_plot = current_plot + 1;
 
-        if k1 <= m_cycle / 2 % Beginning boundary
-            start_idx = 1;
-            end_idx = start_idx + m_cycle;
-        elseif k1 > length(t_cycle_mean_temp) - m_cycle / 2 % Ending boundary
-            end_idx = length(t_cycle_mean_temp);
-            start_idx = end_idx - m_cycle;
-        else % Middle
-            start_idx = k1 - floor(m_cycle / 2);
-            end_idx = k1 + floor(m_cycle / 2);
-        end
+    % 设置 colormap
+    colormap('jet')
+    colorbar
 
-        deltam = log(amp_temp(start_idx) / amp_temp(end_idx));
-
-        zetam(k1) = sqrt(deltam ^ 2 / (4 * m_cycle ^ 2 * pi ^ 2 + deltam ^ 2));
-
-        if deltam > 0
-            zetam(k1) = abs(zetam(k1));
-        else
-            zetam(k1) = -abs(zetam(k1));
-        end
-
-    end
-
-    zeta_structure = result_Main.zeta;
-    zeta1 = zeta_all_cell{1}{1};
-    zeta2 = zetam - zeta_structure(VIV_mode_seq);
-
-    target = norm(zeta1 - zeta2);
-    disp(target)
-
-    for k1 = 1:nVIV
-
-        for k2 = 1:length(top_freqs{k1})
-            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
-            datetimeArray = t_cycle_mean_cell{k1}{k2};
-
-            % 提取第一个 datetime 对象作为参考点
-            referenceDatetime = datetimeArray(1);
-
-            % 计算每个 datetime 对象相对于参考点的秒数
-            secondsFromReference = seconds(datetimeArray - referenceDatetime);
-
-            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
-
-
-            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, VIV_mode_seq(k1))), zeta_all_cell{k1}{k2}, [], U_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-
-            current_plot = current_plot + 1;
-
-            % 设置 colormap
-            colormap('jet')
-            colorbar
-
-            hold on
-            plot([0, 0.15], [-0.003, -0.003])
-            % scatter(ex,epsx,'green')
-            str = "Mode : %d, Frequency : %.2f Hz with wind speed";
-            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
-            xlim([0.00, 0.12])
-            ylim([-0.5, 0.5] / 100)
-            xlabel("Amplitude(m)")
-            ylabel("Damping ratio")
-        end
-
-    end
+    hold on
+    plot([0, 0.15], [-0.003, -0.003])
+    % scatter(ex,epsx,'green')
+    str = "Mode : %d, Frequency : %.2f Hz with wind speed";
+    % title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+    xlim([0.00, 0.12])
+    ylim([-0.5, 0.5] / 100)
+    xlabel("Amplitude(m)")
+    ylabel("Damping ratio")
     %% Damping ratio calculation with wind speed
-    amp_temp = amp_cell{1}{1};
-    % t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
-    m_cycle = input_data.ncycle; %cycles to be averaged
-    zetam = zeros(1, length(t_cycle_mean_temp)); % Pre-allocate zetam with zeros
+    create_subplot(@scatter, total_plots, current_plot, {amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], AoA_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
 
-    for k1 = 1:length(t_cycle_mean_temp)
+    current_plot = current_plot + 1;
 
-        if k1 <= m_cycle / 2 % Beginning boundary
-            start_idx = 1;
-            end_idx = start_idx + m_cycle;
-        elseif k1 > length(t_cycle_mean_temp) - m_cycle / 2 % Ending boundary
-            end_idx = length(t_cycle_mean_temp);
-            start_idx = end_idx - m_cycle;
-        else % Middle
-            start_idx = k1 - floor(m_cycle / 2);
-            end_idx = k1 + floor(m_cycle / 2);
-        end
+    % 设置 colormap
+    colormap('jet')
+    colorbar
 
-        deltam = log(amp_temp(start_idx) / amp_temp(end_idx));
-
-        zetam(k1) = sqrt(deltam ^ 2 / (4 * m_cycle ^ 2 * pi ^ 2 + deltam ^ 2));
-
-        if deltam > 0
-            zetam(k1) = abs(zetam(k1));
-        else
-            zetam(k1) = -abs(zetam(k1));
-        end
-
-    end
-
-    zeta_structure = result_Main.zeta;
-    zeta1 = zeta_all_cell{1}{1};
-    zeta2 = zetam - zeta_structure(VIV_mode_seq);
-
-    target = norm(zeta1 - zeta2);
-    disp(target)
-
-    for k1 = 1:nVIV
-
-        for k2 = 1:length(top_freqs{k1})
-            % 假设 t_cycle_mean_cell{k1}{k2} 是一个包含 datetime 对象的数组
-            datetimeArray = t_cycle_mean_cell{k1}{k2};
-
-            % 提取第一个 datetime 对象作为参考点
-            referenceDatetime = datetimeArray(1);
-
-            % 计算每个 datetime 对象相对于参考点的秒数
-            secondsFromReference = seconds(datetimeArray - referenceDatetime);
-
-            % 现在，secondsFromReference 包含相对于第一个时间戳的秒数
+    hold on
+    plot([0, 0.15], [-0.003, -0.003])
+    % scatter(ex,epsx,'green')
+    str = "Mode : %d, Frequency : %.2f Hz with attack of angle";
+    title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
+    xlim([0.00, 0.12])
+    ylim([-0.5, 0.5] / 100)
+    xlabel("Amplitude(m)")
+    ylabel("Damping ratio")
 
 
-            create_subplot(@scatter, total_plots, current_plot, {amp_cell{k1}{k2} * max(mode_deck(:, VIV_mode_seq(k1))), zeta_all_cell{k1}{k2}, [], AoA_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+    amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
+    zeta_filter = zeta_all_cell{1}{1};
+    % C=rescale(AoA_sel,10,100);
+    S = rescale(zeta_filter, 10, 100);
+    C = AoA_sel;
+    % C = secondsFromReference;
+    % scatter3(amp_filter,U_sel,zeta_filter,S,C)
 
-            current_plot = current_plot + 1;
+    create_subplot(@scatter3, total_plots, current_plot, {amp_filter, U_sel,  zeta_filter,[],C}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    xlabel('Amp. (m)')
+    ylabel('Wind speed (m/s)')
+    title("Damping ratio （Amp,U,damping ratio,,AOA）")
+    current_plot = current_plot + 1;
 
-            % 设置 colormap
-            colormap('jet')
-            colorbar
+    % 设置 colormap
 
-            hold on
-            plot([0, 0.15], [-0.003, -0.003])
-            % scatter(ex,epsx,'green')
-            str = "Mode : %d, Frequency : %.2f Hz with attack of angle";
-            title(sprintf(str, modesel(k1), top_freqs{k1}(k2)));
-            xlim([0.00, 0.12])
-            ylim([-0.5, 0.5] / 100)
-            xlabel("Amplitude(m)")
-            ylabel("Damping ratio")
-        end
+    colorbar
+    colormap('jet'); % 选择一个颜色映射，比如 'parula'
+    % clim([-2 0]); % 设置颜色映射的数据范围为 -3 到 +3
 
-        %% Damping ratio calculation with wind speed, AOA and amplitude
-        amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
-        zeta_filter = zeta_all_cell{1}{1};
-        % C=rescale(AoA_sel,10,100);
-        S = rescale(zeta_filter, 10, 100);
-        C = AoA_sel;
-        % C = secondsFromReference;
-        % scatter3(amp_filter,U_sel,zeta_filter,S,C)
-    
-        create_subplot(@scatter3, total_plots, current_plot, {amp_filter, U_sel,  zeta_filter,[],C}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-        xlabel('Amp. (m)')
-        ylabel('Wind speed (m/s)')
-        title("Damping ratio （Amp,U,damping ratio,,AOA）")
-        current_plot = current_plot + 1;
-    
-        % 设置 colormap
-    
-        colorbar
-        colormap('jet'); % 选择一个颜色映射，比如 'parula'
-        % clim([-2 0]); % 设置颜色映射的数据范围为 -3 到 +3
-    
-        % zlim([-0.01, 0])
-        % xlim([0.01, 0.09])
-        % ylim([5, 12])
-        % 定义平面的四个角的 x, y, 和 z 坐标
-        x = [min(amp_filter), max(amp_filter), max(amp_filter), min(amp_filter)];
-        y = [min(U_sel), min(U_sel), max(U_sel), max(U_sel)];
-        z = [-0.003, -0.003, -0.003, -0.003]; % 所有点都在 z = 0.003 高度
+    % zlim([-0.01, 0])
+    % xlim([0.01, 0.09])
+    % ylim([5, 12])
+    % 定义平面的四个角的 x, y, 和 z 坐标
+    x = [min(amp_filter), max(amp_filter), max(amp_filter), min(amp_filter)];
+    y = [min(U_sel), min(U_sel), max(U_sel), max(U_sel)];
+    z = [-0.003, -0.003, -0.003, -0.003]; % 所有点都在 z = 0.003 高度
 
-        % 创建透明平面
-        patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
-    end
-end
+    % 创建透明平面
+    patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
     holdon = true
     toc
+
+%% save the result
+% eg: result_starttime_VIV_sel.mat VIV_sel is a variable
+startDate_global.Format = 'yyyy_MM_dd_HH_mm';
+filename = sprintf('result_%s_%s.mat', startDate_global, num2str(VIV_sel));
+save(filename, 'VIV_sel',"amp_filter","U_sel","zeta_filter","AoA_sel","datetimeArray");
+
+end
+
     %% functions
     function target = fitnessFunction(params, external_params)
     input.lambda_VIV = 10 ^ params(1);

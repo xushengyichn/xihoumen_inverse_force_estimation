@@ -75,7 +75,10 @@ subStreamNumberDefault = 2132;
 run("InitScript.m")
 
 %% 0 绘图参数
-fig_bool = ON;
+
+if ~exist('fig_bool', 'var')
+    fig_bool = ON;
+end
 num_figs_in_row = 6; %每一行显示几个图
 figPos = figPosSmall; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
