@@ -411,10 +411,10 @@ t_cycle_mean_temp = t_cycle_mean_cell{1}{1};
 duration = minutes(10);
 
 
-start_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+start_time.Format = 'yyyy_MM_dd_HH_mm_ss';
 formatted_start_time = string(start_time);
 
-end_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+end_time.Format = 'yyyy_MM_dd_HH_mm_ss';
 formatted_end_time = string(end_time);
 
 
