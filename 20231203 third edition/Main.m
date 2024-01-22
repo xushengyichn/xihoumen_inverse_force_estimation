@@ -26,6 +26,11 @@ opts = detectImportOptions('vivData.csv');
 
 % 设置日期时间格式
 % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
+opts = setvartype(opts, 'startDate', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'endDate', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'startDate_update', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'endDate_update', 'datetime'); % 确保变量类型为 datetime
+
 opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
