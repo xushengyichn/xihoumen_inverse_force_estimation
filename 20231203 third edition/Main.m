@@ -20,7 +20,7 @@ tic
 % startDate_global = result.startDate;
 % endDate_global = result.endDate;
 if ~exist("VIV_sel",'var')
-    VIV_sel = 6;
+    VIV_sel = 4;
 end
 opts = detectImportOptions('vivData.csv');
 
@@ -69,6 +69,10 @@ modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 32];
 moderemove = [4,9];
 modeall(moderemove)=[];
 modesel = modeall;
+if ~exist("modelupdate",'var')
+    modelupdate = true;
+end
+input_data.modelupdate = modelupdate;
 % modesel = [2,3,5,6,13,20,22,33];%去掉了两个广义坐标为0的点模态
 
 
@@ -417,7 +421,7 @@ filename = "windspeed_result_"+formatted_start_time+"_"+formatted_end_time+".mat
 if exist(filename, 'file') == 2
     load(filename);
 else
-    windspeed_result = read_wind_data_onetime(t_cycle_mean_temp, duration, input_data.wind_dir_all, [1 1 0 0 0 0]);
+    windspeed_result = read_wind_data_onetime(t_cycle_mean_temp, duration, input_data.wind_dir_all, [1 1 1 1 1 1]);
     save(filename,'windspeed_result',"start_time","end_time");
 end
 
@@ -480,37 +484,118 @@ end
 
 %% wind speed with amplitude and damping ratio
 
-UA5 = windspeed_result.UA1;
-UA6 = windspeed_result.UA2;
+UAa = windspeed_result.UA1;
+UAb = windspeed_result.UA2;
 
-beta_deg_mean_UA5 = UA5.beta_deg_mean;
-beta_deg_mean_UA6 = UA6.beta_deg_mean;
+beta_deg_mean_UAa = UAa.beta_deg_mean;
+beta_deg_mean_UAb = UAb.beta_deg_mean;
 
 % judge if the wind direction of both UA5 and UA6 is from 45°-225°
-for k1 = 1:length(beta_deg_mean_UA5)
+for k1 = 1:length(beta_deg_mean_UAa)
 
-    if and(beta_deg_mean_UA5(k1) > 45, beta_deg_mean_UA5(k1) < 225) && and(beta_deg_mean_UA6(k1) > 45, beta_deg_mean_UA6(k1) < 225)
-        U_sel(k1) = UA5.U(k1);
-        AoA_sel(k1) = UA5.alpha_deg_mean(k1);
+    if and(beta_deg_mean_UAa(k1) > 45, beta_deg_mean_UAa(k1) < 225) && and(beta_deg_mean_UAb(k1) > 45, beta_deg_mean_UAb(k1) < 225)
+        U_sel(k1) = UAa.U(k1);
+        AoA_sel(k1) = UAa.alpha_deg_mean(k1);
 
         % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
-    elseif or(and(beta_deg_mean_UA5(k1) > 225, beta_deg_mean_UA5(k1) < 360), and(beta_deg_mean_UA5(k1) > 0, beta_deg_mean_UA5(k1) < 45)) && or(and(beta_deg_mean_UA6(k1) > 225, beta_deg_mean_UA6(k1) < 360), and(beta_deg_mean_UA6(k1) > 0, beta_deg_mean_UA6(k1) < 45))
-        U_sel(k1) = UA6.U(k1);
-        AoA_sel(k1) = UA6.alpha_deg_mean(k1);
+    elseif or(and(beta_deg_mean_UAa(k1) > 225, beta_deg_mean_UAa(k1) < 360), and(beta_deg_mean_UAa(k1) > 0, beta_deg_mean_UAa(k1) < 45)) && or(and(beta_deg_mean_UAb(k1) > 225, beta_deg_mean_UAb(k1) < 360), and(beta_deg_mean_UAb(k1) > 0, beta_deg_mean_UAb(k1) < 45))
+        U_sel(k1) = UAb.U(k1);
+        AoA_sel(k1) = UAb.alpha_deg_mean(k1);
     else
 
-        if abs(UA5.alpha_deg_mean(k1)) < abs(UA6.alpha_deg_mean)
-            U_sel(k1) = UA5.U(k1);
-            AoA_sel(K1) = UA5.alpha_deg_mean(k1);
+        if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean)
+            U_sel(k1) = UAa.U(k1);
+            AoA_sel(K1) = UAa.alpha_deg_mean(k1);
         else
-            U_sel(k1) = UA6.U(k1);
-            AoA_sel(K1) = UA6.alpha_deg_mean(k1);
+            U_sel(k1) = UAb.U(k1);
+            AoA_sel(K1) = UAb.alpha_deg_mean(k1);
         end
 
         disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
     end
 
 end
+
+U_sel_loc_1 = U_sel;
+AoA_sel_1 = AoA_sel;
+beta_deg_mean_UA1a=beta_deg_mean_UAa;
+beta_deg_mean_UA1b=beta_deg_mean_UAb;
+
+UAa = windspeed_result.UA3;
+UAb = windspeed_result.UA4;
+
+beta_deg_mean_UAa = UAa.beta_deg_mean;
+beta_deg_mean_UAb = UAb.beta_deg_mean;
+
+% judge if the wind direction of both UA5 and UA6 is from 45°-225°
+for k1 = 1:length(beta_deg_mean_UAa)
+
+    if and(beta_deg_mean_UAa(k1) > 45, beta_deg_mean_UAa(k1) < 225) && and(beta_deg_mean_UAb(k1) > 45, beta_deg_mean_UAb(k1) < 225)
+        U_sel(k1) = UAa.U(k1);
+        AoA_sel(k1) = UAa.alpha_deg_mean(k1);
+
+        % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
+    elseif or(and(beta_deg_mean_UAa(k1) > 225, beta_deg_mean_UAa(k1) < 360), and(beta_deg_mean_UAa(k1) > 0, beta_deg_mean_UAa(k1) < 45)) && or(and(beta_deg_mean_UAb(k1) > 225, beta_deg_mean_UAb(k1) < 360), and(beta_deg_mean_UAb(k1) > 0, beta_deg_mean_UAb(k1) < 45))
+        U_sel(k1) = UAb.U(k1);
+        AoA_sel(k1) = UAb.alpha_deg_mean(k1);
+    else
+
+        if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean)
+            U_sel(k1) = UAa.U(k1);
+            AoA_sel(K1) = UAa.alpha_deg_mean(k1);
+        else
+            U_sel(k1) = UAb.U(k1);
+            AoA_sel(K1) = UAb.alpha_deg_mean(k1);
+        end
+
+        disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
+    end
+
+end
+
+U_sel_loc_2 = U_sel;
+AoA_sel_2 = AoA_sel;
+beta_deg_mean_UA2a=beta_deg_mean_UAa;
+beta_deg_mean_UA2b=beta_deg_mean_UAb;
+
+UAa = windspeed_result.UA5;
+UAb = windspeed_result.UA6;
+
+beta_deg_mean_UAa = UAa.beta_deg_mean;
+beta_deg_mean_UAb = UAb.beta_deg_mean;
+
+% judge if the wind direction of both UA5 and UA6 is from 45°-225°
+for k1 = 1:length(beta_deg_mean_UAa)
+
+    if and(beta_deg_mean_UAa(k1) > 45, beta_deg_mean_UAa(k1) < 225) && and(beta_deg_mean_UAb(k1) > 45, beta_deg_mean_UAb(k1) < 225)
+        U_sel(k1) = UAa.U(k1);
+        AoA_sel(k1) = UAa.alpha_deg_mean(k1);
+
+        % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
+    elseif or(and(beta_deg_mean_UAa(k1) > 225, beta_deg_mean_UAa(k1) < 360), and(beta_deg_mean_UAa(k1) > 0, beta_deg_mean_UAa(k1) < 45)) && or(and(beta_deg_mean_UAb(k1) > 225, beta_deg_mean_UAb(k1) < 360), and(beta_deg_mean_UAb(k1) > 0, beta_deg_mean_UAb(k1) < 45))
+        U_sel(k1) = UAb.U(k1);
+        AoA_sel(k1) = UAb.alpha_deg_mean(k1);
+    else
+
+        if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean)
+            U_sel(k1) = UAa.U(k1);
+            AoA_sel(K1) = UAa.alpha_deg_mean(k1);
+        else
+            U_sel(k1) = UAb.U(k1);
+            AoA_sel(K1) = UAb.alpha_deg_mean(k1);
+        end
+
+        disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
+    end
+
+end
+
+U_sel_loc_3 = U_sel;
+AoA_sel_3 = AoA_sel;
+beta_deg_mean_UA3a=beta_deg_mean_UAa;
+beta_deg_mean_UA3b=beta_deg_mean_UAb;
+
+
 amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
 zeta_filter = zeta_all_cell{1}{1};
 %% plot
@@ -879,8 +964,15 @@ end
 %% save the result
 % eg: result_starttime_VIV_sel.mat VIV_sel is a variable
 startDate_global.Format = 'yyyy_MM_dd_HH_mm';
-filename = sprintf('result_%s_%s.mat', startDate_global, num2str(VIV_sel));
-save(filename, 'VIV_sel',"amp_filter","U_sel","zeta_filter","AoA_sel","datetimeArray");
+zeta = result_Main.zeta;
+
+if input_data.modelupdate == true
+    str_modelupdate = "updatedmodel";
+else
+    str_modelupdate = "nomodelupdate";
+end
+filename = sprintf('result_%s_%s_%s.mat', startDate_global, num2str(VIV_sel),str_modelupdate);
+save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_seq","zeta","U_sel_loc_1","AoA_sel_1","U_sel_loc_2","AoA_sel_2","U_sel_loc_3","AoA_sel_3","beta_deg_mean_UA1a","beta_deg_mean_UA1b","beta_deg_mean_UA2a","beta_deg_mean_UA2b","beta_deg_mean_UA3a","beta_deg_mean_UA3b","t_cycle_mean_temp")
 
     %% functions
     function target = fitnessFunction(params, external_params)

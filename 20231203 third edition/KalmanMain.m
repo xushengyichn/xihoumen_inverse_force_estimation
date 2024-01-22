@@ -222,7 +222,7 @@ MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
 %% modal updating
-if 1
+if input.modelupdate
     opts = detectImportOptions('vivData.csv');
 
     % 设置日期时间格式
