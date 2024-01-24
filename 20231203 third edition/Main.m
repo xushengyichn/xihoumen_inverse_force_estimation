@@ -170,6 +170,11 @@ if 0 %优化所有参数
     external_params.VIV_mode_seq = VIV_mode_seq;
     external_params.nVIV = nVIV;
     external_params.ft_directint = ft_directint;
+    external_params.modelupdate = modelupdate;
+    external_params.VIV_sel = VIV_sel;
+    external_params.start_time=startDate_global;
+    external_params.end_time=endDate_global;
+
     % 定义参数的范围
     lb = [-4, 1e0, 0.98, -6, -3, 0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e4, 1.02, -4, -1, 2]; % 这里的值也是假设的
@@ -194,7 +199,7 @@ if 0 %优化所有参数
 
 end
 
-if 0 % 选择参数进行优化
+if 1 % 选择参数进行优化
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
@@ -206,6 +211,10 @@ if 0 % 选择参数进行优化
     external_params.ft_directint = ft_directint;
     external_params.omega_0_variation_VIV = input_data.omega_0_variation_VIV;
     external_params.sigma_noise = input_data.sigma_noise;
+    external_params.modelupdate = modelupdate;
+    external_params.VIV_sel = VIV_sel;
+    external_params.start_time=startDate_global;
+    external_params.end_time=endDate_global;
     % 定义参数的范围
     lb = [-4, 1e0, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e4,  -4,  2]; % 这里的值也是假设的
@@ -240,6 +249,10 @@ if 0 % 选择参数进行优化
     external_params.omega_0_variation_VIV = input_data.omega_0_variation_VIV;
     external_params.sigma_noise = input_data.sigma_noise;
     external_params.Q_value = input_data.Q_value;
+    external_params.modelupdate = modelupdate;
+    external_params.VIV_sel = VIV_sel;
+    external_params.start_time=startDate_global;
+    external_params.end_time=endDate_global;
     % 定义参数的范围
     lb = [-4, 1e0,  0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0, 1e2,  2]; % 这里的值也是假设的
@@ -274,7 +287,10 @@ if 0 % 选择参数进行优化
     external_params.Q_value = input_data.Q_value;
     external_params.sigma_buff = input_data.sigma_buff;
     external_params.sigma_p_VIV = input_data.sigma_p_VIV;
-
+    external_params.modelupdate = modelupdate;
+    external_params.VIV_sel = VIV_sel;
+    external_params.start_time=startDate_global;
+    external_params.end_time=endDate_global;
     % 定义参数的范围
     lb = [-5]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [0]; % 这里的值也是假设的
@@ -308,7 +324,9 @@ if 0 % 选择参数进行优化
     external_params.Q_value = input_data.Q_value;
     external_params.sigma_buff = input_data.sigma_buff;
     external_params.lambda_VIV = input_data.lambda_VIV;
-
+    external_params.VIV_sel = VIV_sel;
+    external_params.start_time=startDate_global;
+    external_params.end_time=endDate_global;
     % 定义参数的范围
     lb = [10^0]; % 这里的值是假设的，请根据您的情况进行修改
     ub = [10^3]; % 这里的值也是假设的
@@ -987,13 +1005,13 @@ save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_se
     input.Q_value = 10 ^ params(4);
     input.sigma_noise = 10 ^ params(5);
     input.sigma_buff = 10 ^ params(6);
-
+    input.modelupdate =external_params.modelupdate;
     input.modesel = external_params.modesel;
-
-    n = 4;
-    [result] = viv2013(n, false);
-    input.start_time = result.startDate;
-    input.end_time = result.endDate;
+    input.VIV_sel=external_params.VIV_sel;
+    % n = 4;
+    % [result] = viv2013(n, false);
+    input.start_time =    external_params.start_time;
+    input.end_time = external_params.end_time;
     input.acc_dir = external_params.acc_dir;
     input.VIV_mode_seq = external_params.VIV_mode_seq;
     input.nVIV = external_params.nVIV;
@@ -1015,13 +1033,13 @@ save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_se
     input.sigma_p_VIV = params(2);
     input.Q_value = 10 ^ params(3);
     input.sigma_buff = 10 ^ params(4);
-
+    input.modelupdate =external_params.modelupdate;
     input.modesel = external_params.modesel;
-
-    n = 4;
-    [result] = viv2013(n, false);
-    input.start_time = result.startDate;
-    input.end_time = result.endDate;
+    input.VIV_sel=external_params.VIV_sel;
+    % n = 4;
+    % [result] = viv2013(n, false);
+    input.start_time =    external_params.start_time;
+    input.end_time = external_params.end_time;
     input.acc_dir = external_params.acc_dir;
     input.VIV_mode_seq = external_params.VIV_mode_seq;
     input.nVIV = external_params.nVIV;
@@ -1043,13 +1061,13 @@ save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_se
     input.lambda_VIV = 10 ^ params(1);
     input.sigma_p_VIV = params(2);
     input.sigma_buff = 10 ^ params(3);
-
+    input.modelupdate =external_params.modelupdate;
     input.modesel = external_params.modesel;
-
-    n = 4;
-    [result] = viv2013(n, false);
-    input.start_time = result.startDate;
-    input.end_time = result.endDate;
+    input.VIV_sel=external_params.VIV_sel;
+    % n = 4;
+    % [result] = viv2013(n, false);
+    input.start_time =    external_params.start_time;
+    input.end_time = external_params.end_time;
     input.acc_dir = external_params.acc_dir;
     input.VIV_mode_seq = external_params.VIV_mode_seq;
     input.nVIV = external_params.nVIV;
@@ -1070,13 +1088,13 @@ save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_se
 
     function target = fitnessFunction_sel3(params, external_params)
     input.lambda_VIV = 10 ^ params(1);
-
+    input.modelupdate =external_params.modelupdate;
     input.modesel = external_params.modesel;
-
-    n = 4;
-    [result] = viv2013(n, false);
-    input.start_time = result.startDate;
-    input.end_time = result.endDate;
+    input.VIV_sel=external_params.VIV_sel;
+    % n = 4;
+    % [result] = viv2013(n, false);
+    input.start_time =    external_params.start_time;
+    input.end_time = external_params.end_time;
     input.acc_dir = external_params.acc_dir;
     input.VIV_mode_seq = external_params.VIV_mode_seq;
     input.nVIV = external_params.nVIV;
@@ -1098,13 +1116,13 @@ save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_se
 
     function target = fitnessFunction_sel4(params, external_params)
     input.sigma_p_VIV = params(1);
-
+    input.modelupdate =external_params.modelupdate;
     input.modesel = external_params.modesel;
-
-    n = 4;
-    [result] = viv2013(n, false);
-    input.start_time = result.startDate;
-    input.end_time = result.endDate;
+    input.VIV_sel=external_params.VIV_sel;
+    % n = 4;
+    % % [result] = viv2013(n, false);
+    input.start_time =    external_params.start_time;
+    input.end_time = external_params.end_time;
     input.acc_dir = external_params.acc_dir;
     input.VIV_mode_seq = external_params.VIV_mode_seq;
     input.nVIV = external_params.nVIV;
