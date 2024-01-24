@@ -514,15 +514,15 @@ p_reconstruct = p_filt_m;
 % p_reconstruct([1 2 3 ],:)=0;
 [~, yn_reconstruct, ~] = CalResponse(A_d, B_d_VIV, G_d, J_d_VIV, p_reconstruct, 0, 0, N, x0, ns, n_sensors);
 
-% recalculate logek
-nt = size(yn_reconstruct,2);
-logek=0;
-for k1 = 1:nt
-    ek = yn(:,k1)-yn_reconstruct(:,k1);
-    logek_i = -0.5*ek.'*result.invSk*ek;
-    % logek_i = -0.5*ek.'*ek;
-    logek = logek + logek_i;
-end
+% recalculate logek (this part of code will never be used due to it is against the methodology)
+% nt = size(yn_reconstruct,2);
+% logek=0;
+% for k1 = 1:nt
+%     ek = yn(:,k1)-yn_reconstruct(:,k1);
+%     logek_i = -0.5*ek.'*result.invSk*ek;
+%     % logek_i = -0.5*ek.'*ek;
+%     logek = logek + logek_i;
+% end
 
 % fft
 % [f_origin, magnitude_origin] = fft_transform(1 / dt, yn(3, :));
@@ -531,7 +531,7 @@ end
 %% 8 marginal likelihood
 %     logL = result.logL;
 logSk = result.logSk;
-%     logek = result.logek;
+logek = result.logek;
 invSk = result.invSk;
 logL = logSk +logek;
 
