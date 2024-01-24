@@ -55,18 +55,28 @@ input_data.VIV_sel = VIV_sel;
 % input.sigma_buff = 10 ^ (0.070362659875298);
 
 
-input_data.lambda_VIV = 10 ^ (-3.942762294993564);
-input_data.sigma_p_VIV = 2.045644004352163e+02;
-input_data.sigma_buff = 10 ^ (0.057229481634271);
+% input_data.lambda_VIV = 10 ^ (-3.942762294993564);
+% input_data.sigma_p_VIV = 2.045644004352163e+02;
+% input_data.sigma_buff = 10 ^ (0.057229481634271);
+% 
+% 
+% % input_data.Q_value = 10 ^ (-7.743718510318171);
+% input_data.Q_value = 10 ^ (-9.023298502893022);
+% input_data.omega_0_variation_VIV = 1;
+% input_data.sigma_noise = 10 ^ (-1.3);
+% % input_data.sigma_noise = 10 ^ (0);
+
+
+input_data.lambda_VIV = 10 ^ (-3.972197664915089);
+input_data.sigma_p_VIV = 19.811759673791514;
+input_data.sigma_buff = 10 ^ (0.5411);
 
 
 % input_data.Q_value = 10 ^ (-7.743718510318171);
-input_data.Q_value = 10 ^ (-9.023298502893022);
+input_data.Q_value = 10 ^ (-6);
 input_data.omega_0_variation_VIV = 1;
 input_data.sigma_noise = 10 ^ (-1.3);
 % input_data.sigma_noise = 10 ^ (0);
-
-
 
 
 %% logL优化参数
@@ -93,11 +103,11 @@ showplot = false;
 
 
 %% plot logL with changing parameters
-if 0
+if 1
 
     lambda_VIVs = logspace(-10,-1,20);
     % sigma_p_VIVs = linspace(1e1,1e5,10);
-    sigma_p_VIVs = logspace(-1,6,10);
+    sigma_p_VIVs = logspace(-1,6,20);
 
     [lambda_VIVs, sigma_p_VIVs] = meshgrid(lambda_VIVs, sigma_p_VIVs);
     variables = [lambda_VIVs(:), sigma_p_VIVs(:)];
@@ -106,21 +116,39 @@ if 0
     logSks = zeros(size(variables, 1), 1);
     logeks = zeros(size(variables, 1), 1);
 
+
+    numIterations = length(variables);
+
+% Instantiate the object with the 'IsParallel' switch set to true
+b = ProgressBar(numIterations, ...
+    'IsParallel', true, ...
+    'WorkerDirectory', pwd(), ...
+    'Title', 'Parallel 2' ...
+    );
+
+% ALWAYS CALL THE SETUP() METHOD FIRST!!!
+b.setup([], [], []);
+
     parfor k1 = 1:size(variables, 1)
         input_data_temp = input_data;
         input_data_temp.lambda_VIV = variables(k1, 1);
         input_data_temp.sigma_p_VIV = variables(k1, 2);
         input_data_temp.omega_0_variation_VIV = 1;
 
-        input_data_temp.Q_value = 10 ^ (-9.023298502893022);
+        input_data_temp.Q_value = 10 ^ (-6);
         input_data_temp.sigma_noise = 10 ^ (-1.3);
-        input_data_temp.sigma_buff = 10 ^ (0.057229481634271);
+        input_data_temp.sigma_buff = 10 ^ (0.541113482743460);
         [result_Main] = KalmanMain(input_data_temp, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
         logLs(k1) = result_Main.logL;
         logSks(k1) = result_Main.logSk;
         logeks(k1) = result_Main.logek;
+
+            % USE THIS FUNCTION AND NOT THE STEP() METHOD OF THE OBJECT!!!
+    updateParallel([], pwd);
     end
 
+    b.release();
+    
     logLs = reshape(logLs, size(lambda_VIVs));
     logSks = reshape(logSks, size(lambda_VIVs));
     logeks = reshape(logeks, size(lambda_VIVs));
@@ -199,7 +227,7 @@ if 0 %优化所有参数
 
 end
 
-if 1 % 选择参数进行优化
+if 0 % 选择参数进行优化
     %% 导入直接积分获得的涡激力
     ft_directint = importdata("DirectIntegration.mat");
     %% optimization logL to get the maximum with changing lambda sigma_p omega_0_variation Q_value R_value
@@ -216,8 +244,8 @@ if 1 % 选择参数进行优化
     external_params.start_time=startDate_global;
     external_params.end_time=endDate_global;
     % 定义参数的范围
-    lb = [-4, 1e0, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
-    ub = [0, 1e4,  -4,  2]; % 这里的值也是假设的
+    lb = [-5, 1e0, -10, 0]; % 这里的值是假设的，请根据您的情况进行修改
+    ub = [0, 1e4,  -1,  2]; % 这里的值也是假设的
 
     % 定义整数和连续变量
     IntCon = []; % 如果没有整数变量，否则提供整数变量的索引

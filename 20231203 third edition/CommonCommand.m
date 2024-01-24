@@ -76,7 +76,7 @@ run("InitScript.m")
 
 %% 0 绘图参数
 
-if ~exist('fig_bool', 'var')
+if ~exist('no_fig', 'var')
     fig_bool = ON;
 end
 num_figs_in_row = 6; %每一行显示几个图
