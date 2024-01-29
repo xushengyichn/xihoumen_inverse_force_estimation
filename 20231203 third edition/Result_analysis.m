@@ -232,7 +232,65 @@ for i = 1:length(VIV_sels)
     plotdata_nomodelupdate_sel_drop(i).t_cycle_mean_temp  = plotdata_nomodelupdate(i).t_cycle_mean_temp(loc_temp);
 end
 
+%% newfigure %% different VIV case and AOA and use sensor 1 model updating select VIV exciting case
+total_plots = 1; % 或任何你需要的子图数量
+current_plot = 1;
+num_figs_in_row = [];
+figWidthFactor = 1.5;
+figPosition = [100, 100];
+newfigure = true;
+holdon = false;
+firstfigure = true;
 
+% VIV_sel  = [4,9,11];%不同风向的涡振130
+% VIV_sel  = [5,6,12,16];%不同风向的涡振315
+% VIV_sel  = [2,3,4,9,11];%不同风向的涡振
+% VIV_sel  = [12];%不同风向的涡振
+VIV_sel  = [5,6,7,8,10,12,16,17,18,19,22];%不同风向的涡振
+VIV_sel = VIV_sel;
+plot_sel = find(ismember(VIV_sels, VIV_sel));
+
+% 初始化图例标签数组
+% legend_labels = cell(1, length(categories) - 1);
+plotdata_sel = plotdata_modelupdate_sel_excite;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).beta_deg_mean_UA1a
+
+    plot_color = colors{1};
+
+    % 绘制散点图并为每个类别添加图例
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+
+    hold on;
+
+
+end
+
+hold on
+
+plotdata_sel = plotdata_modelupdate_sel_drop;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).beta_deg_mean_UA1a;
+    plot_color = colors{2};
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+end
+% 添加图例
+% legend(legend_labels);
+% zlim([-0.01 0])
+xlabel("amplitude")
+ylabel("wind speed")
+zlabel("AoA")
+title("amp.U.AoA")
+% 更新 current_plot
+current_plot = current_plot + 1;
+
+return
 %% newfigure %% different VIV case and AOA and use sensor 1 model updating select VIV exciting case
 total_plots = 5; % 或任何你需要的子图数量
 current_plot = 1;
