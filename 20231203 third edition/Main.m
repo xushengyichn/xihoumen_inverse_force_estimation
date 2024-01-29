@@ -547,19 +547,32 @@ for k1 = 1:length(beta_deg_mean_UAa)
     if and(beta_deg_mean_UAa(k1) > 45, beta_deg_mean_UAa(k1) < 225) && and(beta_deg_mean_UAb(k1) > 45, beta_deg_mean_UAb(k1) < 225)
         U_sel(k1) = UAa.U(k1);
         AoA_sel(k1) = UAa.alpha_deg_mean(k1);
+        TI_u_sel(k1) = UAa.TI_u(k1);
+        TI_v_sel(k1) = UAa.TI_v(k1);
+        TI_w_sel(k1) = UAa.TI_w(k1);
+
 
         % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
     elseif or(and(beta_deg_mean_UAa(k1) > 225, beta_deg_mean_UAa(k1) < 360), and(beta_deg_mean_UAa(k1) > 0, beta_deg_mean_UAa(k1) < 45)) && or(and(beta_deg_mean_UAb(k1) > 225, beta_deg_mean_UAb(k1) < 360), and(beta_deg_mean_UAb(k1) > 0, beta_deg_mean_UAb(k1) < 45))
         U_sel(k1) = UAb.U(k1);
         AoA_sel(k1) = UAb.alpha_deg_mean(k1);
+        TI_u_sel(k1) = UAb.TI_u(k1);
+        TI_v_sel(k1) = UAb.TI_v(k1);
+        TI_w_sel(k1) = UAb.TI_w(k1);
     else
 
         if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean)
             U_sel(k1) = UAa.U(k1);
             AoA_sel(K1) = UAa.alpha_deg_mean(k1);
+            TI_u_sel(k1) = UAa.TI_u(k1);
+            TI_v_sel(k1) = UAa.TI_v(k1);
+            TI_w_sel(k1) = UAa.TI_w(k1);
         else
             U_sel(k1) = UAb.U(k1);
             AoA_sel(K1) = UAb.alpha_deg_mean(k1);
+            TI_u_sel(k1) = UAb.TI_u(k1);
+            TI_v_sel(k1) = UAb.TI_v(k1);
+            TI_w_sel(k1) = UAb.TI_w(k1);
         end
 
         disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
@@ -571,6 +584,11 @@ U_sel_loc_1 = U_sel;
 AoA_sel_1 = AoA_sel;
 beta_deg_mean_UA1a=beta_deg_mean_UAa;
 beta_deg_mean_UA1b=beta_deg_mean_UAb;
+
+TI_u_sel_1 = TI_u_sel;
+TI_v_sel_1 = TI_v_sel;
+TI_w_sel_1 = TI_w_sel;
+
 
 UAa = windspeed_result.UA3;
 UAb = windspeed_result.UA4;
@@ -584,19 +602,32 @@ for k1 = 1:length(beta_deg_mean_UAa)
     if and(beta_deg_mean_UAa(k1) > 45, beta_deg_mean_UAa(k1) < 225) && and(beta_deg_mean_UAb(k1) > 45, beta_deg_mean_UAb(k1) < 225)
         U_sel(k1) = UAa.U(k1);
         AoA_sel(k1) = UAa.alpha_deg_mean(k1);
+        TI_u_sel(k1) = UAa.TI_u(k1);
+        TI_v_sel(k1) = UAa.TI_v(k1);
+        TI_w_sel(k1) = UAa.TI_w(k1);
+
 
         % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
     elseif or(and(beta_deg_mean_UAa(k1) > 225, beta_deg_mean_UAa(k1) < 360), and(beta_deg_mean_UAa(k1) > 0, beta_deg_mean_UAa(k1) < 45)) && or(and(beta_deg_mean_UAb(k1) > 225, beta_deg_mean_UAb(k1) < 360), and(beta_deg_mean_UAb(k1) > 0, beta_deg_mean_UAb(k1) < 45))
         U_sel(k1) = UAb.U(k1);
         AoA_sel(k1) = UAb.alpha_deg_mean(k1);
+        TI_u_sel(k1) = UAb.TI_u(k1);
+        TI_v_sel(k1) = UAb.TI_v(k1);
+        TI_w_sel(k1) = UAb.TI_w(k1);
     else
 
         if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean)
             U_sel(k1) = UAa.U(k1);
             AoA_sel(K1) = UAa.alpha_deg_mean(k1);
+            TI_u_sel(k1) = UAa.TI_u(k1);
+            TI_v_sel(k1) = UAa.TI_v(k1);
+            TI_w_sel(k1) = UAa.TI_w(k1);
         else
             U_sel(k1) = UAb.U(k1);
             AoA_sel(K1) = UAb.alpha_deg_mean(k1);
+            TI_u_sel(k1) = UAb.TI_u(k1);
+            TI_v_sel(k1) = UAb.TI_v(k1);
+            TI_w_sel(k1) = UAb.TI_w(k1);
         end
 
         disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
@@ -604,10 +635,15 @@ for k1 = 1:length(beta_deg_mean_UAa)
 
 end
 
+
 U_sel_loc_2 = U_sel;
 AoA_sel_2 = AoA_sel;
 beta_deg_mean_UA2a=beta_deg_mean_UAa;
 beta_deg_mean_UA2b=beta_deg_mean_UAb;
+
+TI_u_sel_2 = TI_u_sel;
+TI_v_sel_2 = TI_v_sel;
+TI_w_sel_2 = TI_w_sel;
 
 UAa = windspeed_result.UA5;
 UAb = windspeed_result.UA6;
@@ -621,19 +657,32 @@ for k1 = 1:length(beta_deg_mean_UAa)
     if and(beta_deg_mean_UAa(k1) > 45, beta_deg_mean_UAa(k1) < 225) && and(beta_deg_mean_UAb(k1) > 45, beta_deg_mean_UAb(k1) < 225)
         U_sel(k1) = UAa.U(k1);
         AoA_sel(k1) = UAa.alpha_deg_mean(k1);
+        TI_u_sel(k1) = UAa.TI_u(k1);
+        TI_v_sel(k1) = UAa.TI_v(k1);
+        TI_w_sel(k1) = UAa.TI_w(k1);
+
 
         % judge if the wind direction of both UA5 and UA6 is from 225°-360° or 0°-45°
     elseif or(and(beta_deg_mean_UAa(k1) > 225, beta_deg_mean_UAa(k1) < 360), and(beta_deg_mean_UAa(k1) > 0, beta_deg_mean_UAa(k1) < 45)) && or(and(beta_deg_mean_UAb(k1) > 225, beta_deg_mean_UAb(k1) < 360), and(beta_deg_mean_UAb(k1) > 0, beta_deg_mean_UAb(k1) < 45))
         U_sel(k1) = UAb.U(k1);
         AoA_sel(k1) = UAb.alpha_deg_mean(k1);
+        TI_u_sel(k1) = UAb.TI_u(k1);
+        TI_v_sel(k1) = UAb.TI_v(k1);
+        TI_w_sel(k1) = UAb.TI_w(k1);
     else
 
         if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean)
             U_sel(k1) = UAa.U(k1);
             AoA_sel(K1) = UAa.alpha_deg_mean(k1);
+            TI_u_sel(k1) = UAa.TI_u(k1);
+            TI_v_sel(k1) = UAa.TI_v(k1);
+            TI_w_sel(k1) = UAa.TI_w(k1);
         else
             U_sel(k1) = UAb.U(k1);
             AoA_sel(K1) = UAb.alpha_deg_mean(k1);
+            TI_u_sel(k1) = UAb.TI_u(k1);
+            TI_v_sel(k1) = UAb.TI_v(k1);
+            TI_w_sel(k1) = UAb.TI_w(k1);
         end
 
         disp("该时间点两个风速仪风向不一致，取风攻角较小的值")
@@ -641,11 +690,15 @@ for k1 = 1:length(beta_deg_mean_UAa)
 
 end
 
+
 U_sel_loc_3 = U_sel;
 AoA_sel_3 = AoA_sel;
 beta_deg_mean_UA3a=beta_deg_mean_UAa;
 beta_deg_mean_UA3b=beta_deg_mean_UAb;
 
+TI_u_sel_3 = TI_u_sel;
+TI_v_sel_3 = TI_v_sel;
+TI_w_sel_3 = TI_w_sel;
 
 amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
 zeta_filter = zeta_all_cell{1}{1};
@@ -1023,7 +1076,8 @@ else
     str_modelupdate = "nomodelupdate";
 end
 filename = sprintf('result_%s_%s_%s.mat', startDate_global, num2str(VIV_sel),str_modelupdate);
-save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_seq","zeta","U_sel_loc_1","AoA_sel_1","U_sel_loc_2","AoA_sel_2","U_sel_loc_3","AoA_sel_3","beta_deg_mean_UA1a","beta_deg_mean_UA1b","beta_deg_mean_UA2a","beta_deg_mean_UA2b","beta_deg_mean_UA3a","beta_deg_mean_UA3b","t_cycle_mean_temp")
+save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_seq","zeta","U_sel_loc_1","AoA_sel_1","U_sel_loc_2","AoA_sel_2","U_sel_loc_3","AoA_sel_3","beta_deg_mean_UA1a","beta_deg_mean_UA1b","beta_deg_mean_UA2a","beta_deg_mean_UA2b","beta_deg_mean_UA3a","beta_deg_mean_UA3b","t_cycle_mean_temp"...
+    ,"TI_u_sel_1","TI_u_sel_2","TI_u_sel_3","TI_v_sel_1","TI_v_sel_2","TI_v_sel_3","TI_w_sel_1","TI_w_sel_2","TI_w_sel_3")
 
     %% functions
     function target = fitnessFunction(params, external_params)
