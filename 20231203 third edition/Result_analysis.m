@@ -68,6 +68,15 @@ for i = 1:length(VIV_sels)
     plotdata_modelupdate(i).beta_deg_mean_UA3a = data_temp.beta_deg_mean_UA3a;
     plotdata_modelupdate(i).beta_deg_mean_UA3b = data_temp.beta_deg_mean_UA3b;
     plotdata_modelupdate(i).t_cycle_mean_temp = data_temp.t_cycle_mean_temp;
+    plotdata_modelupdate(i).TI_u_sel_1 = data_temp.TI_u_sel_1;
+    plotdata_modelupdate(i).TI_u_sel_2 = data_temp.TI_u_sel_2;
+    plotdata_modelupdate(i).TI_u_sel_3 = data_temp.TI_u_sel_3;
+    plotdata_modelupdate(i).TI_v_sel_1 = data_temp.TI_v_sel_1;
+    plotdata_modelupdate(i).TI_v_sel_2 = data_temp.TI_v_sel_2;
+    plotdata_modelupdate(i).TI_v_sel_3 = data_temp.TI_v_sel_3;
+    plotdata_modelupdate(i).TI_w_sel_1 = data_temp.TI_w_sel_1;
+    plotdata_modelupdate(i).TI_w_sel_2 = data_temp.TI_w_sel_2;
+    plotdata_modelupdate(i).TI_w_sel_3 = data_temp.TI_w_sel_3;
 
 end
 
@@ -105,6 +114,16 @@ for i = 1:length(VIV_sels)
     plotdata_nomodelupdate(i).beta_deg_mean_UA3a = data_temp.beta_deg_mean_UA3a;
     plotdata_nomodelupdate(i).beta_deg_mean_UA3b = data_temp.beta_deg_mean_UA3b;
     plotdata_nomodelupdate(i).t_cycle_mean_temp = data_temp.t_cycle_mean_temp;
+    plotdata_nomodelupdate(i).TI_u_sel_1 = data_temp.TI_u_sel_1;
+    plotdata_nomodelupdate(i).TI_u_sel_2 = data_temp.TI_u_sel_2;
+    plotdata_nomodelupdate(i).TI_u_sel_3 = data_temp.TI_u_sel_3;
+    plotdata_nomodelupdate(i).TI_v_sel_1 = data_temp.TI_v_sel_1;
+    plotdata_nomodelupdate(i).TI_v_sel_2 = data_temp.TI_v_sel_2;
+    plotdata_nomodelupdate(i).TI_v_sel_3 = data_temp.TI_v_sel_3;
+    plotdata_nomodelupdate(i).TI_w_sel_1 = data_temp.TI_w_sel_1;
+    plotdata_nomodelupdate(i).TI_w_sel_2 = data_temp.TI_w_sel_2;
+    plotdata_nomodelupdate(i).TI_w_sel_3 = data_temp.TI_w_sel_3;
+
 
 end
 
@@ -160,6 +179,15 @@ for i = 1:length(VIV_sels)
     plotdata_modelupdate_sel_excite(i).beta_deg_mean_UA3a = plotdata_modelupdate(i).beta_deg_mean_UA3a(loc_temp);
     plotdata_modelupdate_sel_excite(i).beta_deg_mean_UA3b = plotdata_modelupdate(i).beta_deg_mean_UA3b(loc_temp);
     plotdata_modelupdate_sel_excite(i).t_cycle_mean_temp  = plotdata_modelupdate(i).t_cycle_mean_temp(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_u_sel_1         = plotdata_modelupdate(i).TI_u_sel_1(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_u_sel_2         = plotdata_modelupdate(i).TI_u_sel_2(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_u_sel_3         = plotdata_modelupdate(i).TI_u_sel_3(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_v_sel_1         = plotdata_modelupdate(i).TI_v_sel_1(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_v_sel_2         = plotdata_modelupdate(i).TI_v_sel_2(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_v_sel_3         = plotdata_modelupdate(i).TI_v_sel_3(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_w_sel_1         = plotdata_modelupdate(i).TI_w_sel_1(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_w_sel_2         = plotdata_modelupdate(i).TI_w_sel_2(loc_temp);
+    plotdata_modelupdate_sel_excite(i).TI_w_sel_3         = plotdata_modelupdate(i).TI_w_sel_3(loc_temp);
 end
 
 for i = 1:length(VIV_sels)
@@ -183,6 +211,15 @@ for i = 1:length(VIV_sels)
     plotdata_nomodelupdate_sel_excite(i).beta_deg_mean_UA3a = plotdata_nomodelupdate(i).beta_deg_mean_UA3a(loc_temp);
     plotdata_nomodelupdate_sel_excite(i).beta_deg_mean_UA3b = plotdata_nomodelupdate(i).beta_deg_mean_UA3b(loc_temp);
     plotdata_nomodelupdate_sel_excite(i).t_cycle_mean_temp  = plotdata_nomodelupdate(i).t_cycle_mean_temp(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_u_sel_1         = plotdata_nomodelupdate(i).TI_u_sel_1(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_u_sel_2         = plotdata_nomodelupdate(i).TI_u_sel_2(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_u_sel_3         = plotdata_nomodelupdate(i).TI_u_sel_3(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_v_sel_1         = plotdata_nomodelupdate(i).TI_v_sel_1(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_v_sel_2         = plotdata_nomodelupdate(i).TI_v_sel_2(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_v_sel_3         = plotdata_nomodelupdate(i).TI_v_sel_3(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_w_sel_1         = plotdata_nomodelupdate(i).TI_w_sel_1(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_w_sel_2         = plotdata_nomodelupdate(i).TI_w_sel_2(loc_temp);
+    plotdata_nomodelupdate_sel_excite(i).TI_w_sel_3         = plotdata_nomodelupdate(i).TI_w_sel_3(loc_temp);
 end
 
 
@@ -207,6 +244,15 @@ for i = 1:length(VIV_sels)
     plotdata_modelupdate_sel_drop(i).beta_deg_mean_UA3a = plotdata_modelupdate(i).beta_deg_mean_UA3a(loc_temp);
     plotdata_modelupdate_sel_drop(i).beta_deg_mean_UA3b = plotdata_modelupdate(i).beta_deg_mean_UA3b(loc_temp);
     plotdata_modelupdate_sel_drop(i).t_cycle_mean_temp  = plotdata_modelupdate(i).t_cycle_mean_temp(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_u_sel_1         = plotdata_modelupdate(i).TI_u_sel_1(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_u_sel_2         = plotdata_modelupdate(i).TI_u_sel_2(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_u_sel_3         = plotdata_modelupdate(i).TI_u_sel_3(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_v_sel_1         = plotdata_modelupdate(i).TI_v_sel_1(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_v_sel_2         = plotdata_modelupdate(i).TI_v_sel_2(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_v_sel_3         = plotdata_modelupdate(i).TI_v_sel_3(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_w_sel_1         = plotdata_modelupdate(i).TI_w_sel_1(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_w_sel_2         = plotdata_modelupdate(i).TI_w_sel_2(loc_temp);
+    plotdata_modelupdate_sel_drop(i).TI_w_sel_3         = plotdata_modelupdate(i).TI_w_sel_3(loc_temp);
 end
 
 for i = 1:length(VIV_sels)
@@ -230,6 +276,15 @@ for i = 1:length(VIV_sels)
     plotdata_nomodelupdate_sel_drop(i).beta_deg_mean_UA3a = plotdata_nomodelupdate(i).beta_deg_mean_UA3a(loc_temp);
     plotdata_nomodelupdate_sel_drop(i).beta_deg_mean_UA3b = plotdata_nomodelupdate(i).beta_deg_mean_UA3b(loc_temp);
     plotdata_nomodelupdate_sel_drop(i).t_cycle_mean_temp  = plotdata_nomodelupdate(i).t_cycle_mean_temp(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_u_sel_1         = plotdata_nomodelupdate(i).TI_u_sel_1(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_u_sel_2         = plotdata_nomodelupdate(i).TI_u_sel_2(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_u_sel_3         = plotdata_nomodelupdate(i).TI_u_sel_3(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_v_sel_1         = plotdata_nomodelupdate(i).TI_v_sel_1(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_v_sel_2         = plotdata_nomodelupdate(i).TI_v_sel_2(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_v_sel_3         = plotdata_nomodelupdate(i).TI_v_sel_3(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_w_sel_1         = plotdata_nomodelupdate(i).TI_w_sel_1(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_w_sel_2         = plotdata_nomodelupdate(i).TI_w_sel_2(loc_temp);
+    plotdata_nomodelupdate_sel_drop(i).TI_w_sel_3         = plotdata_nomodelupdate(i).TI_w_sel_3(loc_temp);
 end
 
 %% newfigure %% different VIV case and AOA and use sensor 1 model updating select VIV exciting case
@@ -256,7 +311,7 @@ plotdata_sel = plotdata_modelupdate_sel_excite;
 for k1 = 1:length(plot_sel)
     x = plotdata_sel(plot_sel(k1)).amp_filter;
     y = plotdata_sel(plot_sel(k1)).U_sel_1;
-    z = plotdata_sel(plot_sel(k1)).beta_deg_mean_UA1a
+    z = plotdata_sel(plot_sel(k1)).TI_v_sel_1;
 
     plot_color = colors{1};
 
@@ -273,9 +328,9 @@ hold on
 
 plotdata_sel = plotdata_modelupdate_sel_drop;
 for k1 = 1:length(plot_sel)
-    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    x = plotdata_sel(plot_sel(k1)).amp_filter;cd
     y = plotdata_sel(plot_sel(k1)).U_sel_1;
-    z = plotdata_sel(plot_sel(k1)).beta_deg_mean_UA1a;
+    z = plotdata_sel(plot_sel(k1)).TI_v_sel_1;
     plot_color = colors{2};
     create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 
