@@ -288,7 +288,7 @@ for i = 1:length(VIV_sels)
 end
 
 %% newfigure %% different VIV case and AOA and use sensor 1 model updating select VIV exciting case
-total_plots = 1; % 或任何你需要的子图数量
+total_plots = 2; % 或任何你需要的子图数量
 current_plot = 1;
 num_figs_in_row = [];
 figWidthFactor = 1.5;
@@ -311,7 +311,8 @@ plotdata_sel = plotdata_modelupdate_sel_excite;
 for k1 = 1:length(plot_sel)
     x = plotdata_sel(plot_sel(k1)).amp_filter;
     y = plotdata_sel(plot_sel(k1)).U_sel_1;
-    z = plotdata_sel(plot_sel(k1)).TI_v_sel_1;
+    z = plotdata_sel(plot_sel(k1)).AoA_sel_1;
+    
 
     plot_color = colors{1};
 
@@ -330,7 +331,7 @@ plotdata_sel = plotdata_modelupdate_sel_drop;
 for k1 = 1:length(plot_sel)
     x = plotdata_sel(plot_sel(k1)).amp_filter;cd
     y = plotdata_sel(plot_sel(k1)).U_sel_1;
-    z = plotdata_sel(plot_sel(k1)).TI_v_sel_1;
+    z = plotdata_sel(plot_sel(k1)).AoA_sel_1;
     plot_color = colors{2};
     create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 
@@ -342,8 +343,44 @@ xlabel("amplitude")
 ylabel("wind speed")
 zlabel("AoA")
 title("amp.U.AoA")
+
 % 更新 current_plot
 current_plot = current_plot + 1;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+VIV_sel = VIV_sel;
+plot_sel = find(ismember(VIV_sels, VIV_sel));
+
+% 初始化图例标签数组
+% legend_labels = cell(1, length(categories) - 1);
+plotdata_sel = plotdata_modelupdate;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).AoA_sel_1;
+    c = plotdata_sel(plot_sel(k1)).zeta_filter;
+    c(c>0)=0;
+    c(c<-0.6/100)=-0.6/100
+    % c =log_data(c)
+    plot_color = colors{1};
+
+    % 绘制散点图并为每个类别添加图例
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], c}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+
+    hold on;
+
+
+end
+
+current_plot = current_plot + 1;
+colorbar
+xlabel("amplitude")
+ylabel("wind speed")
+zlabel("AoA")
+title("amp.U.AoA")
 
 return
 %% newfigure %% different VIV case and AOA and use sensor 1 model updating select VIV exciting case
@@ -358,8 +395,8 @@ firstfigure = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VIV_sel  = [4,9,11];%不同风向的涡振130
 % VIV_sel  = [5,6,12,16];%不同风向的涡振315
-% VIV_sel  = [2,3,4,9,11];%不同风向的涡振
-VIV_sel  = [5,6,7,8,10,12,16,17,18,19,22];%不同风向的涡振
+VIV_sel  = [2,3,4,9,11];%不同风向的涡振
+% VIV_sel  = [5,6,7,8,10,12,16,17,18,19,22];%不同风向的涡振
 VIV_sel  = VIV_sel;
 plot_sel = find(ismember(VIV_sels, VIV_sel));
 plotdata_sel = plotdata_modelupdate;
