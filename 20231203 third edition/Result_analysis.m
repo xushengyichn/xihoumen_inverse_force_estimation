@@ -124,7 +124,7 @@ for k1 = 1:length(plotdata_nomodelupdate)
     zeta_VIV_mode_nomodelupdate(k1,:) = zeta_temp(VIV_mode_seq);
 end
 
-% create table 
+% create table
 zeta_compare = table(VIV_sels,zeta_VIV_mode_modelupdate,zeta_VIV_mode_nomodelupdate,'VariableNames',{'VIV_sel','zeta_VIV_mode_modelupdate','zeta_VIV_mode_nomodelupdate'});
 % disp(zeta_compare)
 %% print amplitude information
@@ -132,7 +132,7 @@ for k1 =1:length(plotdata_modelupdate)
     amp_temp =  plotdata_modelupdate(k1).amp_filter;
     amp_rms(k1,1) = rms(amp_temp);
 end
-    amp_rms_table = table(VIV_sels,amp_rms);
+amp_rms_table = table(VIV_sels,amp_rms);
 % disp(amp_rms_table)
 table_all  = table(VIV_sels,zeta_VIV_mode_modelupdate,zeta_VIV_mode_nomodelupdate,amp_rms,'VariableNames',{'VIV_sel','zeta_VIV_mode_modelupdate','zeta_VIV_mode_nomodelupdate','amp_rms'});
 disp(table_all)
@@ -152,7 +152,7 @@ for i = 1:length(VIV_sels)
     plotdata_modelupdate_sel_excite(i).U_sel_2            = plotdata_modelupdate(i).U_sel_2(loc_temp);
     plotdata_modelupdate_sel_excite(i).U_sel_3            = plotdata_modelupdate(i).U_sel_3(loc_temp);
     plotdata_modelupdate_sel_excite(i).zeta_structure     = plotdata_modelupdate(i).zeta_structure;
-    plotdata_modelupdate_sel_excite(i).VIV_mode_seq       = plotdata_modelupdate(i).VIV_mode_seq; 
+    plotdata_modelupdate_sel_excite(i).VIV_mode_seq       = plotdata_modelupdate(i).VIV_mode_seq;
     plotdata_modelupdate_sel_excite(i).beta_deg_mean_UA1a = plotdata_modelupdate(i).beta_deg_mean_UA1a(loc_temp);
     plotdata_modelupdate_sel_excite(i).beta_deg_mean_UA1b = plotdata_modelupdate(i).beta_deg_mean_UA1b(loc_temp);
     plotdata_modelupdate_sel_excite(i).beta_deg_mean_UA2a = plotdata_modelupdate(i).beta_deg_mean_UA2a(loc_temp);
@@ -175,7 +175,7 @@ for i = 1:length(VIV_sels)
     plotdata_nomodelupdate_sel_excite(i).U_sel_2            = plotdata_nomodelupdate(i).U_sel_2(loc_temp);
     plotdata_nomodelupdate_sel_excite(i).U_sel_3            = plotdata_nomodelupdate(i).U_sel_3(loc_temp);
     plotdata_nomodelupdate_sel_excite(i).zeta_structure     = plotdata_nomodelupdate(i).zeta_structure;
-    plotdata_nomodelupdate_sel_excite(i).VIV_mode_seq       = plotdata_nomodelupdate(i).VIV_mode_seq; 
+    plotdata_nomodelupdate_sel_excite(i).VIV_mode_seq       = plotdata_nomodelupdate(i).VIV_mode_seq;
     plotdata_nomodelupdate_sel_excite(i).beta_deg_mean_UA1a = plotdata_nomodelupdate(i).beta_deg_mean_UA1a(loc_temp);
     plotdata_nomodelupdate_sel_excite(i).beta_deg_mean_UA1b = plotdata_nomodelupdate(i).beta_deg_mean_UA1b(loc_temp);
     plotdata_nomodelupdate_sel_excite(i).beta_deg_mean_UA2a = plotdata_nomodelupdate(i).beta_deg_mean_UA2a(loc_temp);
@@ -199,7 +199,7 @@ for i = 1:length(VIV_sels)
     plotdata_modelupdate_sel_drop(i).U_sel_2            = plotdata_modelupdate(i).U_sel_2(loc_temp);
     plotdata_modelupdate_sel_drop(i).U_sel_3            = plotdata_modelupdate(i).U_sel_3(loc_temp);
     plotdata_modelupdate_sel_drop(i).zeta_structure     = plotdata_modelupdate(i).zeta_structure;
-    plotdata_modelupdate_sel_drop(i).VIV_mode_seq       = plotdata_modelupdate(i).VIV_mode_seq; 
+    plotdata_modelupdate_sel_drop(i).VIV_mode_seq       = plotdata_modelupdate(i).VIV_mode_seq;
     plotdata_modelupdate_sel_drop(i).beta_deg_mean_UA1a = plotdata_modelupdate(i).beta_deg_mean_UA1a(loc_temp);
     plotdata_modelupdate_sel_drop(i).beta_deg_mean_UA1b = plotdata_modelupdate(i).beta_deg_mean_UA1b(loc_temp);
     plotdata_modelupdate_sel_drop(i).beta_deg_mean_UA2a = plotdata_modelupdate(i).beta_deg_mean_UA2a(loc_temp);
@@ -222,7 +222,7 @@ for i = 1:length(VIV_sels)
     plotdata_nomodelupdate_sel_drop(i).U_sel_2            = plotdata_nomodelupdate(i).U_sel_2(loc_temp);
     plotdata_nomodelupdate_sel_drop(i).U_sel_3            = plotdata_nomodelupdate(i).U_sel_3(loc_temp);
     plotdata_nomodelupdate_sel_drop(i).zeta_structure     = plotdata_nomodelupdate(i).zeta_structure;
-    plotdata_nomodelupdate_sel_drop(i).VIV_mode_seq       = plotdata_nomodelupdate(i).VIV_mode_seq; 
+    plotdata_nomodelupdate_sel_drop(i).VIV_mode_seq       = plotdata_nomodelupdate(i).VIV_mode_seq;
     plotdata_nomodelupdate_sel_drop(i).beta_deg_mean_UA1a = plotdata_nomodelupdate(i).beta_deg_mean_UA1a(loc_temp);
     plotdata_nomodelupdate_sel_drop(i).beta_deg_mean_UA1b = plotdata_nomodelupdate(i).beta_deg_mean_UA1b(loc_temp);
     plotdata_nomodelupdate_sel_drop(i).beta_deg_mean_UA2a = plotdata_nomodelupdate(i).beta_deg_mean_UA2a(loc_temp);
@@ -231,6 +231,181 @@ for i = 1:length(VIV_sels)
     plotdata_nomodelupdate_sel_drop(i).beta_deg_mean_UA3b = plotdata_nomodelupdate(i).beta_deg_mean_UA3b(loc_temp);
     plotdata_nomodelupdate_sel_drop(i).t_cycle_mean_temp  = plotdata_nomodelupdate(i).t_cycle_mean_temp(loc_temp);
 end
+
+
+%% newfigure %% different VIV case and AOA and use sensor 1 model updating select VIV exciting case
+total_plots = 5; % 或任何你需要的子图数量
+current_plot = 1;
+num_figs_in_row = [];
+figWidthFactor = 1.5;
+figPosition = [100, 100];
+newfigure = true;
+holdon = false;
+firstfigure = true;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% VIV_sel  = [4,9,11];%不同风向的涡振130
+% VIV_sel  = [5,6,12,16];%不同风向的涡振315
+% VIV_sel  = [2,3,4,9,11];%不同风向的涡振
+VIV_sel  = [5,6,7,8,10,12,16,17,18,19,22];%不同风向的涡振
+VIV_sel  = VIV_sel;
+plot_sel = find(ismember(VIV_sels, VIV_sel));
+plotdata_sel = plotdata_modelupdate;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).zeta_filter;
+    color_points = colors{k1};
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z,[],color_points}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    hold on
+end
+zlim([-0.01 0])
+current_plot = current_plot + 1;
+xlabel("amplitude")
+ylabel("wind speed")
+zlabel("damping ratio")
+title("different VIV cases (model updating)")
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+VIV_sel = VIV_sel;
+plot_sel = find(ismember(VIV_sels, VIV_sel));
+
+% 初始化图例标签数组
+% legend_labels = cell(1, length(categories) - 1);
+plotdata_sel = plotdata_modelupdate;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).zeta_filter;
+    color_points = plotdata_sel(plot_sel(k1)).AoA_sel_1;
+
+    % 分类 color_points
+    categories = -6:1:10;
+    [~, ~, categorized_color_points] = histcounts(color_points, categories);
+
+    for k2 = 1:length(categories) - 1
+        % 选择当前类别的数据点
+        idx = categorized_color_points == k2;
+        x_cat = x(idx);
+        y_cat = y(idx);
+        z_cat = z(idx);
+
+        % 选择颜色
+        color_index = mod(k2, length(colors)) + 1;
+        plot_color = colors{color_index};
+
+        % 绘制散点图并为每个类别添加图例
+        create_subplot(@scatter3, total_plots, current_plot, {x_cat, y_cat, z_cat, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+
+        hold on;
+
+        % 更新图例标签
+        legend_labels{k2} = ['AOA ' num2str(categories(k2))];
+    end
+end
+
+% 添加图例
+legend(legend_labels);
+zlim([-0.01 0])
+xlabel("amplitude")
+ylabel("wind speed")
+zlabel("damping ratio")
+title("different AOA cases (model updating)")
+% 更新 current_plot
+current_plot = current_plot + 1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+VIV_sel = VIV_sel;
+plot_sel = find(ismember(VIV_sels, VIV_sel));
+
+% 初始化图例标签数组
+% legend_labels = cell(1, length(categories) - 1);
+plotdata_sel = plotdata_modelupdate_sel_excite;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).zeta_filter;
+        plot_color = colors{1};
+
+    % 绘制散点图并为每个类别添加图例
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+
+    hold on;
+end
+
+hold on
+
+plotdata_sel = plotdata_modelupdate_sel_drop;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).zeta_filter;
+       plot_color = colors{2};
+
+    % 绘制散点图并为每个类别添加图例
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+
+    hold on;
+end
+% 添加图例
+% legend(legend_labels);
+zlim([-0.01 0])
+xlabel("amplitude")
+ylabel("wind speed")
+zlabel("damping ratio")
+title("excite vs drop")
+% 更新 current_plot
+current_plot = current_plot + 1;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+VIV_sel = VIV_sel;
+plot_sel = find(ismember(VIV_sels, VIV_sel));
+
+% 初始化图例标签数组
+% legend_labels = cell(1, length(categories) - 1);
+plotdata_sel = plotdata_modelupdate_sel_excite;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).AoA_sel_1;
+
+    plot_color = colors{1};
+
+    % 绘制散点图并为每个类别添加图例
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+
+    hold on;
+
+
+end
+
+hold on
+
+plotdata_sel = plotdata_modelupdate_sel_drop;
+for k1 = 1:length(plot_sel)
+    x = plotdata_sel(plot_sel(k1)).amp_filter;
+    y = plotdata_sel(plot_sel(k1)).U_sel_1;
+    z = plotdata_sel(plot_sel(k1)).AoA_sel_1;
+    plot_color = colors{2};
+    create_subplot(@scatter3, total_plots, current_plot, {x, y, z, [], plot_color}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+
+end
+% 添加图例
+% legend(legend_labels);
+% zlim([-0.01 0])
+xlabel("amplitude")
+ylabel("wind speed")
+zlabel("AoA")
+title("amp.U.AoA")
+% 更新 current_plot
+current_plot = current_plot + 1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %% 初始化图形参数
 total_plots = 16; % 或任何你需要的子图数量
@@ -247,25 +422,25 @@ VIV_sel  =  [2,3,4,5,6,7,8,9,10,11,12,16,17,18,19,22];
 plot_sel = find(ismember(VIV_sels, VIV_sel));
 plotdata_sel = plotdata_modelupdate;
 for k1 = 1:length(plot_sel)
-x = plotdata_sel(k1).t_cycle_mean_temp;
-y = plotdata_sel(k1).beta_deg_mean_UA1a;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-hold on
-y = plotdata_sel(k1).beta_deg_mean_UA1b;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-y = plotdata_sel(k1).beta_deg_mean_UA2a;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-y = plotdata_sel(k1).beta_deg_mean_UA2b;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', false);firstfigure = false;
-y = plotdata_sel(k1).beta_deg_mean_UA3a;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', false);firstfigure = false;
-y = plotdata_sel(k1).beta_deg_mean_UA3b;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', false);firstfigure = false;
-xlabel('Time')
-ylabel('Wind direction (deg)')
-legend('UA1a','UA1b','UA2a','UA2b','UA3a','UA3b')
-current_plot = current_plot + 1;
-title("VIV_sel:"+num2str(VIV_sel(k1)))
+    x = plotdata_sel(k1).t_cycle_mean_temp;
+    y = plotdata_sel(k1).beta_deg_mean_UA1a;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    hold on
+    y = plotdata_sel(k1).beta_deg_mean_UA1b;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    y = plotdata_sel(k1).beta_deg_mean_UA2a;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    y = plotdata_sel(k1).beta_deg_mean_UA2b;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', false);firstfigure = false;
+    y = plotdata_sel(k1).beta_deg_mean_UA3a;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', false);firstfigure = false;
+    y = plotdata_sel(k1).beta_deg_mean_UA3b;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', false);firstfigure = false;
+    xlabel('Time')
+    ylabel('Wind direction (deg)')
+    legend('UA1a','UA1b','UA2a','UA2b','UA3a','UA3b')
+    current_plot = current_plot + 1;
+    title("VIV_sel:"+num2str(VIV_sel(k1)))
 end
 
 %% 初始化图形参数
@@ -283,20 +458,20 @@ firstfigure = true;
 plotdata_sel = plotdata_modelupdate;
 plot_sel = find(ismember(VIV_sels, VIV_sel));
 for k1 = 1:length(plot_sel)
-x = plotdata_sel(k1).t_cycle_mean_temp;
-y = plotdata_sel(k1).U_sel_1;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-hold on
-y = plotdata_sel(k1).U_sel_2;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-y = plotdata_sel(k1).U_sel_3;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    x = plotdata_sel(k1).t_cycle_mean_temp;
+    y = plotdata_sel(k1).U_sel_1;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    hold on
+    y = plotdata_sel(k1).U_sel_2;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    y = plotdata_sel(k1).U_sel_3;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 
-xlabel('Time')
-ylabel('Wind speed location (m/s)')
-legend('location 1','location 2','location 3')
-title("VIV_sel:"+num2str(VIV_sel(k1)))
-current_plot = current_plot + 1;
+    xlabel('Time')
+    ylabel('Wind speed location (m/s)')
+    legend('location 1','location 2','location 3')
+    title("VIV_sel:"+num2str(VIV_sel(k1)))
+    current_plot = current_plot + 1;
 end
 %% 初始化图形参数
 total_plots = 16; % 或任何你需要的子图数量
@@ -312,23 +487,23 @@ firstfigure = true;
 
 plotdata_sel = plotdata_modelupdate;
 for k1 = 1:length(plot_sel)
-plot_sel = find(ismember(VIV_sels, VIV_sel));
+    plot_sel = find(ismember(VIV_sels, VIV_sel));
 
-x = plotdata_sel(k1).t_cycle_mean_temp;
-y = plotdata_sel(k1).AoA_sel_1;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-hold on
-y = plotdata_sel(k1).AoA_sel_2;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-y = plotdata_sel(k1).AoA_sel_3;
-create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    x = plotdata_sel(k1).t_cycle_mean_temp;
+    y = plotdata_sel(k1).AoA_sel_1;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    hold on
+    y = plotdata_sel(k1).AoA_sel_2;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+    y = plotdata_sel(k1).AoA_sel_3;
+    create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 
-xlabel('Time')
-ylabel('AOA (m/s)')
-legend('location 1','location 2','location 3')
-title("VIV_sel:"+num2str(VIV_sel(k1)))
-ylim([-4,4])
-current_plot = current_plot + 1;
+    xlabel('Time')
+    ylabel('AOA (m/s)')
+    legend('location 1','location 2','location 3')
+    title("VIV_sel:"+num2str(VIV_sel(k1)))
+    ylim([-4,4])
+    current_plot = current_plot + 1;
 end
 
 
@@ -372,7 +547,7 @@ for k1 = 1:length(plot_sel)
     create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
     hold on
     ylim([-0.01,0.1/100])
-    
+
 end
 xlabel("amplitude")
 ylabel("damping ratio")
@@ -389,7 +564,7 @@ for k1 = 1:length(plot_sel)
     create_subplot(@scatter, total_plots, current_plot, {x, y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
     hold on
     ylim([-0.01,0.1/100])
-    
+
 end
 
 xlabel("amplitude")
@@ -976,16 +1151,16 @@ current_plot = current_plot + 1;
 % [Acc_Data] = read_acceleration_data(start_time, end_time, input_data.acc_dir);
 % [Wind_Data] = read_wind_data(start_time, end_time, input_data.wind_dir);
 % Acc_Data = Acc_Data.mergedData;
-% 
+%
 % t_acc = Acc_Data.Time;
 % AC2_1 = Acc_Data.AC2_1;
 % AC2_3 = Acc_Data.AC2_3;
 % AC3_1 = Acc_Data.AC3_1;
 % AC3_3 = Acc_Data.AC3_3;
 % AC4_1 = Acc_Data.AC4_1;
-% AC4_3 = Acc_Data.AC4_3; 
-% 
-% 
+% AC4_3 = Acc_Data.AC4_3;
+%
+%
 % create_subplot(@plot, total_plots, current_plot, {t_acc, AC2_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 % hold on
 % create_subplot(@plot, total_plots, current_plot, {t_acc, AC2_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
@@ -994,7 +1169,7 @@ current_plot = current_plot + 1;
 % create_subplot(@plot, total_plots, current_plot, {t_acc, AC4_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 % create_subplot(@plot, total_plots, current_plot, {t_acc, AC4_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 % current_plot=current_plot+1;
-% 
+%
 % t_wind = Wind_Data.resultsTable_UA1.Time_Start;
 % u1 = Wind_Data.resultsTable_UA1.U;
 % u2 = Wind_Data.resultsTable_UA2.U;
@@ -1002,8 +1177,8 @@ current_plot = current_plot + 1;
 % u4 = Wind_Data.resultsTable_UA4.U;
 % u5 = Wind_Data.resultsTable_UA5.U;
 % u6 = Wind_Data.resultsTable_UA6.U;
-% 
-% 
+%
+%
 % create_subplot(@plot, total_plots, current_plot, {t_wind, u1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 % hold on
 % create_subplot(@plot, total_plots, current_plot, {t_wind, u2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
@@ -1011,6 +1186,6 @@ current_plot = current_plot + 1;
 % create_subplot(@plot, total_plots, current_plot, {t_wind, u4}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 % create_subplot(@plot, total_plots, current_plot, {t_wind, u5}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
 % create_subplot(@plot, total_plots, current_plot, {t_wind, u6}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
-% 
+%
 
 

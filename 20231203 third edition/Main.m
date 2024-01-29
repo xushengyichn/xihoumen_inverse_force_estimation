@@ -103,7 +103,7 @@ showplot = false;
 
 
 %% plot logL with changing parameters
-if 1
+if 0
 
     lambda_VIVs = logspace(-10,-1,20);
     % sigma_p_VIVs = linspace(1e1,1e5,10);

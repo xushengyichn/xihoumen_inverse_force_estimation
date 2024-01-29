@@ -221,6 +221,7 @@ MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
 zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
+zeta = importdata("zeta_viv4.mat");
 %% modal updating
 if input.modelupdate
     opts = detectImportOptions('vivData.csv');
@@ -269,7 +270,7 @@ if input.modelupdate
         replece_idx = find(abs(Freq - idx_ModalFEM_temp)<1e-6);
         if ~isempty(replece_idx)
             Freq(replece_idx) = Modal_updating_data.frequency(k1);
-            zeta(replece_idx) = Modal_updating_data.damping_ratio(k1);
+            % zeta(replece_idx) = Modal_updating_data.damping_ratio(k1);
             KK_eq(replece_idx,replece_idx) = MM_eq(replece_idx,replece_idx) * (2 * pi * Freq(replece_idx))^2;
             
             
