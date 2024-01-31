@@ -81,7 +81,7 @@ input_data.sigma_noise = 10 ^ (-1.3);
 
 %% logL优化参数
 modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 32];
-moderemove = [4,9];
+moderemove = [4,9,10];
 modeall(moderemove)=[];
 modesel = modeall;
 if ~exist("modelupdate",'var')
