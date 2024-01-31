@@ -34,6 +34,8 @@ for k1 =  3
     dirName = input_data.wind_dir_all;
     start_time = vivTable.startDate(k1);
     end_time = vivTable.endDate(k1);
+    % start_time = datetime(2013,4,2,0,40,0);
+    % end_time = datetime(2013,4,3,23,10,0);
     % start_time_update = vivTable.update_startDate(k1);
     % end_time_update = vivTable.endDate_update(k1);
     start_time.Format = 'dd-MMM-yyyy HH:mm:ss';
@@ -85,11 +87,11 @@ firstfigure = true;
 if fig_bool
  create_subplot(@plot, total_plots, current_plot, {t_wind,u1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  hold on
- % create_subplot(@plot, total_plots, current_plot, {t_wind,u2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,u3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,u4}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,u5}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,u6}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,u2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,u3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,u4}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,u5}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,u6}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  title("U")
  current_plot = current_plot+1;
  legend

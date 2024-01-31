@@ -221,7 +221,7 @@ MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
 zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
-zeta = importdata("zeta_viv4.mat");
+zeta = importdata("zeta_update.mat");
 %% modal updating
 if input.modelupdate
     opts = detectImportOptions('vivData.csv');
