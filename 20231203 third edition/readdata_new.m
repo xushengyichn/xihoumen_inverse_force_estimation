@@ -28,7 +28,7 @@ vivTable = readtable('vivData.csv',opts);
 %% Readdata
 VIV_sels = [2;3;4;5;6;7;8;9;10;12;16;17;18;19];
 % for k1 = 2
-for k1 =  3
+for k1 =  5
     acc_dir = input_data.acc_dir;
     wind_dir = input_data.wind_dir;
     dirName = input_data.wind_dir_all;
@@ -98,11 +98,11 @@ if fig_bool
 
  create_subplot(@plot, total_plots, current_plot, {t_wind,aoa1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  hold on
- % create_subplot(@plot, total_plots, current_plot, {t_wind,aoa2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,aoa3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,aoa4}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,aoa5}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {t_wind,aoa6}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,aoa2}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,aoa3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,aoa4}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,aoa5}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {t_wind,aoa6}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  title("AOA")
  current_plot = current_plot+1;
  legend
@@ -110,33 +110,33 @@ if fig_bool
 
   create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA1_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  hold on
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA2_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA3_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA4_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA5_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA6_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA2_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA3_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA4_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA5_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA6_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  title("z")
  current_plot = current_plot+1;
  legend
 
    create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA1_x}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  hold on
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA2_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA3_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA4_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA5_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA6_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA2_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA3_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA4_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA5_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA6_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  title("x")
  current_plot = current_plot+1;
  legend
 
     create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA1_y}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  hold on
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA2_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA3_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA4_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA5_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
- % create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA6_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA2_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA3_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA4_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA5_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
+ create_subplot(@plot, total_plots, current_plot, {Wind_Data_all.Time,Wind_Data_all.UA6_z}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', firstfigure, 'holdon', holdon);firstfigure = false;
  title("y")
  current_plot = current_plot+1;
  legend

@@ -4,12 +4,12 @@ function [result] = read_wind_data_onetime(timestamps,duration,dirName,sensors)
         clc;clear;close all;
         disp('Running tests...');
         run("CommonCommand.m")
-        timestamp1 = datetime('2013-03-01 00:01:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-        timestamp2 = datetime('2013-03-01 00:02:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+        timestamp1 = datetime('2013-03-06 18:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+        timestamp2 = datetime('2013-03-06 20:00:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
         timestamps = [timestamp1 ;timestamp2];
         duration = minutes(10);
         dirName = 'F:\test\result_wind\';
-        sensors = [0 0 0 0 1 1];% 0 代表不导出，1 代表导出 分别对应 UA1 UA2 UA3 UA4 UA5 UA6
+        sensors = [1 1 1 1 1 1];% 0 代表不导出，1 代表导出 分别对应 UA1 UA2 UA3 UA4 UA5 UA6
         [result] = read_wind_data_onetime(timestamps,duration,dirName,sensors);
         disp('Tests completed.');
         return;
