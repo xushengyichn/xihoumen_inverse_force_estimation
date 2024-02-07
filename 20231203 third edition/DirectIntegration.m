@@ -49,8 +49,8 @@ phi = mode_vec; %模态向量 每一列是一个模态
 nodegap = Result.nodegap;
 
 
-load("Modal_updating_04_Feb_2013_23_15_00_04_Feb_2013_23_45_00.mat")
-VIV_seq = 5;
+load("Modal_updating_02_04_2013_23_15_00_02_04_2013_23_45_00.mat")
+VIV_seq = 7;
 xi = table_fre.damping_ratio(VIV_seq);
 Omega = 2 * pi * table_fre.frequency(VIV_seq);
 
