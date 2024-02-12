@@ -19,9 +19,10 @@ opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 vivTable = readtable('vivData.csv',opts);
 
 %% load acceleration and wind data
-VIV_sel = 6;
+VIV_sel = 11;
 start_time = vivTable.startDate_update(VIV_sel);
 end_time = vivTable.endDate_update(VIV_sel);
+disp(vivTable.startDate(VIV_sel))
 % start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
 % end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
 % start_time = result.startDate;
