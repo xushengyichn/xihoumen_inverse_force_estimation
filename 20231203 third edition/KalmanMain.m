@@ -473,6 +473,28 @@ p_filt_m = H_d_m * xa_history(ns + 1:end, :);
 
 Pp_filt_m = H_d_m * pa_history(ns + 1:end,ns + 1:end)*H_d_m';
 % [f, magnitude] = fft_transform(fs, x_k_k(1, :));
+
+
+%% test if discrete the equation before augment it has the same results.
+if 0
+    Ac = A_c;
+    Bc = B_c_m;
+    Hc = H_c_m;
+    Fc = F_c_m;
+
+    Fa_c = [Ac,Bc*Hc;zeros(size(Fc,1),size(Ac,2)),Fc];
+
+    [Fa_d,~,~,~]=ssmod_c2d(Fa_c,[],[],[],dt);
+    
+    [Ad,Bd,~,~,~]=ssmod_c2d(Ac,Bc,[],[],dt);
+    Hd=Hc;
+    [Fd,~,~,~]=ssmod_c2d(Fc,[],[],[],dt);
+
+    Fa_d_2=[Ad,Bd*Hd;zeros(size(Fd,1),size(Ad,2)),Fd];
+    test=Fa_d_2-Fa_d;
+
+end
+
 %% 5 fft and bandpass filter for the estimated modal force
 for k1 = 1:length(VIV_mode_seq)
     if shouldFilterp_filt_m == true
