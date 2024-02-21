@@ -15,7 +15,7 @@ opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 vivTable = readtable('viv_in _the_paper.csv',opts);
 
 %% load acceleration and wind data
-VIV_sel = 2;
+VIV_sel = 11;
 start_time = vivTable.startDate_update(VIV_sel);
 end_time = vivTable.endDate_update(VIV_sel);
 % start_time = vivTable.startDate(VIV_sel);
@@ -68,15 +68,24 @@ T_new = T_original(1):seconds(1/fs):T_original(end);
 T_new = 1:1:length(AC2_1);
 
 
-% figure
-% plot(T_new,AC2_1)
-% hold on
-% plot(T_new,AC2_3)
-% plot(T_new,AC3_1)
-% plot(T_new,AC3_3)
-% plot(T_new,AC4_1)
-% plot(T_new,AC4_3)
-% legend('AC2_1','AC2_3','AC3_1','AC3_3','AC4_1','AC4_3')
+figure
+scatter(UA1.Time_Start,UA1.U)
+hold on
+scatter(UA2.Time_Start,UA2.U)
+scatter(UA3.Time_Start,UA3.U)
+scatter(UA4.Time_Start,UA4.U)
+scatter(UA5.Time_Start,UA5.U)
+scatter(UA6.Time_Start,UA6.U)
+
+figure
+plot(T_new,AC2_1)
+hold on
+plot(T_new,AC2_3)
+plot(T_new,AC3_1)
+plot(T_new,AC3_3)
+plot(T_new,AC4_1)
+plot(T_new,AC4_3)
+legend('AC2_1','AC2_3','AC3_1','AC3_3','AC4_1','AC4_3')
 
 %% selection of the sensors' data
 sensor_selection= string(vivTable.sensor_selection(VIV_sel));
@@ -404,7 +413,7 @@ if 1
             
             seq_in_table =find(table_fre.idx_Fre_FEM==FEM_freq);
             
-            MAC_value(seq_in_table) = calculate_MAC(phi_sensor_loc, phi_sel);
+            MAC_value(seq_in_table,1) = calculate_MAC(phi_sensor_loc, phi_sel);
 
             disp("Mode shape of FEM mode "+FEM_mode_sel+" : " + ...
                 "Frequency = "+table_fre.frequency(seq_in_table)+" Hz, " + ...
