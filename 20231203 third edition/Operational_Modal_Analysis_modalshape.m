@@ -3,7 +3,7 @@ run('CommonCommand.m');
 
 %% Read viv Data
 % 创建导入选项对象
-opts = detectImportOptions('vivData.csv');
+opts = detectImportOptions('viv_in _the_paper.csv');
 
 % 设置日期时间格式
 % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
@@ -12,12 +12,14 @@ opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 
-vivTable = readtable('vivData.csv',opts);
+vivTable = readtable('viv_in _the_paper.csv',opts);
 
 %% load acceleration and wind data
-VIV_sel = 11;
+VIV_sel = 2;
 start_time = vivTable.startDate_update(VIV_sel);
 end_time = vivTable.endDate_update(VIV_sel);
+% start_time = vivTable.startDate(VIV_sel);
+% end_time = vivTable.endDate(VIV_sel);
 disp(vivTable.startDate(VIV_sel))
 % start_time = datetime('2013-02-04 23:15:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
 % end_time = datetime('2013-02-04 23:45:00', 'InputFormat', 'yyyy-MM-dd HH:mm:ss'); % Example time range
@@ -63,13 +65,49 @@ AC3_3 = resample(AC3_3,P,Q);
 AC4_1 = resample(AC4_1,P,Q);
 AC4_3 = resample(AC4_3,P,Q);
 T_new = T_original(1):seconds(1/fs):T_original(end);
+T_new = 1:1:length(AC2_1);
 
 
-y = [AC2_1;AC2_3;AC3_1;AC3_3;AC4_1;AC4_3];
+% figure
+% plot(T_new,AC2_1)
+% hold on
+% plot(T_new,AC2_3)
+% plot(T_new,AC3_1)
+% plot(T_new,AC3_3)
+% plot(T_new,AC4_1)
+% plot(T_new,AC4_3)
+% legend('AC2_1','AC2_3','AC3_1','AC3_3','AC4_1','AC4_3')
+
+%% selection of the sensors' data
+sensor_selection= string(vivTable.sensor_selection(VIV_sel));
+sensor_selection = strsplit(sensor_selection, ';'); % 以分号为分隔符分割字符串
+sensor_selection = str2double(sensor_selection); % 将字符串数组转换为double数组
+
+% 检查1和2是否在数组中
+contains1 = ismember(1, sensor_selection);
+contains2 = ismember(2, sensor_selection);
+AC2 = sel_sensor(AC2_1,AC2_3,contains1,contains2);
+
+contains1 = ismember(3, sensor_selection);
+contains2 = ismember(4, sensor_selection);
+AC3 = sel_sensor(AC3_1,AC3_3,contains1,contains2);
+
+contains1 = ismember(5, sensor_selection);
+contains2 = ismember(6, sensor_selection);
+AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
+
+y = [AC2;AC3;AC4];
+
+figure
+plot(T_new,AC2)
+hold on
+plot(T_new,AC3)
+plot(T_new,AC4)
+legend('AC2','AC3','AC4')
 
 %% SSI
 
-y_ref =y([2 3],:);
+y_ref =y([1,2,3],:);
 fs = fs;
 blockrows = 100
 nb = 20
@@ -191,12 +229,12 @@ for k1 = 1:k_value
     mean_xi(k1,1) = mean(list_xi{k1});
 end
 
-% create a table | sequence | frequency | damping ratio |
-table_fre = table();
-table_fre.sequence = (1:k_value)';
-table_fre.frequency = mean_fre;
-table_fre.damping_ratio = mean_xi;
-table_fre.omega = mean_fre*2*pi;
+% % create a table | sequence | frequency | damping ratio |
+% table_fre = table();
+% table_fre.sequence = (1:k_value)';
+% table_fre.frequency = mean_fre;
+% table_fre.damping_ratio = mean_xi;
+% table_fre.omega = mean_fre*2*pi;
 
 %% calculate the error of the modes
 fre_error=[];
@@ -219,7 +257,7 @@ end
 
 %% modal updating
 
-modesel = [2, 3, 5, 6, 7, 13, 20, 22, 27, 32];
+modesel = [2, 3, 5, 7, 13, 20, 22];
 nmodes = length(modesel);
 Result = ImportMK(nmodes, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt', 'modesel', modesel,'showtext',true);
 Fre_FEM = Result.Freq;
@@ -229,33 +267,84 @@ table_FEM = table();
 table_FEM.sequence = (1:length(Fre_FEM))';
 table_FEM.frequency = Fre_FEM;
 
+%% collect data
+frequency=[];
+frequency_sigma =[];
+damping_ratio= [];
+damping_ratio_sigma= [];
+omega=[];
+idx_ModalFEM=[];
+MPC = [];
+MPCW = [];
+for k1 = 1:length(modesel)
+    columnName = sprintf('mode%d_SSI', k1); % 动态生成列名
+    columnName_seq = sprintf('mode%d_seq', k1); % 动态生成列名
+    if or(vivTable.(columnName)(VIV_sel)==0,isnan(vivTable.(columnName)(VIV_sel)))
+        continue
+    else
+        order_sel = vivTable.(columnName)(VIV_sel);
+        mode_sel = vivTable.(columnName_seq)(VIV_sel);
+        idx_ModalFEM = [idx_ModalFEM;Fre_FEM(k1)];
+        % frequency
+        temp_list = w_array{order_sel};
+        temp = temp_list(mode_sel);
+        frequency_temp = temp/2/pi;
+        frequency = [frequency;frequency_temp];
+        omega=[omega;temp]
+
+        % frequency covariance
+        temp_list = cov_omega{order_sel};
+        temp = temp_list(mode_sel);
+        temp = sqrt(temp);
+        frequency_sigma_temp = temp/2/pi;
+        frequency_sigma = [frequency_sigma;frequency_sigma_temp];
+
+        % damping ratio
+        temp_list = xi_array{order_sel};
+        temp = temp_list(mode_sel);
+        xi_temp = temp;
+        damping_ratio = [damping_ratio;xi_temp];
+
+        % damping ratio covariance
+        temp_list = cov_xi{order_sel};
+        temp = temp_list(mode_sel);
+        temp = sqrt(temp);
+        xi_sigma_temp = temp;
+        damping_ratio_sigma = [damping_ratio_sigma;xi_sigma_temp];    
+
+        % MPCW,MPC
+         [MPCW_temp,~,~,MPC_temp]=rotate_modes(phi_array{order_sel}(:,mode_sel));
+         MPC= [MPC;MPC_temp];
+         MPCW =[MPCW;MPCW_temp];
+    end
+end
+
+% create a table | sequence | frequency | damping ratio |
+table_fre = table();
+table_fre.sequence = (1:length(omega))';
+table_fre.frequency = frequency;
+table_fre.damping_ratio = damping_ratio;
+table_fre.omega = omega;
+table_fre.frequency_cov = frequency_sigma;
+table_fre.damping_ratio_cov = damping_ratio_sigma;
+table_fre.idx_Fre_FEM=idx_ModalFEM;
+table_fre.MPC=MPC;
+table_fre.MPCW = MPCW;
 
 %% test
-close all
-FEM_mode_sel = 9;
-mode_deck_plot = (Result.mode_deck(:,FEM_mode_sel));
-FEM_freq = Result.Freq(FEM_mode_sel);
-figure('Position', [[100, 100], 960, 540]);
-plot(Result.node_loc,mode_deck_plot)
-
-sensor_loc = [578+1650/4,578+1650*2/4,578+1650*3/4];
-% find the modal shape of the sensor location
-[~,idx_sensor_loc] = min(abs(Result.node_loc-sensor_loc));
-phi_sensor_loc = mode_deck_plot(idx_sensor_loc);
-hold on
-scatter(sensor_loc,phi_sensor_loc,'filled')
-
-Modal_analysis_mode_sel =5;
-order_sel = 41;
-w_sel = w_array{order_sel}(Modal_analysis_mode_sel);
-freq_sel = w_sel/(2*pi);
-xi_sel = xi_array{order_sel}(Modal_analysis_mode_sel);
-phi_sel = phi_array{order_sel}(:,Modal_analysis_mode_sel);
-
-loc = [1,1.1,2,2.1,3,3.1]';
-plot_modal_shape_animation(phi_sel,'loc',loc)
-disp("FEM mode "+FEM_mode_sel+" : Frequency = "+FEM_freq+" Hz")
-disp("Mode shape of order "+order_sel+" and mode "+Modal_analysis_mode_sel+" : Frequency = "+freq_sel+" Hz, Damping ratio = "+xi_sel)
+% close all
+% FEM_mode_sel = 1;
+% mode_deck_plot = (Result.mode_deck(:,FEM_mode_sel));
+% FEM_freq = Result.Freq(FEM_mode_sel);
+% figure('Position', [[100, 100], 960, 540]);
+% plot(Result.node_loc,mode_deck_plot)
+% 
+% sensor_loc = [578+1650/4,578+1650*2/4,578+1650*3/4];
+% % find the modal shape of the sensor location
+% [~,idx_sensor_loc] = min(abs(Result.node_loc-sensor_loc));
+% phi_sensor_loc = mode_deck_plot(idx_sensor_loc);
+% hold on
+% scatter(sensor_loc,phi_sensor_loc,'filled')
 
 %% plot
 if 1
@@ -263,10 +352,77 @@ if 1
 
 
     stabplot(omega_id,xi_id,order,Phi_id,'cov_w',cov_omega,'cov_xi',cov_xi,'std_w_tol',0.1,'std_xi_tol',1);
+    
+    for k1 = 1:length(modesel)
+        columnName = sprintf('mode%d_SSI', k1); % 动态生成列名
+        columnName_seq = sprintf('mode%d_seq', k1); % 动态生成列名
+        if or(vivTable.(columnName)(VIV_sel)==0,isnan(vivTable.(columnName)(VIV_sel)))
+            continue
+        else
+            % animation
+            Modal_analysis_mode_sel = vivTable.(columnName_seq)(VIV_sel);
+            order_sel = vivTable.(columnName)(VIV_sel);
+            w_sel = w_array{order_sel}(Modal_analysis_mode_sel);
+            freq_sel = w_sel/(2*pi);
+            xi_sel = xi_array{order_sel}(Modal_analysis_mode_sel);
+            phi_sel = phi_array{order_sel}(:,Modal_analysis_mode_sel);
+            
+            loc = [1,2,3]';
+            plot_modal_shape_animation(phi_sel,'loc',loc)
+            
+            FEM_mode_sel = k1;
+            FEM_freq = Result.Freq(FEM_mode_sel);
 
+            disp("FEM mode "+FEM_mode_sel+" : Frequency = "+FEM_freq+" Hz")
+            disp("Mode shape of order "+order_sel+" and mode "+Modal_analysis_mode_sel+" : Frequency = "+freq_sel+" Hz, Damping ratio = "+xi_sel)
+            
+            % complex plane
+            plot_mode_complex_plane(phi_sel,'rotate','yes');
+            
+            % bridge deck mode comparison
+            mode_deck_plot = (Result.mode_deck(:,k1));
+            sensor_loc = [578+1650/4,578+1650*2/4,578+1650*3/4];
+            mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+            KMmapping = Result.Mapping;
+            nodegap = Result.nodegap;
+            mode_vec = Result.mode_vec;
+            mode_vec = mode_vec(:,k1)
+            phi_sensor_loc = FindModeShapewithLocation(sensor_loc,node_loc,nodeondeck,KMmapping,nodegap,mode_vec);
+            % phi_sensor_loc = mode_deck_plot(idx_sensor_loc);
+            figure('Position', [[100, 100], 960, 540]);
+            plot(Result.node_loc,mode_deck_plot)
+            hold on
+            scatter(sensor_loc,phi_sensor_loc,'filled')
 
+            
+            
+
+            phi_id = real(phi_sel);
+            [~,loc_temp]= max(phi_id);
+            phi_id_scale = phi_id*(phi_sensor_loc(loc_temp)/phi_id(loc_temp));
+            scatter(sensor_loc,phi_id_scale,'filled')
+            
+            seq_in_table =find(table_fre.idx_Fre_FEM==FEM_freq);
+            
+            MAC_value(seq_in_table) = calculate_MAC(phi_sensor_loc, phi_sel);
+
+            disp("Mode shape of FEM mode "+FEM_mode_sel+" : " + ...
+                "Frequency = "+table_fre.frequency(seq_in_table)+" Hz, " + ...
+                "Damping ratio = "+table_fre.damping_ratio(seq_in_table) + ", " + ...
+                "MPCW = " + table_fre.MPCW(seq_in_table) +", " + ...
+                "MPC = " +table_fre.MPC(seq_in_table)+", " + ...
+                "MAC = " +MAC_value(seq_in_table));
+
+            % test = 1;
+         
+            close all
+        end
+
+    end
+
+    table_fre.MAC_value = MAC_value;
+    % TODO：check
     %
-
     %% plot
     % 定义总子图数量
     total_plots = 16; % 或任何你需要的子图数量
@@ -398,4 +554,35 @@ if 1
     hold off;
 
     holdon = true;
+end
+
+function data = sel_sensor(data1,data2,contains1,contains2)
+    % 基于条件执行不同的操作
+    if contains1 && ~contains2
+        % 数组仅包含1的操作
+        disp('Array contains only contains 1.');
+        data=data1;
+    elseif ~contains1 && contains2
+        % 数组仅包含2的操作
+        disp('Array contains only contains 2.');
+        data=data2;
+    elseif contains1 && contains2
+        % 数组同时包含1和2的操作
+        disp('Array contains both contains 1 and contains 2.');
+        data = (data1+data2)/2;
+    else
+        % 数组既不包含1也不包含2的操作
+        error('Array contains neither contains 1 nor contains 2.');
+    end
+end
+
+function MAC_value = calculate_MAC(phi1, phi2)
+    % 确保振型是列向量
+    phi1 = phi1(:);
+    phi2 = phi2(:);
+    
+    % 计算MAC值
+    numerator = abs(phi1'*phi2)^2;
+    denominator = (phi1'*phi1) * (phi2'*phi2);
+    MAC_value = numerator / denominator;
 end
