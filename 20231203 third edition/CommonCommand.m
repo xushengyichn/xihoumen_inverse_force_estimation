@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-12-21 23:06:32
-%LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2023-12-27 20:04:55
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsf:\git\xihoumen_inverse_force_estimation\20231203 third edition\CommonCommand.m
+%LastEditors: xushengyichn xushengyichn@outlook.com
+%LastEditTime: 2024-02-21 10:24:49
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\20231203 third edition\CommonCommand.m
 %Description: 
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -49,6 +49,7 @@ elseif strcmp(computer_name,'ROG-SHENGYI')
     addpath(genpath("D:\git\xihoumen_inverse_force_estimation\FEM_model"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\xihoumen_data_extract"))
     addpath(genpath("D:\Users\xushe\Documents\GitHub\HHT-Tutorial\"))
+    addpath(genpath("D:\Users\xushe\Documents\GitHub\plot_tools\"))
 elseif strcmp(computer_name,'NTNU08916')
     addpath(genpath("C:\Users\shengyix\Documents\GitHub\Function_shengyi_package"))
     addpath(genpath("C:\Users\shengyix\Documents\GitHub\ssm_tools_sy"))
@@ -118,9 +119,24 @@ elseif strcmp(computer_name,'xushengyi')
     input_data.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
     input_data.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
 elseif strcmp(computer_name,'ROG-SHENGYI')
-    input_data.acc_dir = "D:\xihoumendata\acc";
-    input_data.wind_dir = "D:\xihoumendata\wind";
-    input_data.wind_dir_all = "D:\xihoumendata\wind_all";
+    % 检查E盘是否存在
+    if exist('E:\', 'dir')
+        % 如果E盘存在，使用E盘的路径
+        input_data.acc_dir = "E:\result";
+        input_data.wind_dir = "E:\result_wind_10min";
+        input_data.wind_dir_all = "E:\result_wind";
+    else
+        % 如果E盘不存在，使用D盘的路径
+        input_data.acc_dir = "D:\xihoumendata\acc";
+        input_data.wind_dir = "D:\xihoumendata\wind";
+        input_data.wind_dir_all = "D:\xihoumendata\wind_all";
+    end
+
+    % 打印结果，验证路径是否设置正确
+    disp(['acc_dir: ', input_data.acc_dir]);
+    disp(['wind_dir: ', input_data.wind_dir]);
+    disp(['wind_dir_all: ', input_data.wind_dir_all]);
+
 elseif strcmp(computer_name,'WIN-IUMUERP66UT')
     input_data.acc_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result";
     input_data.wind_dir = "Z:\Drive\Backup\SHENGYI_HP\F\test\result_wind_10min";
