@@ -300,31 +300,31 @@ for k1 = 1:length(modesel)
         frequency_temp = temp/2/pi;
         frequency = [frequency;frequency_temp];
         omega=[omega;temp]
-
+        
         % frequency covariance
         temp_list = cov_omega{order_sel};
         temp = temp_list(mode_sel);
         temp = sqrt(temp);
         frequency_sigma_temp = temp/2/pi;
         frequency_sigma = [frequency_sigma;frequency_sigma_temp];
-
+        
         % damping ratio
         temp_list = xi_array{order_sel};
         temp = temp_list(mode_sel);
         xi_temp = temp;
         damping_ratio = [damping_ratio;xi_temp];
-
+        
         % damping ratio covariance
         temp_list = cov_xi{order_sel};
         temp = temp_list(mode_sel);
         temp = sqrt(temp);
         xi_sigma_temp = temp;
-        damping_ratio_sigma = [damping_ratio_sigma;xi_sigma_temp];    
-
+        damping_ratio_sigma = [damping_ratio_sigma;xi_sigma_temp];
+        
         % MPCW,MPC
-         [MPCW_temp,~,~,MPC_temp]=rotate_modes(phi_array{order_sel}(:,mode_sel));
-         MPC= [MPC;MPC_temp];
-         MPCW =[MPCW;MPCW_temp];
+        [MPCW_temp,~,~,MPC_temp]=rotate_modes(phi_array{order_sel}(:,mode_sel));
+        MPC= [MPC;MPC_temp];
+        MPCW =[MPCW;MPCW_temp];
     end
 end
 
@@ -336,30 +336,88 @@ table_fre.damping_ratio = damping_ratio;
 table_fre.omega = omega;
 table_fre.frequency_cov = frequency_sigma;
 table_fre.damping_ratio_cov = damping_ratio_sigma;
-table_fre.idx_Fre_FEM=idx_ModalFEM;
+table_fre.idx_ModalFEM=idx_ModalFEM;
 table_fre.MPC=MPC;
 table_fre.MPCW = MPCW;
 
-%% test
-% close all
-% FEM_mode_sel = 1;
-% mode_deck_plot = (Result.mode_deck(:,FEM_mode_sel));
-% FEM_freq = Result.Freq(FEM_mode_sel);
-% figure('Position', [[100, 100], 960, 540]);
-% plot(Result.node_loc,mode_deck_plot)
-% 
-% sensor_loc = [578+1650/4,578+1650*2/4,578+1650*3/4];
-% % find the modal shape of the sensor location
-% [~,idx_sensor_loc] = min(abs(Result.node_loc-sensor_loc));
-% phi_sensor_loc = mode_deck_plot(idx_sensor_loc);
-% hold on
-% scatter(sensor_loc,phi_sensor_loc,'filled')
 
+%% cal mac value
+
+ for k1 = 1:length(modesel)
+        columnName = sprintf('mode%d_SSI', k1); % 动态生成列名
+        columnName_seq = sprintf('mode%d_seq', k1); % 动态生成列名
+        if or(vivTable.(columnName)(VIV_sel)==0,isnan(vivTable.(columnName)(VIV_sel)))
+            continue
+        else
+            % animation
+            Modal_analysis_mode_sel = vivTable.(columnName_seq)(VIV_sel);
+            order_sel = vivTable.(columnName)(VIV_sel);
+            w_sel = w_array{order_sel}(Modal_analysis_mode_sel);
+            freq_sel = w_sel/(2*pi);
+            xi_sel = xi_array{order_sel}(Modal_analysis_mode_sel);
+            phi_sel = phi_array{order_sel}(:,Modal_analysis_mode_sel);
+
+            FEM_mode_sel = k1;
+            FEM_freq = Result.Freq(FEM_mode_sel);
+            
+            disp("FEM mode "+FEM_mode_sel+" : Frequency = "+FEM_freq+" Hz")
+            disp("Mode shape of order "+order_sel+" and mode "+Modal_analysis_mode_sel+" : Frequency = "+freq_sel+" Hz, Damping ratio = "+xi_sel)
+            
+              
+            % bridge deck mode comparison
+            mode_deck_plot = (Result.mode_deck(:,k1));
+            sensor_loc = [578+1650/4,578+1650*2/4,578+1650*3/4];
+            mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Result.node_loc; nodeondeck = Result.nodeondeck;
+            KMmapping = Result.Mapping;
+            nodegap = Result.nodegap;
+            mode_vec = Result.mode_vec;
+            mode_vec = mode_vec(:,k1);
+            phi_sensor_loc = FindModeShapewithLocation(sensor_loc,node_loc,nodeondeck,KMmapping,nodegap,mode_vec);
+            
+
+            phi_id = real(phi_sel);
+            [~,loc_temp]= max(phi_id);
+            phi_id_scale = phi_id*(phi_sensor_loc(loc_temp)/phi_id(loc_temp));
+            
+            seq_in_table =find(table_fre.idx_ModalFEM==FEM_freq);
+            
+            MAC_value(seq_in_table,1) = calculate_MAC(phi_sensor_loc, phi_sel);
+            
+            disp("Mode shape of FEM mode "+FEM_mode_sel+" : " + ...
+                "Frequency = "+table_fre.frequency(seq_in_table)+" Hz, " + ...
+                "Damping ratio = "+table_fre.damping_ratio(seq_in_table) + ", " + ...
+                "MPCW = " + table_fre.MPCW(seq_in_table) +", " + ...
+                "MPC = " +table_fre.MPC(seq_in_table)+", " + ...
+                "MAC = " +MAC_value(seq_in_table));
+        end
+        
+    end
+    
+    table_fre.MAC_value = MAC_value;
+%% save data
+% 替换日期时间字符串中的冒号和其他特殊字符
+% start_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+start_time.Format = 'MM_dd_yyyy_HH_mm_ss';
+formatted_start_time = string(start_time);
+
+% end_time.Format = 'dd_MMM_yyyy_HH_mm_ss';
+end_time.Format = 'MM_dd_yyyy_HH_mm_ss';
+formatted_end_time = string(end_time);
+
+
+formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
+formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
+
+filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+save(filename,'table_fre',"start_time","end_time");
+disp(table_fre)
+    
+    
 %% plot
-if 1
-
-
-
+if 0
+    
+    
+    
     stabplot(omega_id,xi_id,order,Phi_id,'cov_w',cov_omega,'cov_xi',cov_xi,'std_w_tol',0.1,'std_xi_tol',1);
     
     for k1 = 1:length(modesel)
@@ -381,7 +439,7 @@ if 1
             
             FEM_mode_sel = k1;
             FEM_freq = Result.Freq(FEM_mode_sel);
-
+            
             disp("FEM mode "+FEM_mode_sel+" : Frequency = "+FEM_freq+" Hz")
             disp("Mode shape of order "+order_sel+" and mode "+Modal_analysis_mode_sel+" : Frequency = "+freq_sel+" Hz, Damping ratio = "+xi_sel)
             
@@ -402,10 +460,10 @@ if 1
             plot(Result.node_loc,mode_deck_plot)
             hold on
             scatter(sensor_loc,phi_sensor_loc,'filled')
-
             
             
-
+            
+            
             phi_id = real(phi_sel);
             [~,loc_temp]= max(phi_id);
             phi_id_scale = phi_id*(phi_sensor_loc(loc_temp)/phi_id(loc_temp));
@@ -413,185 +471,179 @@ if 1
             
             seq_in_table =find(table_fre.idx_Fre_FEM==FEM_freq);
             
-            MAC_value(seq_in_table,1) = calculate_MAC(phi_sensor_loc, phi_sel);
 
-            disp("Mode shape of FEM mode "+FEM_mode_sel+" : " + ...
-                "Frequency = "+table_fre.frequency(seq_in_table)+" Hz, " + ...
-                "Damping ratio = "+table_fre.damping_ratio(seq_in_table) + ", " + ...
-                "MPCW = " + table_fre.MPCW(seq_in_table) +", " + ...
-                "MPC = " +table_fre.MPC(seq_in_table)+", " + ...
-                "MAC = " +MAC_value(seq_in_table));
-
-            % test = 1;
-         
             close all
         end
-
+        
     end
+    
 
-    table_fre.MAC_value = MAC_value;
-    % TODO：check
     %
-    %% plot
-    % 定义总子图数量
-    total_plots = 16; % 或任何你需要的子图数量
-    current_plot = 1;
-    num_figs_in_row = [];
-    figWidthFactor = 1.5;
-    %     figPosition = [1080*2.5,100];
-    figPosition = [100, 100];
-    newfigure = true;
-    holdon = false;
+    
 
-    create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC2_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', true, 'holdon', holdon);
-    hold on
-    create_subplot(@plot, total_plots, current_plot, {T_new, AC2_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
-    ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC2_1")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC2_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-    hold on
-    create_subplot(@plot, total_plots, current_plot, {T_new, AC2_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
-    ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC2_3")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC3_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-    hold on
-    create_subplot(@plot, total_plots, current_plot, {T_new, AC3_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
-    ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC3_1")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC3_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-    hold on
-    create_subplot(@plot, total_plots, current_plot, {T_new, AC3_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
-    ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC3_3")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC4_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-    hold on
-    create_subplot(@plot, total_plots, current_plot, {T_new, AC4_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
-    ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC4_1")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC4_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-    hold on
-    create_subplot(@plot, total_plots, current_plot, {T_new, AC4_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
-    ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC4_3")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {UA1.Time_Start,UA1.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
-    ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA1")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {UA2.Time_Start,UA2.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
-    ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA2")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {UA3.Time_Start,UA3.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
-    ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA3")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {UA4.Time_Start,UA4.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
-    ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA4")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {UA5.Time_Start,UA5.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
-    ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA5")
-    current_plot = current_plot+1;
-
-    create_subplot(@plot, total_plots, current_plot, {UA6.Time_Start,UA6.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
-    ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA6")
-    current_plot = current_plot+1;
-
-    create_subplot(@gscatter, total_plots, current_plot, {all_w,all_orders,new_idx}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
-    legend('off')
-    xlabel("Omega(rad/s)")
-    current_plot = current_plot+1;
-
-    for k1 = 1:k_value
-        create_subplot(@scatter, total_plots, current_plot, {list_fre{k1},k1*ones(length(list_fre{k1}),1)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+    
+    if 0
+        %% plot
+        % 定义总子图数量
+        total_plots = 16; % 或任何你需要的子图数量
+        current_plot = 1;
+        num_figs_in_row = [];
+        figWidthFactor = 1.5;
+        %     figPosition = [1080*2.5,100];
+        figPosition = [100, 100];
+        newfigure = true;
+        holdon = false;
+        
+        create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC2_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', true, 'holdon', holdon);
         hold on
-    end
-    xlabel("Frequency(Hz)");ylabel("Cluster");title("Frequency")
-    current_plot = current_plot+1;
-
-    for k1 = 1:k_value
-        create_subplot(@scatter, total_plots, current_plot, {list_xi{k1},k1*ones(length(list_xi{k1}),1)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        create_subplot(@plot, total_plots, current_plot, {T_new, AC2_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
+        ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC2_1")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC2_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
         hold on
-    end
-    xlabel("Damping ratio");ylabel("Cluster");title("Damping ratio")
-    current_plot = current_plot+1;
-
-    for k1 = 1:k_value
-        create_subplot(@scatter, total_plots, current_plot, {k1*ones(length(list_xi{k1}),1),list_xi{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        create_subplot(@plot, total_plots, current_plot, {T_new, AC2_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
+        ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC2_3")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC3_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
         hold on
+        create_subplot(@plot, total_plots, current_plot, {T_new, AC3_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
+        ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC3_1")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC3_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+        hold on
+        create_subplot(@plot, total_plots, current_plot, {T_new, AC3_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
+        ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC3_3")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC4_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+        hold on
+        create_subplot(@plot, total_plots, current_plot, {T_new, AC4_1}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
+        ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC4_1")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {acc_result.Time, acc_result.AC4_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+        hold on
+        create_subplot(@plot, total_plots, current_plot, {T_new, AC4_3}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'holdon', holdon);
+        ylim([-60,60]);xlabel("Time");ylabel("Acceleration");title("AC4_3")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {UA1.Time_Start,UA1.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA1")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {UA2.Time_Start,UA2.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA2")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {UA3.Time_Start,UA3.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA3")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {UA4.Time_Start,UA4.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA4")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {UA5.Time_Start,UA5.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA5")
+        current_plot = current_plot+1;
+        
+        create_subplot(@plot, total_plots, current_plot, {UA6.Time_Start,UA6.U}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        ylim([0,15]);xlabel("Time");ylabel("Wind Speed");title("UA6")
+        current_plot = current_plot+1;
+        
+        create_subplot(@gscatter, total_plots, current_plot, {all_w,all_orders,new_idx}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+        legend('off')
+        xlabel("Omega(rad/s)")
+        current_plot = current_plot+1;
+        
+        for k1 = 1:k_value
+            create_subplot(@scatter, total_plots, current_plot, {list_fre{k1},k1*ones(length(list_fre{k1}),1)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+            hold on
+        end
+        xlabel("Frequency(Hz)");ylabel("Cluster");title("Frequency")
+        current_plot = current_plot+1;
+        
+        for k1 = 1:k_value
+            create_subplot(@scatter, total_plots, current_plot, {list_xi{k1},k1*ones(length(list_xi{k1}),1)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+            hold on
+        end
+        xlabel("Damping ratio");ylabel("Cluster");title("Damping ratio")
+        current_plot = current_plot+1;
+        
+        for k1 = 1:k_value
+            create_subplot(@scatter, total_plots, current_plot, {k1*ones(length(list_xi{k1}),1),list_xi{k1}}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', false, 'firstfigure', false, 'holdon', holdon);
+            hold on
+        end
+        ylabel("Damping ratio");xlabel("Cluster");title("Damping ratio")
+        current_plot = current_plot+1;
+        
+        
+        
+        figure
+        h = gscatter(all_fre,all_xi,new_idx);
+        legend("off")
+        xlim([0,0.5])
+        
+        hold on
+        % 获取每个组的颜色，以便误差线与散点颜色匹配
+        colors = get(h, 'Color');
+        if iscell(colors)
+            colors = cell2mat(colors);
+        end
+        
+        % 绘制每个组的矩形
+        for k1 = 1:size(fre_error, 2)
+            fre_min = fre_error(1, k1);
+            fre_max = fre_error(2, k1);
+            xi_min = xi_error(1, k1);
+            xi_max = xi_error(2, k1);
+            
+            % 矩形的位置和尺寸
+            pos = [fre_min, xi_min, fre_max - fre_min, xi_max - xi_min];
+            
+            % 绘制矩形
+            rectangle('Position', pos, 'EdgeColor', colors(k1, :), 'LineWidth', 1.5);
+        end
+        
+        scatter(mean_fre,mean_xi)
+        scatter(Result.Freq,0.3/100*ones(size(Result.Freq)))
+        % 关闭 hold 状态
+        hold off;
+        
+        holdon = true;
     end
-    ylabel("Damping ratio");xlabel("Cluster");title("Damping ratio")
-    current_plot = current_plot+1;
-
-
-
-    figure
-    h = gscatter(all_fre,all_xi,new_idx);
-    legend("off")
-    xlim([0,0.5])
-
-    hold on
-    % 获取每个组的颜色，以便误差线与散点颜色匹配
-    colors = get(h, 'Color');
-    if iscell(colors)
-        colors = cell2mat(colors);
-    end
-
-    % 绘制每个组的矩形
-    for k1 = 1:size(fre_error, 2)
-        fre_min = fre_error(1, k1);
-        fre_max = fre_error(2, k1);
-        xi_min = xi_error(1, k1);
-        xi_max = xi_error(2, k1);
-
-        % 矩形的位置和尺寸
-        pos = [fre_min, xi_min, fre_max - fre_min, xi_max - xi_min];
-
-        % 绘制矩形
-        rectangle('Position', pos, 'EdgeColor', colors(k1, :), 'LineWidth', 1.5);
-    end
-
-    scatter(mean_fre,mean_xi)
-    scatter(Result.Freq,0.3/100*ones(size(Result.Freq)))
-    % 关闭 hold 状态
-    hold off;
-
-    holdon = true;
 end
 
 function data = sel_sensor(data1,data2,contains1,contains2)
-    % 基于条件执行不同的操作
-    if contains1 && ~contains2
-        % 数组仅包含1的操作
-        disp('Array contains only contains 1.');
-        data=data1;
-    elseif ~contains1 && contains2
-        % 数组仅包含2的操作
-        disp('Array contains only contains 2.');
-        data=data2;
-    elseif contains1 && contains2
-        % 数组同时包含1和2的操作
-        disp('Array contains both contains 1 and contains 2.');
-        data = (data1+data2)/2;
-    else
-        % 数组既不包含1也不包含2的操作
-        error('Array contains neither contains 1 nor contains 2.');
-    end
+% 基于条件执行不同的操作
+if contains1 && ~contains2
+    % 数组仅包含1的操作
+    disp('Array contains only contains 1.');
+    data=data1;
+elseif ~contains1 && contains2
+    % 数组仅包含2的操作
+    disp('Array contains only contains 2.');
+    data=data2;
+elseif contains1 && contains2
+    % 数组同时包含1和2的操作
+    disp('Array contains both contains 1 and contains 2.');
+    data = (data1+data2)/2;
+else
+    % 数组既不包含1也不包含2的操作
+    error('Array contains neither contains 1 nor contains 2.');
+end
 end
 
 function MAC_value = calculate_MAC(phi1, phi2)
-    % 确保振型是列向量
-    phi1 = phi1(:);
-    phi2 = phi2(:);
-    
-    % 计算MAC值
-    numerator = abs(phi1'*phi2)^2;
-    denominator = (phi1'*phi1) * (phi2'*phi2);
-    MAC_value = numerator / denominator;
+% 确保振型是列向量
+phi1 = phi1(:);
+phi2 = phi2(:);
+
+% 计算MAC值
+numerator = abs(phi1'*phi2)^2;
+denominator = (phi1'*phi1) * (phi2'*phi2);
+MAC_value = numerator / denominator;
 end

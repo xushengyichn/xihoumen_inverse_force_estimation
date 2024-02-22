@@ -1,7 +1,7 @@
 clc; clear; close all;
 run('CommonCommand.m');
 
-opts = detectImportOptions('vivData.csv');
+opts = detectImportOptions('viv_in_the_paper.csv');
 
 % 设置日期时间格式
 % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
@@ -15,10 +15,11 @@ opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 
-vivTable = readtable('vivData.csv',opts);
+vivTable = readtable('viv_in_the_paper.csv',opts);
 
-FEM_fre = [0.0938;0.1013;0.1319;0.1779;0.2273;0.2718;0.3213];
-VIV_sels = [2;3;4;5;6;7;8;9;10;12;16;17;18;19];
+FEM_fre = [0.0938;0.1013;0.1319;0.1796;0.2273;0.2718;0.3213];
+% VIV_sels = [2;3;4;5;6;7;8;9;10;12;16;17;18;19];
+VIV_sels = [1;2;3;4;5;6;7;8;9;10;11];
 
 %% mode 1
 updated_frequency_mode1=[];
@@ -41,7 +42,7 @@ for k1 = 1:length(VIV_sels)
     formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
     formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
     
-    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
     
     if exist(filename, 'file') == 2
         Modal_updating_file = load(filename);
@@ -78,7 +79,7 @@ for k1 = 1:length(VIV_sels)
     formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
     formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
     
-    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
     
     if exist(filename, 'file') == 2
         Modal_updating_file = load(filename);
@@ -115,7 +116,7 @@ for k1 = 1:length(VIV_sels)
     formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
     formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
     
-    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
     
     if exist(filename, 'file') == 2
         Modal_updating_file = load(filename);
@@ -152,7 +153,7 @@ for k1 = 1:length(VIV_sels)
     formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
     formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
     
-    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
     
     if exist(filename, 'file') == 2
         Modal_updating_file = load(filename);
@@ -190,7 +191,7 @@ for k1 = 1:length(VIV_sels)
     formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
     formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
     
-    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
     
     if exist(filename, 'file') == 2
         Modal_updating_file = load(filename);
@@ -227,7 +228,7 @@ for k1 = 1:length(VIV_sels)
     formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
     formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
     
-    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
     
     if exist(filename, 'file') == 2
         Modal_updating_file = load(filename);
@@ -263,7 +264,7 @@ for k1 = 1:length(VIV_sels)
     formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' ', '_'), '/', '-');
     formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
     
-    filename = "Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
+    filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
     
     if exist(filename, 'file') == 2
         Modal_updating_file = load(filename);

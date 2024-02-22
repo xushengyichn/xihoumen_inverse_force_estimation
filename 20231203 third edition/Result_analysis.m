@@ -17,20 +17,20 @@ run('CommonCommand.m');
 
 % 定义VIV_sel值的数组，例如：[1, 2, 3, ...]
 % VIV_sels = [2,3,4,5,6]; % 根据你的数据集进行修改
-VIV_sels = [2;3;4;5;6;7;8;9;10;12;16;17;18;19];
-
+% VIV_sels = [2;3;4;5;6;7;8;9;10;12;16;17;18;19];
+VIV_sels = [1;2;3;4;5;6;7;8;9;10;11];
 % 定义不同的标记样式
 % 定义15种不同的标记样式和颜色
 markers = {'o', '+', '*', '.', 'x', 's', 'd', '^', 'v', '>', '<', 'p', 'h'};
 colors = {'r', 'g', 'b', 'c', 'm', 'y', 'k', [.5 .6 .7], [.8 .2 .6], [.2 .5 .8], [.3 .7 .9], [.4 .4 .4], [.6 .2 .2], [.7 .5 .3], [.1 .3 .5]};
 
-opts = detectImportOptions('vivData.csv');
+opts = detectImportOptions('viv_in_the_paper.csv');
 opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 
-vivTable = readtable('vivData.csv',opts);
+vivTable = readtable('viv_in_the_paper.csv',opts);
 
 
 

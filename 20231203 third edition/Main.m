@@ -20,9 +20,10 @@ tic
 % startDate_global = result.startDate;
 % endDate_global = result.endDate;
 if ~exist("VIV_sel",'var')
-    VIV_sel = 6;
+    VIV_sel = 11;
 end
-opts = detectImportOptions('vivData.csv');
+opts = detectImportOptions('viv_in_the_paper.csv');
+% opts = detectImportOptions('vivData.csv');
 
 % 设置日期时间格式
 % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
@@ -36,7 +37,8 @@ opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 
-vivTable = readtable('vivData.csv',opts);
+vivTable = readtable('viv_in_the_paper.csv',opts);
+% vivTable = readtable('vivData.csv',opts);
 
 start_time = vivTable.startDate(VIV_sel);
 end_time = vivTable.endDate(VIV_sel);
