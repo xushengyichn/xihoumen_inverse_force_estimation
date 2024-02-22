@@ -3,7 +3,7 @@ run('CommonCommand.m');
 
 %% Read viv Data
 % 创建导入选项对象
-opts = detectImportOptions('viv_in _the_paper.csv');
+opts = detectImportOptions('viv_in_the_paper.csv');
 
 % 设置日期时间格式
 % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
@@ -12,7 +12,7 @@ opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 
-vivTable = readtable('viv_in _the_paper.csv',opts);
+vivTable = readtable('viv_in_the_paper.csv',opts);
 
 %% load acceleration and wind data
 VIV_sel = 11;
@@ -334,8 +334,8 @@ table_fre.sequence = (1:length(omega))';
 table_fre.frequency = frequency;
 table_fre.damping_ratio = damping_ratio;
 table_fre.omega = omega;
-table_fre.frequency_cov = frequency_sigma;
-table_fre.damping_ratio_cov = damping_ratio_sigma;
+table_fre.frequency_sigma = frequency_sigma;
+table_fre.damping_ratio_sigma = damping_ratio_sigma;
 table_fre.idx_ModalFEM=idx_ModalFEM;
 table_fre.MPC=MPC;
 table_fre.MPCW = MPCW;
