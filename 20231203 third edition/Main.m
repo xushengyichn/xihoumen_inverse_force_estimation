@@ -563,15 +563,15 @@ for k1 = 1:length(beta_deg_mean_UAa)
         TI_w_sel(k1) = UAb.TI_w(k1);
     else
 
-        if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean)
+        if abs(UAa.alpha_deg_mean(k1)) < abs(UAb.alpha_deg_mean(k1))
             U_sel(k1) = UAa.U(k1);
-            AoA_sel(K1) = UAa.alpha_deg_mean(k1);
+            AoA_sel(k1) = UAa.alpha_deg_mean(k1);
             TI_u_sel(k1) = UAa.TI_u(k1);
             TI_v_sel(k1) = UAa.TI_v(k1);
             TI_w_sel(k1) = UAa.TI_w(k1);
         else
             U_sel(k1) = UAb.U(k1);
-            AoA_sel(K1) = UAb.alpha_deg_mean(k1);
+            AoA_sel(k1) = UAb.alpha_deg_mean(k1);
             TI_u_sel(k1) = UAb.TI_u(k1);
             TI_v_sel(k1) = UAb.TI_v(k1);
             TI_w_sel(k1) = UAb.TI_w(k1);

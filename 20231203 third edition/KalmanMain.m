@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2024-03-03 15:40:57
+%LastEditTime: 2024-03-03 15:55:31
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\20231203 third edition\KalmanMain.m
 %Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
@@ -363,7 +363,7 @@ contains1 = ismember(5, sensor_sel);
 contains2 = ismember(6, sensor_sel);
 AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
 
-yn = [AC2;AC2;AC3;AC3;AC4;AC4];
+yn = [AC2;AC2;AC3;AC3;AC4;AC4]/ 1000 * 9.8;
 
 
 % yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
