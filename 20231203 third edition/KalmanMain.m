@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
-%LastEditors: ShengyiXu xushengyichn@outlook.com
-%LastEditTime: 2024-02-22 11:55:36
-%FilePath: \manuscriptf:\git\xihoumen_inverse_force_estimation\20231203 third edition\KalmanMain.m
+%LastEditors: xushengyichn xushengyichn@outlook.com
+%LastEditTime: 2024-03-03 15:40:57
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\20231203 third edition\KalmanMain.m
 %Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -222,22 +222,25 @@ MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
 zeta = importdata("zeta_update.mat");
+
+opts = detectImportOptions('viv_in_the_paper.csv');
+% opts = detectImportOptions('vivData.csv');
+% 设置日期时间格式
+% 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
+opts = setvartype(opts, 'startDate', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'endDate', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'startDate_update', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'endDate_update', 'datetime'); % 确保变量类型为 datetime
+opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+
+vivTable = readtable('viv_in_the_paper.csv',opts);
+
 %% modal updating
 if input.modelupdate
-    opts = detectImportOptions('viv_in_the_paper.csv');
-    % opts = detectImportOptions('vivData.csv');
-    % 设置日期时间格式
-    % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
-    opts = setvartype(opts, 'startDate', 'datetime'); % 确保变量类型为 datetime
-    opts = setvartype(opts, 'endDate', 'datetime'); % 确保变量类型为 datetime
-    opts = setvartype(opts, 'startDate_update', 'datetime'); % 确保变量类型为 datetime
-    opts = setvartype(opts, 'endDate_update', 'datetime'); % 确保变量类型为 datetime
-    opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
-    opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
-    opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
-    opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
-    
-    vivTable = readtable('viv_in_the_paper.csv',opts);
+
     % vivTable = readtable('vivData.csv',opts);
     
     start_time = vivTable.startDate_update(input.VIV_sel);
@@ -343,34 +346,34 @@ AC4_1 = acc_result.AC4_1';
 AC4_3 = acc_result.AC4_3';
 
 %% selection of the sensors' data
-% sensor_sel= string(vivTable.sensor_selection(input.VIV_sel));
-% sensor_sel = strsplit(sensor_sel, ';'); % 以分号为分隔符分割字符串
-% sensor_sel = str2double(sensor_sel); % 将字符串数组转换为double数组
-% 
-% % 检查1和2是否在数组中
-% contains1 = ismember(1, sensor_sel);
-% contains2 = ismember(2, sensor_sel);
-% AC2 = sel_sensor(AC2_1,AC2_3,contains1,contains2);
-% 
-% contains1 = ismember(3, sensor_sel);
-% contains2 = ismember(4, sensor_sel);
-% AC3 = sel_sensor(AC3_1,AC3_3,contains1,contains2);
-% 
-% contains1 = ismember(5, sensor_sel);
-% contains2 = ismember(6, sensor_sel);
-% AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
-% 
-% yn = [AC2;AC2;AC3;AC3;AC4;AC4];
+sensor_sel= string(vivTable.sensor_selection(input.VIV_sel));
+sensor_sel = strsplit(sensor_sel, ';'); % 以分号为分隔符分割字符串
+sensor_sel = str2double(sensor_sel); % 将字符串数组转换为double数组
+
+% 检查1和2是否在数组中
+contains1 = ismember(1, sensor_sel);
+contains2 = ismember(2, sensor_sel);
+AC2 = sel_sensor(AC2_1,AC2_3,contains1,contains2);
+
+contains1 = ismember(3, sensor_sel);
+contains2 = ismember(4, sensor_sel);
+AC3 = sel_sensor(AC3_1,AC3_3,contains1,contains2);
+
+contains1 = ismember(5, sensor_sel);
+contains2 = ismember(6, sensor_sel);
+AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
+
+yn = [AC2;AC2;AC3;AC3;AC4;AC4];
 
 
-yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
-yn(2, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
-yn(3, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
-yn(4, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
-% yn(5, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
-% yn(6, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
-yn(5, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
-yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+% yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
+% yn(2, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
+% yn(3, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
+% yn(4, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
+% % yn(5, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
+% % yn(6, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
+% yn(5, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+% yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
 % figure
 % plot(yn(1, :))
 % hold on 
