@@ -36,7 +36,7 @@ UA4 = wind_result.resultsTable_UA4;
 UA5 = wind_result.resultsTable_UA5;
 UA6 = wind_result.resultsTable_UA6;
 
-
+dt = seconds(acc_result.Time(2)-acc_result.Time(1));
 %% resample
 % Øyvind's instruction: 2Hz lowpass filter + resample to 5 or 10 Hz
 fs_original = 1/(seconds(acc_result.Time(2)-acc_result.Time(1)));
@@ -107,6 +107,8 @@ AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
 
 y = [AC2;AC3;AC4];
 
+
+
 figure
 plot(T_new,AC2)
 hold on
@@ -126,6 +128,29 @@ order = 1:50;
 [lambda,Phi_id,cov_omega,cov_xi,cov_phi]=covssi_REF_unc(y,y_ref,fs,blockrows,nb,'order',order);
 [omega_id,xi_id]=eig2modal(lambda);
 
+
+%% sync the sensors
+% Select the VIV mode and lambda
+phi_prime=[];
+lambda1=[];
+for k1 = 1:7
+    columnName = sprintf('mode%d_SSI', k1); % 动态生成列名
+    columnName_seq = sprintf('mode%d_seq', k1); % 动态生成列名
+    if or(vivTable.(columnName)(VIV_sel)==0,isnan(vivTable.(columnName)(VIV_sel)))
+        continue
+    else
+        phi_prime=[phi_prime,Phi_id{vivTable.(columnName)(VIV_sel)}(:,vivTable.(columnName_seq)(VIV_sel))];
+        lambda1 = [lambda1;lambda{vivTable.(columnName)(VIV_sel)}(vivTable.(columnName_seq)(VIV_sel))];
+    end
+end
+% phi_prime=Phi_id{vivTable.mode7_SSI(VIV_sel)}(:,vivTable.mode7_seq(VIV_sel));
+% lambda1=lambda{vivTable.mode7_SSI(VIV_sel)}(vivTable.mode7_seq(VIV_sel));
+
+[dt_opt,psi_opt,mpcw_opt]=sync_mpcw(phi_prime,lambda1,1,{[2] [3]},200,dt,'plot',true)
+
+str= num2str(dt_opt(1))+","+num2str(dt_opt(2));
+disp(str)
+return
 %%
 
 
@@ -322,7 +347,8 @@ for k1 = 1:length(modesel)
         damping_ratio_sigma = [damping_ratio_sigma;xi_sigma_temp];
         
         % MPCW,MPC
-        [MPCW_temp,~,~,MPC_temp]=rotate_modes(phi_array{order_sel}(:,mode_sel));
+        % [MPCW_temp,~,~,MPC_temp]=rotate_modes(phi_array{order_sel}(:,mode_sel));
+        [MPCW_temp,~,~,MPC_temp]=mpcweighted(phi_array{order_sel}(:,mode_sel))
         MPC= [MPC;MPC_temp];
         MPCW =[MPCW;MPCW_temp];
     end
@@ -409,7 +435,7 @@ formatted_start_time = strrep(strrep(strrep(formatted_start_time, ':', '-'), ' '
 formatted_end_time = strrep(strrep(strrep(formatted_end_time, ':', '-'), ' ', '_'), '/', '-');
 
 filename = "v2_Modal_updating_"+formatted_start_time+"_"+formatted_end_time+".mat";
-save(filename,'table_fre',"start_time","end_time");
+% save(filename,'table_fre',"start_time","end_time");
 disp(table_fre)
     
     

@@ -365,6 +365,16 @@ AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
 
 yn = [AC2;AC2;AC3;AC3;AC4;AC4]/ 1000 * 9.8;
 
+delay2= int32(vivTable.delay2(input.VIV_sel));
+delay3= int32(vivTable.delay3(input.VIV_sel));
+
+yn(3,:)=circshift(yn(3,:),-delay2/dt);
+yn(4,:)=circshift(yn(4,:),-delay2/dt);
+
+
+yn(5,:)=circshift(yn(5,:),-delay3/dt);
+yn(6,:)=circshift(yn(6,:),-delay3/dt);
+
 
 % yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
 % yn(2, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
