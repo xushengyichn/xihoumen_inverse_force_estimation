@@ -130,6 +130,7 @@ order = 1:50;
 
 
 %% sync the sensors
+if 1
 % Select the VIV mode and lambda
 phi_prime=[];
 lambda1=[];
@@ -150,7 +151,64 @@ end
 
 str= num2str(dt_opt(1))+","+num2str(dt_opt(2));
 disp(str)
-return
+
+
+end
+%% sync the sensors using VIV data
+if 0 
+start_time = vivTable.startDate(VIV_sel);
+end_time = vivTable.endDate(VIV_sel);
+[acc_result] = read_acceleration_data(start_time,end_time,input_data.acc_dir);
+[wind_result] = read_wind_data(start_time,end_time,input_data.wind_dir);
+acc_result=acc_result.mergedData;
+AC2_1 = acc_result.AC2_1';
+AC2_3 = acc_result.AC2_3';
+AC3_1 = acc_result.AC3_1';
+AC3_3 = acc_result.AC3_3';
+AC4_1 = acc_result.AC4_1';
+AC4_3 = acc_result.AC4_3';
+
+sensor_selection= string(vivTable.sensor_selection(VIV_sel));
+sensor_selection = strsplit(sensor_selection, ';'); % 以分号为分隔符分割字符串
+sensor_selection = str2double(sensor_selection); % 将字符串数组转换为double数组
+
+% 检查1和2是否在数组中
+contains1 = ismember(1, sensor_selection);
+contains2 = ismember(2, sensor_selection);
+AC2 = sel_sensor(AC2_1,AC2_3,contains1,contains2);
+
+contains1 = ismember(3, sensor_selection);
+contains2 = ismember(4, sensor_selection);
+AC3 = sel_sensor(AC3_1,AC3_3,contains1,contains2);
+
+contains1 = ismember(5, sensor_selection);
+contains2 = ismember(6, sensor_selection);
+AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
+
+y = [AC2;AC3;AC4];
+figure
+plot(AC2)
+hold on
+plot(AC3)
+plot(AC4)
+[delay2_seconds, delay3_seconds] = sync_cov(AC2, AC3, AC4, 1/dt,2);
+
+
+y(2,:)=circshift(y(2,:),-delay2_seconds/dt);
+y(3,:)=circshift(y(3,:),-delay3_seconds/dt);
+
+[delay2_seconds_verify, delay3_seconds_verify] = sync_cov(y(1,:), y(2,:), y(3,:), 1/dt,2);
+
+figure
+plot(y(1,:))
+hold on 
+plot(y(2,:))
+plot(y(3,:))
+
+str= num2str(delay2_seconds)+","+num2str(delay3_seconds);
+disp(str)
+end
+% return
 %%
 
 
