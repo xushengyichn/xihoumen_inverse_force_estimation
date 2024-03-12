@@ -19,8 +19,8 @@ function [delay2_seconds, delay3_seconds,results] = sync_cov(signal1, signal2, s
     delay3_samples = lags3(I3);
 
     % 将延时从样本数转换为秒
-    delay2_seconds = int32(delay2_samples / sampleRate);
-    delay3_seconds = int32(delay3_samples / sampleRate);
+    delay2_seconds = delay2_samples / sampleRate;
+    delay3_seconds = delay3_samples / sampleRate;
     results.corr2=corr2;
     results.corr3=corr3;
     results.lags2=lags2;

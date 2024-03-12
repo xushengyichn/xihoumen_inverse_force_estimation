@@ -15,7 +15,7 @@ opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 vivTable = readtable('viv_in_the_paper.csv',opts);
 
 %% load acceleration and wind data
-VIV_sel = 11;
+VIV_sel = 3;
 % start_time = vivTable.startDate_update(VIV_sel);
 % end_time = vivTable.endDate_update(VIV_sel);
 start_time = vivTable.startDate(VIV_sel);
@@ -142,194 +142,40 @@ lambda1=[];
 %         lambda1 = [lambda1;lambda{vivTable.(columnName)(VIV_sel)}(vivTable.(columnName_seq)(VIV_sel))];
 %     end
 % end
-switch VIV_sel
-    case 1 
-        phi_prime=Phi_id{42};
-        phi_prime = phi_prime(:,2:7);
-        lambda1=lambda{42};
-        lambda1 = lambda1(2:7);
-    case 2 
-        phi_prime=Phi_id{40};
-        phi_prime = phi_prime(:,1:7);
-        lambda1=lambda{40};
-        lambda1 = lambda1(1:7);
-    case 3
-        phi_prime=Phi_id{40};
-        phi_prime = phi_prime(:,2:8);
-        lambda1=lambda{40};
-        lambda1 = lambda1(2:8);
-    case 4
-        phi_prime=Phi_id{40};
-        phi_prime = phi_prime(:,2:7);
-        lambda1=lambda{40};
-        lambda1 = lambda1(2:7);
-    case 5
-        phi_prime=Phi_id{41};
-        phi_prime = phi_prime(:,2:6);
-        lambda1=lambda{41};
-        lambda1 = lambda1(2:6);
-    case 6
-        phi_prime=Phi_id{43};
-        phi_prime = phi_prime(:,3:7);
-        lambda1=lambda{43};
-        lambda1 = lambda1(3:7);
-    case 7
-        phi_prime=Phi_id{38};
-        phi_prime = phi_prime(:,[1:3,6]);
-        lambda1=lambda{38};
-        lambda1 = lambda1([1:3,6]);
-    case 8
-        phi_prime=Phi_id{40};
-        phi_prime = phi_prime(:,[3:5,9]);
-        lambda1=lambda{40};
-        lambda1 = lambda1([3:5,9]);
-    case 9
-        phi_prime=Phi_id{38};
-        phi_prime = phi_prime(:,[1:5]);
-        lambda1=lambda{38};
-        lambda1 = lambda1([1:5]);
-    case 10
-        phi_prime=Phi_id{42};
-        phi_prime = phi_prime(:,[1:6]);
-        lambda1=lambda{42};
-        lambda1 = lambda1([1:6]);
-    case 11
-        phi_prime=Phi_id{41};
-        phi_prime = phi_prime(:,[1:3,6:7]);
-        lambda1=lambda{41};
-        lambda1 = lambda1([1:3,6:7]);
-end
+phi_prime=Phi_id{40};
+phi_prime = phi_prime(:,2:8);
+lambda1=lambda{40};
+lambda1 = lambda1(2:8);
 
 [dt_opt,psi_opt,mpcw_opt]=sync_mpcw(phi_prime,lambda1,1,{[2] [3]},10/dt,dt,'plot',true,'plotobj',true)
 
 str= num2str(dt_opt(1))+","+num2str(dt_opt(2));
 disp(str)
 
-disp('maximize mpcw:')
-fprintf('Signal 2 delay relative to Signal 1: %f seconds\n', dt_opt(1));
-fprintf('Signal 3 delay relative to Signal 1: %f seconds\n', dt_opt(2));
 
 end
-%% set period
-period = 2.5
 %% sync the sensors using VIV data
 if 1 
-disp('no filter:')
-[delay2_seconds, delay3_seconds,results] = sync_cov(AC2, AC3, AC4, fs,period);
+
+[delay2_seconds, delay3_seconds,results] = sync_cov(AC2, AC3, AC4, fs,10);
 
 
-% y(2,:)=circshift(y(2,:),-delay2_seconds/dt);
-% y(3,:)=circshift(y(3,:),-delay3_seconds/dt);
-% 
-% 
-% figure
-% plot(results.lags2*dt,results.corr2)
-% figure
-% plot(results.lags3*dt,results.corr3)
-% 
-% str= num2str(delay2_seconds)+","+num2str(delay3_seconds);
-% disp(str)
-% 
-% [delay2_seconds_verify, delay3_seconds_verify,results] = sync_cov(y(1,:), y(2,:), y(3,:), fs,period);
+y(2,:)=circshift(y(2,:),-delay2_seconds/dt);
+y(3,:)=circshift(y(3,:),-delay3_seconds/dt);
 
-end
 
-%% sync the sensors using VIV data
-if 1 
-    disp('after applying lowpass filter 0.1Hz')
-    lowpassfreq = 0.1;
-    y_lowpass(1,:) = lowpass(y(1,:),lowpassfreq,fs,'Steepness',0.9);
-    y_lowpass(2,:) = lowpass(y(2,:),lowpassfreq,fs,'Steepness',0.9);
-    y_lowpass(3,:) = lowpass(y(3,:),lowpassfreq,fs,'Steepness',0.9);
+figure
+plot(results.lags2/dt,results.corr2)
+figure
+plot(results.lags3/dt,results.corr3)
 
-    [f, magnitude] = fft_transform(fs,y(1,:));
-    figure
-    plot(f,magnitude)
-    
-    [f, magnitude] = fft_transform(fs,y_lowpass(1,:));
-    figure
-    plot(f,magnitude)
+str= num2str(delay2_seconds)+","+num2str(delay3_seconds);
+disp(str)
 
-    [delay2_seconds, delay3_seconds,results] = sync_cov(y_lowpass(1,:), y_lowpass(2,:), y_lowpass(3,:), fs,period);
-    
-
-    figure
-    hold on
-    plot(y_lowpass(1,:))
-    plot(y_lowpass(2,:))
-    plot(y_lowpass(3,:))
-
-    figure
-    plot(results.lags2*dt,results.corr2)
-    figure
-    plot(results.lags3*dt,results.corr3)
+[delay2_seconds_verify, delay3_seconds_verify,results] = sync_cov(y(1,:), y(2,:), y(3,:), fs,600);
 
 end
 
-
-%% sync the sensors using VIV data
-if 1 
-    disp('after applying highpass filter 0.35Hz')
-    highpassfreq = 0.35;
-    y_highpass(1,:) = highpass(y(1,:),highpassfreq,fs,'Steepness',0.9);
-    y_highpass(2,:) = highpass(y(2,:),highpassfreq,fs,'Steepness',0.9);
-    y_highpass(3,:) = highpass(y(3,:),highpassfreq,fs,'Steepness',0.9);
-
-    [f, magnitude] = fft_transform(fs,y(1,:));
-    figure
-    plot(f,magnitude)
-    
-    [f, magnitude] = fft_transform(fs,y_highpass(1,:));
-    figure
-    plot(f,magnitude)
-
-    [delay2_seconds, delay3_seconds,results] = sync_cov(y_highpass(1,:), y_highpass(2,:), y_highpass(3,:), fs,period);
-    
-    figure
-    hold on
-    plot(y_highpass(1,:))
-    plot(y_highpass(2,:))
-    plot(y_highpass(3,:))
-
-    figure
-    plot(results.lags2*dt,results.corr2)
-    figure
-    plot(results.lags3*dt,results.corr3)
-
-end
-
-%% sync the sensors using VIV data
-if 1 
-    disp('after applying bandpass filter [0.3 0.35]Hz')
-    bandpassfreq = [0.3,0.35];
-
-    y_bandpass(1,:) = bandpass(y(1,:),bandpassfreq,fs,'Steepness',0.9);
-    y_bandpass(2,:) = bandpass(y(2,:),bandpassfreq,fs,'Steepness',0.9);
-    y_bandpass(3,:) = bandpass(y(3,:),bandpassfreq,fs,'Steepness',0.9);
-
-    [f, magnitude] = fft_transform(fs,y(1,:));
-    figure
-    plot(f,magnitude)
-    
-    [f, magnitude] = fft_transform(fs,y_bandpass(1,:));
-    figure
-    plot(f,magnitude)
-
-    [delay2_seconds, delay3_seconds,results] = sync_cov(y_bandpass(1,:), y_bandpass(2,:), y_bandpass(3,:), fs,period);
-    
-    figure
-    hold on
-    plot(y_bandpass(1,:))
-    plot(y_bandpass(2,:))
-    plot(y_bandpass(3,:))
-
-    figure
-    plot(results.lags2*dt,results.corr2)
-    figure
-    plot(results.lags3*dt,results.corr3)
-
-end
-    
 tilefigs
 
 %% functions
