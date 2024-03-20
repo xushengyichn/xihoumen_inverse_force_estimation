@@ -24,7 +24,7 @@ close all
 run("CommonCommand.m")
 %% 0 绘图参数
 fig_bool = ON;
-num_figs_in_row = 5; %每一行显示几个图
+num_figs_in_row = 2; %每一行显示几个图
 figPos = figPosMedium; %图的大小，参数基于InitScript.m中的设置
 %设置图片间隔
 gap_between_images = [0, 0];
@@ -53,7 +53,7 @@ node_modal_shape=[nodes.NODE, nodes.X, nodes.Y, nodes.Z];
 % node_modal_shape_original = node_modal_shape;
 Mapping_data = output.Mapping;
 modal_shape_all = output.eig_vec;
-mode_num  =5;
+mode_num  =32;
 output.Freq(mode_num)
 modal_shape_plot = modal_shape_all(:,mode_num);
 modal_shape_plot = modal_shape_plot/max(abs(modal_shape_plot))*50;

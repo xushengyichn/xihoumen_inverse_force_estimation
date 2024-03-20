@@ -336,7 +336,7 @@ if 1
 
 
 
-    stabplot(omega_id,xi_id,order,Phi_id,'cov_w',cov_omega,'cov_xi',cov_xi,'std_w_tol',0.1,'std_xi_tol',1);
+    stabplot(omega_id,xi_id,order,Phi_id,'cov_omega',cov_omega,'cov_xi',cov_xi,'std_omega_tol',0.1,'std_xi_tol',1);
 
 
     %
