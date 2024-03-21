@@ -1098,8 +1098,9 @@ for k1 = 1:size(modal_state,1)
 
     [f, magnitude] = fft_transform(50,modal_state(k1,:)*max(abs(result_Main.mode_deck(:,k1))));
     figure
-    plot(f, magnitude)
+    semilogy(f, magnitude)
     xlim([0,1])
+    ylim([1e-10,0.5])
 end
 
 
