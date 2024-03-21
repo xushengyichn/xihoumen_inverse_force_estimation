@@ -20,7 +20,7 @@ tic
 % startDate_global = result.startDate;
 % endDate_global = result.endDate;
 if ~exist("VIV_sel",'var')
-    VIV_sel = 11;
+    VIV_sel = 3;
 end
 opts = detectImportOptions('viv_in_the_paper.csv');
 % opts = detectImportOptions('vivData.csv');

@@ -20,7 +20,7 @@ tic
 % startDate_global = result.startDate;
 % endDate_global = result.endDate;
 if ~exist("VIV_sel",'var')
-    VIV_sel = 11;
+    VIV_sel = 3;
 end
 opts = detectImportOptions('viv_in_the_paper.csv');
 % opts = detectImportOptions('vivData.csv');
@@ -82,13 +82,17 @@ input_data.sigma_noise = 10 ^ (-1.3);
 
 
 %% logL优化参数
-modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 32];
-moderemove = [4,9,10];
-modeall(moderemove)=[];
+modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33, 39, 43, 44, 46, 49, 52, 59, 61, 65, 69, 71, 76, 78, 83, 87, 94, 98];
+% modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+% moderemove = [4,9,10];
+% modeall(moderemove)=[];
+
+
 modesel = modeall;
 if ~exist("modelupdate",'var')
     modelupdate = true;
 end
+
 input_data.modelupdate = modelupdate;
 % modesel = [2,3,5,6,13,20,22,33];%去掉了两个广义坐标为0的点模态
 
@@ -1081,6 +1085,28 @@ filename = sprintf('result_%s_%s_%s.mat', startDate_global, num2str(VIV_sel),str
 save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_seq","zeta","U_sel_loc_1","AoA_sel_1","U_sel_loc_2","AoA_sel_2","U_sel_loc_3","AoA_sel_3","beta_deg_mean_UA1a","beta_deg_mean_UA1b","beta_deg_mean_UA2a","beta_deg_mean_UA2b","beta_deg_mean_UA3a","beta_deg_mean_UA3b","t_cycle_mean_temp"...
     ,"TI_u_sel_1","TI_u_sel_2","TI_u_sel_3","TI_v_sel_1","TI_v_sel_2","TI_v_sel_3","TI_w_sel_1","TI_w_sel_2","TI_w_sel_3")
 
+
+%% plot state estimate
+close all
+modal_state = result_Main.x_k_k(1:(end-2)/2,:);
+
+
+
+for k1 = 1:size(modal_state,1)
+    figure
+    plot(t,modal_state(k1,:)*max(abs(result_Main.mode_deck(:,k1))))
+
+    [f, magnitude] = fft_transform(50,modal_state(k1,:)*max(abs(result_Main.mode_deck(:,k1))));
+    figure
+    plot(f, magnitude)
+    xlim([0,1])
+end
+
+
+
+
+
+tilefigs([4 14],'',[],[100 0],[100 150],[100 100])
     %% functions
     function target = fitnessFunction(params, external_params)
     input.lambda_VIV = 10 ^ params(1);

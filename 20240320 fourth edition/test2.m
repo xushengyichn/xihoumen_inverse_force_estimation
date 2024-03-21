@@ -67,14 +67,14 @@ T_new = T_original;
 % T_new = 1:1:length(AC2_1);
 
 
-figure
-scatter(UA1.Time_Start,UA1.U)
-hold on
-scatter(UA2.Time_Start,UA2.U)
-scatter(UA3.Time_Start,UA3.U)
-scatter(UA4.Time_Start,UA4.U)
-scatter(UA5.Time_Start,UA5.U)
-scatter(UA6.Time_Start,UA6.U)
+% figure
+% scatter(UA1.Time_Start,UA1.U)
+% hold on
+% scatter(UA2.Time_Start,UA2.U)
+% scatter(UA3.Time_Start,UA3.U)
+% scatter(UA4.Time_Start,UA4.U)
+% scatter(UA5.Time_Start,UA5.U)
+% scatter(UA6.Time_Start,UA6.U)
 
 figure
 plot(T_new,AC2_1)
@@ -106,7 +106,20 @@ AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
 
 y = [AC2;AC3;AC4];
 
+[f, magnitude] = fft_transform(fs,y(1,:));
+figure
+semilogy(f,magnitude)
+xlim([0,1.2])
 
+[f, magnitude] = fft_transform(fs,y(2,:));
+figure
+semilogy(f,magnitude)
+xlim([0,1.2])
+
+[f, magnitude] = fft_transform(fs,y(3,:));
+figure
+semilogy(f,magnitude)
+xlim([0,1.2])
 
 figure
 plot(T_new,AC2)
@@ -119,26 +132,42 @@ legend('AC2','AC3','AC4')
 if 1 
 
     bandpassfreq = [0.63,0.66];
+    % bandpassfreq = [0.95,1];
+
+    y_bandpass(1,:) = bandpass(y(1,:),bandpassfreq,fs,'Steepness',0.9);
+    y_bandpass(2,:) = bandpass(y(2,:),bandpassfreq,fs,'Steepness',0.9);
+    y_bandpass(3,:) = bandpass(y(3,:),bandpassfreq,fs,'Steepness',0.9);
+
+
+
+    [f, magnitude] = fft_transform(fs,y_bandpass(1,:));
+    figure
+    plot(f,magnitude)
+
+
+    figure
+    hold on
+    plot(y_bandpass(1,:))
+    plot(y_bandpass(2,:))
+    plot(y_bandpass(3,:))
+    legend('AC2','AC3','AC4')
+
+
+end
+    
+
+
+%% 
+if 1 
+
+    % bandpassfreq = [0.63,0.66];
     bandpassfreq = [0.95,1];
 
     y_bandpass(1,:) = bandpass(y(1,:),bandpassfreq,fs,'Steepness',0.9);
     y_bandpass(2,:) = bandpass(y(2,:),bandpassfreq,fs,'Steepness',0.9);
     y_bandpass(3,:) = bandpass(y(3,:),bandpassfreq,fs,'Steepness',0.9);
 
-    [f, magnitude] = fft_transform(fs,y(1,:));
-    figure
-    semilogy(f,magnitude)
-    xlim([0,1.2])
-    
-    [f, magnitude] = fft_transform(fs,y(2,:));
-    figure
-    semilogy(f,magnitude)
-    xlim([0,1.2])
 
-    [f, magnitude] = fft_transform(fs,y(3,:));
-    figure
-    semilogy(f,magnitude)
-    xlim([0,1.2])
 
     [f, magnitude] = fft_transform(fs,y_bandpass(1,:));
     figure

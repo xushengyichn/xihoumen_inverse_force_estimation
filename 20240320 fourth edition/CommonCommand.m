@@ -123,9 +123,9 @@ elseif strcmp(computer_name,'ROG-SHENGYI')
     % 检查E盘是否存在
     if exist('E:\', 'dir')
         % 如果E盘存在，使用E盘的路径
-        input_data.acc_dir = "E:\result";
-        input_data.wind_dir = "E:\result_wind_10min";
-        input_data.wind_dir_all = "E:\result_wind";
+        input_data.acc_dir = "E:\xihoumendata\result";
+        input_data.wind_dir = "E:\xihoumendata\result_wind_10min";
+        input_data.wind_dir_all = "E:\xihoumendata\result_wind";
     else
         % 如果E盘不存在，使用D盘的路径
         input_data.acc_dir = "D:\xihoumendata\acc";

@@ -64,8 +64,10 @@ end
 
 %% plot FEM with different element with modal shape
 output = ImportMK(100, 'KMatrix.matrix', 'MMatrix.matrix', 'nodeondeck.txt', 'KMatrix.mapping', 'nodegap.txt');
-output.mode_num= 52;
-output.mode_num= 83;
+% output.mode_num= 22;
+% output.mode_num= 52;
+% output.mode_num= 78;
+output.mode_num= 7;
 output.amplify = 50;
 disp(output.Freq(output.mode_num))
 [X,Y,Z,nodes,elements]=plot_FEM_with_element('nodes.txt','elements.txt','if_modeshape',true,'FEM_data',output);
