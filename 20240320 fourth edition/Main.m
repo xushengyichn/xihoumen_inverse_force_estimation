@@ -82,9 +82,9 @@ input_data.sigma_noise = 10 ^ (-1.3);
 
 
 %% logL优化参数
-modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33, 39, 43, 44, 46, 49, 52, 59, 61, 65, 69, 71, 76, 78, 83, 87, 94, 98];
-% modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
-% moderemove = [4,9,10];
+% modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33, 39, 43, 44, 46, 49, 52, 59, 61, 65, 69, 71, 76, 78, 83, 87, 94, 98];
+modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
+moderemove = [4,9,10];
 % modeall(moderemove)=[];
 
 
@@ -144,7 +144,7 @@ b.setup([], [], []);
         input_data_temp.Q_value = 10 ^ (-6);
         input_data_temp.sigma_noise = 10 ^ (-1.3);
         input_data_temp.sigma_buff = 10 ^ (0.541113482743460);
-        [result_Main] = KalmanMain(input_data_temp, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
+        [result_Main] = KalmanMain(input_data_temp,'shouldFilterYn', true, 'showtext', false, 'showplot', false, 'filterstyle', 'nofilter');
         logLs(k1) = result_Main.logL;
         logSks(k1) = result_Main.logSk;
         logeks(k1) = result_Main.logek;
@@ -381,7 +381,7 @@ end
 %% Apply kalman filter
 % [result_Main] = KalmanMain(input, 'showtext', true, 'showplot', false, 'filterstyle', 'fft', 'f_keep', 0.33 * [0.9, 1.1]);
 
-[result_Main] = KalmanMain(input_data, 'showtext', showtext, 'showplot', showplot, 'filterstyle', 'nofilter');
+[result_Main] = KalmanMain(input_data, 'shouldFilterYn', true,'showtext', showtext, 'showplot', showplot, 'filterstyle', 'nofilter');
 logL = result_Main.logL;
 logSk = result_Main.logSk;
 logek = result_Main.logek;
@@ -1085,7 +1085,7 @@ filename = sprintf('result_%s_%s_%s.mat', startDate_global, num2str(VIV_sel),str
 save(filename, 'VIV_sel',"amp_filter","zeta_filter","datetimeArray","VIV_mode_seq","zeta","U_sel_loc_1","AoA_sel_1","U_sel_loc_2","AoA_sel_2","U_sel_loc_3","AoA_sel_3","beta_deg_mean_UA1a","beta_deg_mean_UA1b","beta_deg_mean_UA2a","beta_deg_mean_UA2b","beta_deg_mean_UA3a","beta_deg_mean_UA3b","t_cycle_mean_temp"...
     ,"TI_u_sel_1","TI_u_sel_2","TI_u_sel_3","TI_v_sel_1","TI_v_sel_2","TI_v_sel_3","TI_w_sel_1","TI_w_sel_2","TI_w_sel_3")
 
-
+return
 %% plot state estimate
 close all
 modal_state = result_Main.x_k_k(1:(end-2)/2,:);

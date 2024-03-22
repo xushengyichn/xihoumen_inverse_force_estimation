@@ -409,10 +409,27 @@ yn(6,:)=circshift(yn(6,:),-delay3/dt);
 % yn(2, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
 
 if shouldFilterYn == true
-    [f, magnitude] = fft_transform(fs, yn(3,:));
-    [~, idx] = max(magnitude);
-    f_keep = [f(idx) * 0.9, f(idx) * 1.1];
-    yn = bandpass(yn', f_keep, fs)';
+    yn_temp = yn;
+    clear yn
+    lowpassfreq = 0.36;
+    yn(1,:) = lowpass(yn_temp(1,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
+    yn(2,:) = lowpass(yn_temp(2,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
+    yn(3,:) = lowpass(yn_temp(3,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
+    yn(4,:) = lowpass(yn_temp(4,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
+    yn(5,:) = lowpass(yn_temp(5,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
+    yn(6,:) = lowpass(yn_temp(6,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
+    [f, magnitude] =fft_transform(fs,yn_temp(1,:));
+    figure
+    semilogy(f,magnitude)
+    xlim([0,1])
+    [f, magnitude] =fft_transform(fs,yn(1,:));
+    figure
+    semilogy(f,magnitude)
+    xlim([0,1])
+    figure
+    plot(uniqueTimestamps,yn(1,:))
+    hold on
+    plot(uniqueTimestamps,yn(2,:))
 end
 
 
