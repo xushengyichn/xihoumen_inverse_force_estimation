@@ -2,8 +2,8 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-12-21 23:06:32
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2024-02-21 10:24:49
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\20231203 third edition\CommonCommand.m
+%LastEditTime: 2024-03-24 10:34:17
+%FilePath: /ssm_tools_sy/Users/xushengyi/Documents/GitHub/xihoumen_inverse_force_estimation/20240320 fourth edition/CommonCommand.m
 %Description: 
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -20,7 +20,7 @@ switch osType
     case 'GLNXA64' % 对于 Linux 系统
         % 执行 Linux 专用命令
         [status, result] = system('hostname');
-    case 'MACA64' % 对于 Mac 系统
+    case 'MACI64' % 对于 Mac 系统
         % 执行 Mac 专用命令
         computer_name = getenv('LOGNAME');% mac获取登录名
     otherwise
@@ -104,7 +104,7 @@ switch osType
     case 'GLNXA64' % 对于 Linux 系统
         % 执行 Linux 专用命令
         [status, result] = system('hostname');
-    case 'MACA64' % 对于 Mac 系统
+    case 'MACI64' % 对于 Mac 系统
         % 执行 Mac 专用命令
         computer_name = getenv('LOGNAME');% mac获取登录名
     otherwise
@@ -117,8 +117,9 @@ if strcmp(computer_name,'SHENGYI_HP')
     input_data.wind_dir = "F:\test\result_wind_10min";
     input_data.wind_dir_all = "F:\test\result_wind";
 elseif strcmp(computer_name,'xushengyi')
-    input_data.acc_dir = "/Users/xushengyi/Documents/xihoumendata/acc";
-    input_data.wind_dir = "/Users/xushengyi/Documents/xihoumendata/wind";
+    input_data.acc_dir = "/Volumes/Untitled/xihoumendata/result";
+    input_data.wind_dir = "/Volumes/Untitled/xihoumendata/result_wind_10min";
+    input_data.wind_dir_all = "/Volumes/Untitled/xihoumendata/result_wind";
 elseif strcmp(computer_name,'ROG-SHENGYI')
     % 检查E盘是否存在
     if exist('E:\', 'dir')
