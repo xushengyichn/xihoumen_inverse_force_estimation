@@ -85,7 +85,7 @@ input_data.sigma_noise = 10 ^ (-1.3);
 % modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33, 39, 43, 44, 46, 49, 52, 59, 61, 65, 69, 71, 76, 78, 83, 87, 94, 98];
 modeall = [2, 3, 5, 6, 7, 13, 20, 22, 27, 33];
 moderemove = [4,9,10];
-% modeall(moderemove)=[];
+modeall(moderemove)=[];
 
 
 modesel = modeall;

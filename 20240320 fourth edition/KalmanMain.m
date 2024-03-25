@@ -2,8 +2,8 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2024-03-03 15:55:31
-%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\20231203 third edition\KalmanMain.m
+%LastEditTime: 2024-03-25 20:14:51
+%FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\20240320 fourth edition\KalmanMain.m
 %Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
 %Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
@@ -219,9 +219,9 @@ mode_deck = Result.mode_deck; mode_deck_re = Result.mode_deck_re; node_loc = Res
 Freq = Result.Freq;
 MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
-zeta = ones(size(modesel)) * 0.3/100;
+% zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
-% zeta = importdata("zeta_update.mat");
+zeta = importdata("zeta_update.mat");
 
 opts = detectImportOptions('viv_in_the_paper.csv');
 % opts = detectImportOptions('vivData.csv');
@@ -412,12 +412,12 @@ if shouldFilterYn == true
     yn_temp = yn;
     clear yn
     lowpassfreq = 0.36;
-    yn(1,:) = lowpass(yn_temp(1,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
-    yn(2,:) = lowpass(yn_temp(2,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
-    yn(3,:) = lowpass(yn_temp(3,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
-    yn(4,:) = lowpass(yn_temp(4,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
-    yn(5,:) = lowpass(yn_temp(5,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
-    yn(6,:) = lowpass(yn_temp(6,:),lowpassfreq,fs,'ImpulseResponse','fir',Steepness=0.99999999);
+    yn(1,:) = lowpass(yn_temp(1,:),lowpassfreq,fs,Steepness=0.99);
+    yn(2,:) = lowpass(yn_temp(2,:),lowpassfreq,fs,Steepness=0.99);
+    yn(3,:) = lowpass(yn_temp(3,:),lowpassfreq,fs,Steepness=0.99);
+    yn(4,:) = lowpass(yn_temp(4,:),lowpassfreq,fs,Steepness=0.99);
+    yn(5,:) = lowpass(yn_temp(5,:),lowpassfreq,fs,Steepness=0.99);
+    yn(6,:) = lowpass(yn_temp(6,:),lowpassfreq,fs,Steepness=0.99);
     [f, magnitude] =fft_transform(fs,yn_temp(1,:));
     figure
     semilogy(f,magnitude)
