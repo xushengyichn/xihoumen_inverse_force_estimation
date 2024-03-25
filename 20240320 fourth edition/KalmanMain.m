@@ -223,20 +223,44 @@ MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 % zeta = ones(size(modesel)) * 0.0/100;
 zeta = importdata("zeta_update.mat");
 
-opts = detectImportOptions('viv_in_the_paper.csv');
-% opts = detectImportOptions('vivData.csv');
-% 设置日期时间格式
-% 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
-opts = setvartype(opts, 'startDate', 'datetime'); % 确保变量类型为 datetime
-opts = setvartype(opts, 'endDate', 'datetime'); % 确保变量类型为 datetime
-opts = setvartype(opts, 'startDate_update', 'datetime'); % 确保变量类型为 datetime
-opts = setvartype(opts, 'endDate_update', 'datetime'); % 确保变量类型为 datetime
-opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
-opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
-opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
-opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+% opts = detectImportOptions('viv_in_the_paper.csv');
+% % opts = detectImportOptions('vivData.csv');
+% % 设置日期时间格式
+% % 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
+% opts = setvartype(opts, 'startDate', 'datetime'); % 确保变量类型为 datetime
+% opts = setvartype(opts, 'endDate', 'datetime'); % 确保变量类型为 datetime
+% opts = setvartype(opts, 'startDate_update', 'datetime'); % 确保变量类型为 datetime
+% opts = setvartype(opts, 'endDate_update', 'datetime'); % 确保变量类型为 datetime
+% opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+% opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+% opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+% opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+% 
+% vivTable = readtable('viv_in_the_paper.csv',opts);
 
-vivTable = readtable('viv_in_the_paper.csv',opts);
+opts = delimitedTextImportOptions("NumVariables", 25);
+
+% Specify range and delimiter
+opts.DataLines = [2, Inf];
+opts.Delimiter = ",";
+
+% Specify column names and types
+opts.VariableNames = ["caseNumber", "startDate", "endDate", "Fre", "startDate_update", "endDate_update", "bad_data", "k_value", "sensor_selection", "delay2", "delay3", "mode1_SSI", "mode1_seq", "mode2_SSI", "mode2_seq", "mode3_SSI", "mode3_seq", "mode4_SSI", "mode4_seq", "mode5_SSI", "mode5_seq", "mode6_SSI", "mode6_seq", "mode7_SSI", "mode7_seq"];
+opts.VariableTypes = ["double", "datetime", "datetime", "double", "datetime", "datetime", "double", "double", "categorical", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double"];
+
+% Specify file level properties
+opts.ExtraColumnsRule = "ignore";
+opts.EmptyLineRule = "read";
+
+% Specify variable properties
+opts = setvaropts(opts, "sensor_selection", "EmptyFieldRule", "auto");
+opts = setvaropts(opts, "startDate", "InputFormat", "MM/dd/yyyy HH:mm", "DatetimeFormat", "preserveinput");
+opts = setvaropts(opts, "endDate", "InputFormat", "MM/dd/yyyy HH:mm", "DatetimeFormat", "preserveinput");
+opts = setvaropts(opts, "startDate_update", "InputFormat", "MM/dd/yyyy HH:mm", "DatetimeFormat", "preserveinput");
+opts = setvaropts(opts, "endDate_update", "InputFormat", "MM/dd/yyyy HH:mm", "DatetimeFormat", "preserveinput");
+
+% Import the data
+vivTable = readtable('viv_in_the_paper.csv', opts);
 
 %% modal updating
 if input.modelupdate
