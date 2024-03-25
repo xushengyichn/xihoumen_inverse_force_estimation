@@ -93,8 +93,8 @@ input_data.VIV_sel = VIV_sel;
 % % input_data.sigma_noise = 10 ^ (0);
 
 
-input_data.lambda_VIV = 10 ^ (-3.972197664915089);
-input_data.sigma_p_VIV = 19.811759673791514;
+input_data.lambda_VIV = 5.689866029018299*10^(-4)
+input_data.sigma_p_VIV = 7.1969;
 input_data.sigma_buff = 10 ^ (0.5411);
 
 
