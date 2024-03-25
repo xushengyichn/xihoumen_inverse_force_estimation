@@ -30,13 +30,66 @@ Acc_Data.mergedData.AC4_2 = fft_filter(fs, Acc_Data.mergedData.AC4_2, f_keep)';
 Acc_Data.mergedData.AC4_3 = fft_filter(fs, Acc_Data.mergedData.AC4_3, f_keep)';
 
 
-yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
-yn(2, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
-yn(3, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
-yn(4, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
-yn(5, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
-yn(6, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
+opts = detectImportOptions('viv_in_the_paper.csv');
+% opts = detectImportOptions('vivData.csv');
+% 设置日期时间格式
+% 假设日期时间格式为 'MM/dd/yyyy HH:mm'，请根据您的实际情况进行调整
+opts = setvartype(opts, 'startDate', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'endDate', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'startDate_update', 'datetime'); % 确保变量类型为 datetime
+opts = setvartype(opts, 'endDate_update', 'datetime'); % 确保变量类型为 datetime
+opts = setvaropts(opts, 'startDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'startDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
+opts = setvaropts(opts, 'endDate_update', 'InputFormat', 'MM/dd/yyyy HH:mm');
 
+vivTable = readtable('viv_in_the_paper.csv',opts);
+input.VIV_sel =3;
+acc_result=Acc_Data.mergedData;
+AC2_1 = acc_result.AC2_1';
+AC2_3 = acc_result.AC2_3';
+AC3_1 = acc_result.AC3_1';
+AC3_3 = acc_result.AC3_3';
+AC4_1 = acc_result.AC4_1';
+AC4_3 = acc_result.AC4_3';
+
+sensor_sel= string(vivTable.sensor_selection(input.VIV_sel));
+sensor_sel = strsplit(sensor_sel, ';'); % 以分号为分隔符分割字符串
+sensor_sel = str2double(sensor_sel); % 将字符串数组转换为double数组
+
+% 检查1和2是否在数组中
+contains1 = ismember(1, sensor_sel);
+contains2 = ismember(2, sensor_sel);
+AC2 = sel_sensor(AC2_1,AC2_3,contains1,contains2);
+
+contains1 = ismember(3, sensor_sel);
+contains2 = ismember(4, sensor_sel);
+AC3 = sel_sensor(AC3_1,AC3_3,contains1,contains2);
+
+contains1 = ismember(5, sensor_sel);
+contains2 = ismember(6, sensor_sel);
+AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
+
+yn = [AC2;AC2;AC3;AC3;AC4;AC4]/ 1000 * 9.8;
+
+delay2= int32(vivTable.delay2(input.VIV_sel));
+delay3= int32(vivTable.delay3(input.VIV_sel));
+
+yn(3,:)=circshift(yn(3,:),-delay2/dt);
+yn(4,:)=circshift(yn(4,:),-delay2/dt);
+
+
+yn(5,:)=circshift(yn(5,:),-delay3/dt);
+yn(6,:)=circshift(yn(6,:),-delay3/dt);
+
+% yn(1, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
+% yn(2, :) = (Acc_Data.mergedData.AC2_1 / 1000 * 9.8+Acc_Data.mergedData.AC2_3 / 1000 * 9.8)/2;
+% yn(3, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
+% yn(4, :) = (Acc_Data.mergedData.AC3_1 / 1000 * 9.8+Acc_Data.mergedData.AC3_3 / 1000 * 9.8)/2;
+% % yn(5, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
+% % yn(6, :) = (Acc_Data.mergedData.AC4_1 / 1000 * 9.8+Acc_Data.mergedData.AC4_3 / 1000 * 9.8)/2;
+% yn(5, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
+% yn(6, :) = Acc_Data.mergedData.AC4_3 / 1000 * 9.8;
 
 modesel = 22;
 nmodes = length(modesel); ns = nmodes * 2;
@@ -48,15 +101,12 @@ Mapping_data = Result.Mapping;
 phi = mode_vec; %模态向量 每一列是一个模态
 nodegap = Result.nodegap;
 
-
-load("Modal_updating_02_04_2013_23_15_00_02_04_2013_23_45_00.mat")
+load("v2_Modal_updating_02_04_2013_23_15_00_02_04_2013_23_45_00.mat")
+load("zeta_update.mat")
 VIV_seq = 7;
-xi = table_fre.damping_ratio(VIV_seq);
-Omega = 2 * pi * table_fre.frequency(VIV_seq);
-
-
-% xi = 0.3/100;
-% Omega = 2 * pi * Result.Freq;
+% xi = table_fre.damping_ratio(VIV_seq);
+xi = zeta(VIV_seq);
+Omega = 2 * pi *  table_fre.frequency(VIV_seq);
 Fs = 50;
 MM = 1;
 KK = MM * Omega ^ 2;
@@ -94,7 +144,6 @@ fw(abs(freq) < 0.3) = 0;
 ft = ifft(ifftshift(fw));
 ft_real = real(ft);
 ft_imag = imag(ft);
-
 
 % modal displacement
 zw = Hw .* fw;
@@ -134,7 +183,7 @@ num_figs_in_row = [];
 newfigure = false;
 firstfigure=true;
 
-data = importdata("temp.mat");
+data = importdata("temp2.mat");
 t= data.t;
 F_filter = data.F_filter;
 
@@ -219,3 +268,22 @@ title("Frequency domain");
 xlabel("Frequency (Hz)")
 ylabel("Amplitude")
 current_plot = current_plot + 1;
+function data = sel_sensor(data1,data2,contains1,contains2)
+% 基于条件执行不同的操作
+if contains1 && ~contains2
+    % 数组仅包含1的操作
+    disp('Array contains only contains 1.');
+    data=data1;
+elseif ~contains1 && contains2
+    % 数组仅包含2的操作
+    disp('Array contains only contains 2.');
+    data=data2;
+elseif contains1 && contains2
+    % 数组同时包含1和2的操作
+    disp('Array contains both contains 1 and contains 2.');
+    data = (data1+data2)/2;
+else
+    % 数组既不包含1也不包含2的操作
+    error('Array contains neither contains 1 nor contains 2.');
+end
+end
