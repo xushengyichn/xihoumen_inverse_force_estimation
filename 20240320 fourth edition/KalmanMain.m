@@ -2,7 +2,7 @@
 %Author: ShengyiXu xushengyichn@outlook.com
 %Date: 2023-10-09 22:23:15
 %LastEditors: xushengyichn xushengyichn@outlook.com
-%LastEditTime: 2024-03-25 20:14:51
+%LastEditTime: 2024-03-25 22:11:02
 %FilePath: \Exercises-for-Techniques-for-estimation-in-dynamics-systemsd:\git\xihoumen_inverse_force_estimation\20240320 fourth edition\KalmanMain.m
 %Description: 加上更多模态，不要只留下单一模态，看看能不能起到滤波的作用
 %
@@ -385,15 +385,15 @@ sensor_sel = str2double(sensor_sel); % 将字符串数组转换为double数组
 % 检查1和2是否在数组中
 contains1 = ismember(1, sensor_sel);
 contains2 = ismember(2, sensor_sel);
-AC2 = sel_sensor(AC2_1,AC2_3,contains1,contains2);
+AC2 = sel_sensor(AC2_1,AC2_3,contains1,contains2,showtext);
 
 contains1 = ismember(3, sensor_sel);
 contains2 = ismember(4, sensor_sel);
-AC3 = sel_sensor(AC3_1,AC3_3,contains1,contains2);
+AC3 = sel_sensor(AC3_1,AC3_3,contains1,contains2,showtext);
 
 contains1 = ismember(5, sensor_sel);
 contains2 = ismember(6, sensor_sel);
-AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2);
+AC4 = sel_sensor(AC4_1,AC4_3,contains1,contains2,showtext);
 
 yn = [AC2;AC2;AC3;AC3;AC4;AC4]/ 1000 * 9.8;
 
@@ -805,7 +805,7 @@ end
 
 end
 
-function data = sel_sensor(data1,data2,contains1,contains2)
+function data = sel_sensor(data1,data2,contains1,contains2,showtext)
 % 基于条件执行不同的操作
 if contains1 && ~contains2
     % 数组仅包含1的操作
