@@ -809,15 +809,21 @@ function data = sel_sensor(data1,data2,contains1,contains2)
 % 基于条件执行不同的操作
 if contains1 && ~contains2
     % 数组仅包含1的操作
-    disp('Array contains only contains 1.');
+    if showtext
+        disp('Array contains only contains 1.');
+    end
     data=data1;
 elseif ~contains1 && contains2
     % 数组仅包含2的操作
+    if showtext
     disp('Array contains only contains 2.');
+    end
     data=data2;
 elseif contains1 && contains2
     % 数组同时包含1和2的操作
-    disp('Array contains both contains 1 and contains 2.');
+    if showtext
+        disp('Array contains both contains 1 and contains 2.');
+    end
     data = (data1+data2)/2;
 else
     % 数组既不包含1也不包含2的操作
