@@ -34,8 +34,8 @@ for k1 =  5
     dirName = input_data.wind_dir_all;
     start_time = vivTable.startDate(k1);
     end_time = vivTable.endDate(k1);
-    start_time = datetime(2013,3,30,1,30,0);
-    end_time = datetime(2013,3,30,2,0,0);
+    start_time = datetime(2013,7,11,18,0,0);
+    end_time = datetime(2013,7,11,19,0,0);
     % start_time_update = vivTable.update_startDate(k1);
     % end_time_update = vivTable.endDate_update(k1);
     start_time.Format = 'dd-MMM-yyyy HH:mm:ss';
@@ -56,6 +56,34 @@ AC3_3 = Acc_Data.AC3_3;
 AC4_1 = Acc_Data.AC4_1;
 AC4_3 = Acc_Data.AC4_3; 
 
+figure
+plot(t_acc,AC2_1)
+xlabel("Time")
+ylabel('Acceleration $\mu g$', 'Interpreter', 'latex')
+ylim([-60,60])
+figure
+plot(t_acc,AC3_1)
+xlabel("Time")
+ylabel('Acceleration $\mu g$', 'Interpreter', 'latex')
+ylim([-60,60])
+
+figure
+plot(t_acc,AC4_1)
+xlabel("Time")
+ylabel('Acceleration $\mu g$', 'Interpreter', 'latex')
+ylim([-60,60])
+
+figure
+hold on
+plot(t_acc,AC2_1)
+plot(t_acc,AC3_1)
+plot(t_acc,AC4_1)
+plot(t_acc,AC2_3)
+plot(t_acc,AC3_3)
+plot(t_acc,AC4_3)
+xlabel("Time")
+ylabel('Acceleration $\mu g$', 'Interpreter', 'latex')
+ylim([-60,60])
 
 t_wind = Wind_Data.resultsTable_UA1.Time_Start;
 u1 = Wind_Data.resultsTable_UA1.U;
