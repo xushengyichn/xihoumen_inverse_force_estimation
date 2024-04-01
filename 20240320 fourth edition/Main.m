@@ -773,6 +773,13 @@ if fig_bool
     end
     [f, magnitude] = fft_transform(50,F_filter(1, :));
     create_subplot(@plot, total_plots, current_plot, {f, magnitude}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
+    xlim([0,0.4])
+    title("Force in the frequency domain")
+    xlabel("Frequency")
+    ylabel("Amplitude")
+    current_plot = current_plot + 1;
+    create_subplot(@semilogy, total_plots, current_plot, {f, magnitude}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
+    xlim([0,0.4])
     title("Force in the frequency domain")
     xlabel("Frequency")
     ylabel("Amplitude")
