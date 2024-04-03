@@ -746,9 +746,10 @@ if fig_bool
 
     %% modal force
     for k1 = 1:nVIV
-
+        
         if k1 == 1
-            create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'firstfigure', true, 'holdon', holdon);
+          figure  
+            plot(t, F_filter(k1, :));
             hold on
             NN = length(t);
             tnew=t';
@@ -759,34 +760,37 @@ if fig_bool
             h_hat_fill = [Pp_filt_m_cov_upper_bound fliplr(Pp_filt_m_cov_lower_bound)];
             [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
             hold on
-            create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+            fill(t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none');
 
 
         else
-            create_subplot(@plot, total_plots, current_plot, {t, F_filter(k1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
+            plot(t, F_filter(k1, :));
         end
 
         legend("Force from Kalman Filter")
         title("modal force for " + "mode"+modesel(VIV_mode_seq));
-        current_plot = current_plot + 1;
+    
         ylim([-100, 100])
     end
     [f, magnitude] = fft_transform(50,F_filter(1, :));
-    create_subplot(@plot, total_plots, current_plot, {f, magnitude}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    plot(f, magnitude);
     xlim([0,0.4])
     title("Force in the frequency domain")
     xlabel("Frequency")
     ylabel("Amplitude")
-    current_plot = current_plot + 1;
-    create_subplot(@semilogy, total_plots, current_plot, {f, magnitude}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'figPosition', figPosition, 'newfigure', newfigure, 'holdon', holdon);
+
+    figure
+    semilogy(f, magnitude);
     xlim([0,0.4])
     title("Force in the frequency domain")
     xlabel("Frequency")
     ylabel("Amplitude")
-    current_plot = current_plot + 1;
+
     save temp2.mat t F_filter
     %% installation of the sensors and the rms of the sensors
     % 三个传感器位置的振型大小
+    figure
     loc_acc = result_Main.loc_acc;
     loc_acc_shape = FindModeShapewithLocation(loc_acc, node_loc, nodeondeck, KMmapping, nodegap, mode_vec);
     max_loc_acc_shape = max(abs(loc_acc_shape(:, VIV_mode_seq)));
@@ -795,44 +799,48 @@ if fig_bool
     max_acc = max(yn_rms);
     scale_factor = max_acc / max_loc_acc_shape;
     yn_rms_scaled = yn_rms / scale_factor;
-    create_subplot(@plot, total_plots, current_plot, {node_loc, mode_deck(:, VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    plot(node_loc, mode_deck(:, VIV_mode_seq));
     hold on
-    create_subplot(@scatter, total_plots, current_plot, {loc_acc, loc_acc_shape(:, VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
-    create_subplot(@scatter, total_plots, current_plot, {loc_acc, yn_rms_scaled([1, 3, 5], :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    scatter(loc_acc, loc_acc_shape(:, VIV_mode_seq));
+    scatter(loc_acc, yn_rms_scaled([1, 3, 5], :));
     legend("modal shape", "modal shape at the sensors location", "scaled rms value of the sensors", 'Location', 'southeast')
     title("Mode shape and the locaiton of the sensors")
-    current_plot = current_plot + 1;
+
     xlabel('Time (s)')
     ylabel('Dimensionless displacement')
 
     %% reconstructed data comparison (reconstructed vs kalman filter vitural sensoring)
-    create_subplot(@plot, total_plots, current_plot, { t, h_hat(15, :),t, node_shape(VIV_mode_seq) * u}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    plot( t, h_hat(15, :),t, node_shape(VIV_mode_seq) * u);
     legend( 'filtered from kalman filter',"Kalman filter reconstruct")
     % title("reconstructed displacement vs kalman filter vitural sensoring")
     title("Dis (1/2span)")
-    current_plot = current_plot + 1;
+
     xlabel('Time (s)')
     ylabel('Displacement (m)')
-
-    create_subplot(@plot, total_plots, current_plot, { t, h_hat(9, :),t, node_shape(VIV_mode_seq) * udot}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    
+    figure
+    plot( t, h_hat(9, :),t, node_shape(VIV_mode_seq) * udot);
     legend( 'filtered from kalman filter',"Kalman filter reconstruct")
     % title("reconstructed velocity vs kalman filter vitural sensoring")
     title("Vel (1/2span)")
-    current_plot = current_plot + 1;
+
     xlabel('Time (s)')
     ylabel('Velocity (m/s)')
-
-    create_subplot(@plot, total_plots, current_plot, { t, h_hat(3, :),t, node_shape(VIV_mode_seq) * u2dot}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    
+    figure
+    plot( t, h_hat(3, :),t, node_shape(VIV_mode_seq) * u2dot);
     legend( 'filtered from kalman filter',"Kalman filter reconstruct")
     % title("reconstructed acceleration vs kalman filter vitural sensoring")
     title("Acc (1/2span)")
-    current_plot = current_plot + 1;
+
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
 
 
     %% kalman filter vitural sensoring and the covariance
-    create_subplot(@plot, total_plots, current_plot, { t, h_hat(15, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    plot( t, h_hat(15, :));
     NN = length(t);
     tnew=t';
     t_fill = [tnew(1:NN) fliplr(tnew(1:NN))];
@@ -842,16 +850,17 @@ if fig_bool
     h_hat_fill = [h_hat_upper_bound fliplr(h_hat_lower_bound)];
     hold on
     [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
-    create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    fill(t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none');
 
     legend( 'filtered from kalman filter')
     % title("reconstructed displacement vs kalman filter vitural sensoring")
     title("Dis (1/2span)")
-    current_plot = current_plot + 1;
+
     xlabel('Time (s)')
     ylabel('Displacement (m)')
 
-    create_subplot(@plot, total_plots, current_plot, { t, h_hat(9, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    plot( t, h_hat(9, :));
     tnew=t';
     t_fill = [tnew(1:NN) fliplr(tnew(1:NN))];
     h_hat_cov = result_Main.h_hat_covariance(9,9);
@@ -860,16 +869,16 @@ if fig_bool
     h_hat_fill = [h_hat_upper_bound fliplr(h_hat_lower_bound)];
     [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
     hold on
-    create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    fill(t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none');
 
     legend( 'filtered from kalman filter')
     % title("reconstructed velocity vs kalman filter vitural sensoring")
     title("Vel (1/2span)")
-    current_plot = current_plot + 1;
+
     xlabel('Time (s)')
     ylabel('Velocity (m/s)')
 
-    create_subplot(@plot, total_plots, current_plot, { t, h_hat(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    plot( t, h_hat(3, :));
     tnew=t';
     t_fill = [tnew(1:NN) fliplr(tnew(1:NN))];
     h_hat_cov = result_Main.h_hat_covariance(3,3);
@@ -878,12 +887,12 @@ if fig_bool
     h_hat_fill = [h_hat_upper_bound fliplr(h_hat_lower_bound)];
     [t_fill, h_hat_fill] = reduceDataPoints(t_fill, h_hat_fill, 10);
     hold on
-    create_subplot(@fill, total_plots, current_plot, { t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    fill(t_fill, h_hat_fill,'red','FaceAlpha',0.5,'EdgeColor','none');
 
     legend( 'filtered from kalman filter')
     % title("reconstructed acceleration vs kalman filter vitural sensoring")
     title("Acc (1/2span)")
-    current_plot = current_plot + 1;
+
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     %% wind speed during the period
@@ -910,42 +919,43 @@ if fig_bool
     %
     % end
     %
-    % create_subplot(@scatter, total_plots, current_plot, {result_wind.resultsTable_UA6.Time_Start, U_sel}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure,'holdon',holdon);
+    % scatter(result_wind.resultsTable_UA6.Time_Start, U_sel}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure,'holdon',holdon);
     % xlabel('Time (s)')
     % ylabel('Wind speed (m/s)')
     % title("Wind speed vs. Time")
     % current_plot = current_plot + 1;
 
     %% measured, filtered and recalcuated acceleration
-    create_subplot(@plot, total_plots, current_plot, {t, yn(1, :), t, h_hat(1, :), t, yn_reconstruct(1, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    plot(t, yn(1, :), t, h_hat(1, :), t, yn_reconstruct(1, :));
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     title("Acceleration vs. Time 1/4 span")
     legend("measure", "kalman filter", "reconstruct using force from kalman filter")
-    current_plot = current_plot + 1;
 
-    create_subplot(@plot, total_plots, current_plot, {t, yn(3, :), t, h_hat(3, :), t, yn_reconstruct(3, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    plot(t, yn(3, :), t, h_hat(3, :), t, yn_reconstruct(3, :));
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     title("Acceleration vs. Time 1/2 span")
     legend("measure", "kalman filter", "reconstruct using force from kalman filter")
-    current_plot = current_plot + 1;
 
-    create_subplot(@plot, total_plots, current_plot, {t, yn(5, :), t, h_hat(5, :), t, yn_reconstruct(5, :)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    plot(t, yn(5, :), t, h_hat(5, :), t, yn_reconstruct(5, :));
     xlabel('Time (s)')
     ylabel('Acceleration (m/s^2)')
     title("Acceleration vs. Time 3/4 span")
     legend("measure", "kalman filter", "reconstruct using force from kalman filter")
-    current_plot = current_plot + 1;
+
 
     %% Damping ratio calculation
 
-
-    create_subplot(@scatter, total_plots, current_plot, {amp_temp * max(mode_deck(:, VIV_mode_seq)), zetam - zeta_structure(VIV_mode_seq)}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+    figure
+    scatter(amp_temp * max(mode_deck(:, VIV_mode_seq)), zetam - zeta_structure(VIV_mode_seq));
     hold on
-    create_subplot(@scatter, total_plots, current_plot, {amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], secondsFromReference, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
+    scatter(amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], secondsFromReference, 'filled');
 
-    current_plot = current_plot + 1;
+
 
     % 设置 colormap
     colormap('jet')
@@ -961,20 +971,20 @@ if fig_bool
     xlabel("Amplitude(m)")
     ylabel("Damping ratio")
     
-
-    create_subplot(@scatter, total_plots, current_plot, {t_cycle_mean_temp, U_sel}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    scatter(t_cycle_mean_temp, U_sel);
     xlabel('Time (s)')
     ylabel('Wind speed (m/s)')
     title("Wind speed vs. Time")
-    current_plot = current_plot + 1;
 
-    create_subplot(@scatter, total_plots, current_plot, {t_cycle_mean_temp, AoA_sel}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    figure
+    scatter(t_cycle_mean_temp, AoA_sel);
     xlabel('Time (s)')
     ylabel('AoA (deg)')
     title("AoA vs. Time")
-    current_plot = current_plot + 1;
 
-    % figure
+
+    figure
     amp_filter = amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq(1)));
     zeta_filter = zeta_all_cell{1}{1};
     % C=rescale(AoA_sel,10,100);
@@ -982,11 +992,11 @@ if fig_bool
     C = AoA_sel;
     % scatter3(amp_filter,U_sel,zeta_filter,S,C)
 
-    create_subplot(@scatter3, total_plots, current_plot, {amp_filter, U_sel, zeta_filter, S, C}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    scatter3(amp_filter, U_sel, zeta_filter, S, C);
     xlabel('Amp. (m)')
     ylabel('Wind speed (m/s)')
     title("Damping ratio")
-    current_plot = current_plot + 1;
+
 
     % 设置 colormap
 
@@ -1007,11 +1017,11 @@ if fig_bool
 
     amp_filterdis = amp_temp * max(mode_deck(:, VIV_mode_seq(1)));
     zeta_filterdis = zetam - zeta_structure(VIV_mode_seq);
-    create_subplot(@scatter3, total_plots, current_plot, {amp_filterdis, U_sel, zeta_filterdis, S, C}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    scatter3(amp_filterdis, U_sel, zeta_filterdis, S, C);
     xlabel('Amp. (m)')
     ylabel('Wind speed (m/s)')
     title("Damping ratio using filtered dis")
-    current_plot = current_plot + 1;
+
 
     % 设置 colormap
 
@@ -1031,9 +1041,8 @@ if fig_bool
     patch(x, y, z, 'blue', 'FaceAlpha', 0.3); % 设置颜色和透明度
 
     %% Damping ratio calculation with wind speed
-    create_subplot(@scatter, total_plots, current_plot, {amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], U_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-
-    current_plot = current_plot + 1;
+    figure
+    scatter(amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], U_sel, 'filled');
 
     % 设置 colormap
     colormap('jet')
@@ -1049,10 +1058,8 @@ if fig_bool
     xlabel("Amplitude(m)")
     ylabel("Damping ratio")
     %% Damping ratio calculation with wind speed
-    create_subplot(@scatter, total_plots, current_plot, {amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], AoA_sel, 'filled'}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'firstfigure', false, 'holdon', holdon);
-
-    current_plot = current_plot + 1;
-
+    figure
+    scatter(amp_cell{1}{1} * max(mode_deck(:, VIV_mode_seq)), zeta_all_cell{1}{1}, [], AoA_sel, 'filled');
     % 设置 colormap
     colormap('jet')
     colorbar
@@ -1068,18 +1075,18 @@ if fig_bool
     ylabel("Damping ratio")
 
 
-    
+
     % C=rescale(AoA_sel,10,100);
     S = rescale(zeta_filter, 10, 100);
     C = AoA_sel;
     % C = secondsFromReference;
     % scatter3(amp_filter,U_sel,zeta_filter,S,C)
 
-    create_subplot(@scatter3, total_plots, current_plot, {amp_filter, U_sel,  zeta_filter,[],C}, 'num_figs_in_row', num_figs_in_row, 'figWidthFactor', figWidthFactor, 'newfigure', newfigure, 'holdon', holdon);
+    scatter3(amp_filter, U_sel,  zeta_filter,[],C);
     xlabel('Amp. (m)')
     ylabel('Wind speed (m/s)')
     title("Damping ratio （Amp,U,damping ratio,,AOA）")
-    current_plot = current_plot + 1;
+
 
     % 设置 colormap
 
@@ -1102,6 +1109,8 @@ if fig_bool
 
 
 end
+tilefigs
+
 %% save the result
 % eg: result_starttime_VIV_sel.mat VIV_sel is a variable
 startDate_global.Format = 'yyyy_MM_dd_HH_mm';

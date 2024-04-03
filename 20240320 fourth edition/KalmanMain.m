@@ -550,13 +550,16 @@ pa_history = zeros(ns + np_m * (2), NN);
 
 x_ak = zeros(ns + nVIV * (2), 1);
 P_ak = 10 ^ (1) * eye(ns + nVIV * (2));
-
+p_det= zeros(size(A_a_m,1),size(yn_a,2));
+B_a_m = zeros(size(A_a_m));
+J_a_m = zeros(size(G_a_m));
 
 % [x_k_k, x_k_kmin, P_k_k, P_k_kmin, result] = KalmanFilterNoInput(A_a_m, G_a_m, Q_a_m, R_a_m, yn_a, x_ak, P_ak, 'debugstate', true,'showtext',showtext);
 % [x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'steadystate','no');
-[x_k_k,x_k_kmin,P_k_k,P_k_kmin,result]=KalmanFilter(A_a_m, G_a_m, Q_a_m, R_a_m,S_a_m, yn_a, x_ak, P_ak,'debugstate', true,'showtext',showtext_char);
+[x_k_k,x_k_kmin,P_k_k,P_k_kmin,K_k_ss,M_k_ss,Omega_k_ss,result]=KF(A_a_m,B_a_m, G_a_m,J_a_m, Q_a_m, R_a_m,S_a_m, yn_a,p_det, x_ak, P_ak,'steadystate',true,'showtext',showtext,'debugstate',true);
 % [x_k_k, P_k_k] = RTSFixedInterval(A_a_m, x_k_k, x_k_kmin, P_k_k, P_k_kmin);
-[x_k_k,P_k_k]=RTSSmoother(A_a_m,x_k_k,x_k_kmin,P_k_k,P_k_kmin,'showtext',false);
+% [x_k_k,P_k_k]=RTSSmoother(A_a_m,x_k_k,x_k_kmin,P_k_k,P_k_kmin,'showtext',false);
+[x_k_k,P_k_k]=RTSS(A_a_m-S_a_m/R_a_m*G_a_m,x_k_k,x_k_kmin,P_k_k,P_k_kmin,'showtext',showtext);
 xa_history = x_k_k;
 pa_history = P_k_k;
 x_filt_original = xa_history(1:ns, :);
