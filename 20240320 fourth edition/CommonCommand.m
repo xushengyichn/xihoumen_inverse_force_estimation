@@ -128,10 +128,17 @@ elseif strcmp(computer_name,'ROG-SHENGYI')
         input_data.wind_dir = "E:\xihoumendata\result_wind_10min";
         input_data.wind_dir_all = "E:\xihoumendata\result_wind";
     else
-        % 如果E盘不存在，使用D盘的路径
-        input_data.acc_dir = "D:\xihoumendata\acc";
-        input_data.wind_dir = "D:\xihoumendata\wind";
-        input_data.wind_dir_all = "D:\xihoumendata\wind_all";
+            if exist('F:\', 'dir')
+                % 如果E盘存在，使用E盘的路径
+                input_data.acc_dir = "F:\xihoumendata\result";
+                input_data.wind_dir = "F:\xihoumendata\result_wind_10min";
+                input_data.wind_dir_all = "F:\xihoumendata\result_wind";
+             else
+                % 如果E盘不存在，使用D盘的路径
+                input_data.acc_dir = "D:\xihoumendata\acc";
+                input_data.wind_dir = "D:\xihoumendata\wind";
+                input_data.wind_dir_all = "D:\xihoumendata\wind_all";
+            end
     end
 
     % 打印结果，验证路径是否设置正确
