@@ -19,7 +19,7 @@ vivTable = readtable('viv_in_the_paper.csv',opts);
 
 FEM_fre = [0.0938;0.1013;0.1319;0.1796;0.2273;0.2718;0.3213];
 % VIV_sels = [2;3;4;5;6;7;8;9;10;12;16;17;18;19];
-VIV_sels = [1;2;3;4;5;6;7;8;9;10;11];
+VIV_sels = [1;2;3;4;5;6;7;8;9;10];
 
 %% mode 1
 updated_frequency_mode1=[];
@@ -303,5 +303,5 @@ frequency(7,1) = mean(updated_frequency);
 result_table_mode = table(frequency,zeta);
 disp(result_table_mode)
 
-save("zeta_update.mat","zeta")
+save("zeta_update0406.mat","zeta")
 
