@@ -221,7 +221,8 @@ MM_eq = Result.MM_eq; KK_eq = Result.KK_eq;
 
 % zeta = ones(size(modesel)) * 0.3/100;
 % zeta = ones(size(modesel)) * 0.0/100;
-zeta = importdata("zeta_update.mat");
+% zeta = importdata("zeta_update.mat");
+zeta = importdata("zeta_update0406.mat");
 
 % opts = detectImportOptions('viv_in_the_paper.csv');
 % % opts = detectImportOptions('vivData.csv');

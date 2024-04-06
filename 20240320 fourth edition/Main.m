@@ -101,7 +101,7 @@ input_data.sigma_buff = 10 ^ (0.5411);
 % input_data.Q_value = 10 ^ (-7.743718510318171);
 input_data.Q_value = 10 ^ (-6);
 input_data.omega_0_variation_VIV = 1;
-input_data.sigma_noise = 10 ^ (-1.3);
+input_data.sigma_noise = 10 ^ (-2);
 % input_data.sigma_noise = 10 ^ (0);
 
 
