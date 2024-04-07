@@ -164,6 +164,10 @@ switch filterstyle
         Acc_Data.mergedData.AC3_1 = bandpass(Acc_Data.mergedData.AC3_1', f_keep, fs)';
         Acc_Data.mergedData.AC3_2 = bandpass(Acc_Data.mergedData.AC3_2', f_keep, fs)';
         Acc_Data.mergedData.AC3_3 = bandpass(Acc_Data.mergedData.AC3_3', f_keep, fs)';
+        Acc_Data.mergedData.AC4_1 = bandpass(Acc_Data.mergedData.AC4_1', f_keep, fs)';
+        Acc_Data.mergedData.AC4_2 = bandpass(Acc_Data.mergedData.AC4_2', f_keep, fs)';
+        Acc_Data.mergedData.AC4_3 = bandpass(Acc_Data.mergedData.AC4_3', f_keep, fs)';
+
         
     case 'nofilter'
         
