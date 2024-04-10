@@ -93,15 +93,17 @@ input_data.VIV_sel = VIV_sel;
 % % input_data.sigma_noise = 10 ^ (0);
 
 
-input_data.lambda_VIV = 5.689866029018299*10^(-4) % equal to 10^(−3.2448979591836733)
-input_data.sigma_p_VIV = 7.1969;
+% input_data.lambda_VIV = 5.689866029018299*10^(-4) % equal to 10^(−3.2448979591836733)
+% input_data.sigma_p_VIV = 7.1969;
+input_data.lambda_VIV = 10^(-2);
+input_data.sigma_p_VIV = 1.7300;
 input_data.sigma_buff = 10 ^ (0.5411);
 
 
 % input_data.Q_value = 10 ^ (-7.743718510318171);
 input_data.Q_value = 10 ^ (-6);
 input_data.omega_0_variation_VIV = 1;
-input_data.sigma_noise = 10 ^ (-2);
+input_data.sigma_noise = 10 ^ (-1.3);
 % input_data.sigma_noise = 10 ^ (0);
 
 
