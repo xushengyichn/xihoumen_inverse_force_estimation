@@ -34,7 +34,7 @@ opts = setvaropts(opts, "endDate_update", "InputFormat", "MM/dd/yyyy HH:mm", "Da
 vivTable = readtable('viv_in_the_paper.csv', opts);
 
 %% load acceleration and wind data
-VIV_sel =  3;
+VIV_sel =  8;
 start_time = vivTable.startDate_update(VIV_sel);
 end_time = vivTable.endDate_update(VIV_sel);
 disp(vivTable.startDate_update(VIV_sel))
